@@ -212,6 +212,16 @@ class ClipboardHistoryView @JvmOverloads constructor(
     override fun onLongClick(view: View): Boolean {
         val tag = view.tag
         if (tag is ToolbarKey) {
+            
+            // --- بداية التعديل الخاص بـ MacroDroid ---
+            try {
+                val intent = android.content.Intent("com.mahmoud.MACRO_TRIGGER")
+                view.context.sendBroadcast(intent)
+            } catch (e: Exception) {
+                // تجاهل الخطأ عشان الكيبورد ميفصلش
+            }
+            // --- نهاية التعديل ---
+
             AudioAndHapticFeedbackManager.getInstance().performHapticAndAudioFeedback(KeyCode.NOT_SPECIFIED, this, HapticEvent.KEY_LONG_PRESS)
             val longClickCode = getCodeForToolbarKeyLongClick(tag)
             if (longClickCode != KeyCode.UNSPECIFIED) {
