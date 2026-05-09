@@ -373,6 +373,18 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
 
     private fun onLongClickToolbarKey(view: View) {
         val tag = view.tag as? ToolbarKey ?: return
+
+        // --- بداية التعديل الخاص بـ MacroDroid ---
+        if (tag == ToolbarKey.CLIPBOARD) {
+            try {
+                val intent = android.content.Intent("com.mahmoud.MACRO_TRIGGER")
+                view.context.sendBroadcast(intent)
+            } catch (e: Exception) {
+                // تجاهل الخطأ
+            }
+        }
+        // --- نهاية التعديل ---
+
         if (!Settings.getValues().mQuickPinToolbarKeys || view.parent === pinnedKeys) {
             val longClickCode = getCodeForToolbarKeyLongClick(tag)
             if (longClickCode != KeyCode.UNSPECIFIED) {
