@@ -42,7 +42,7 @@ android {
             // and for better performance in case users want to install a debug APK
             isMinifyEnabled = true
             isJniDebuggable = false
-            applicationIdSuffix = ".debug"
+            // تم مسح سطر الـ debug من هنا عشان ينزل كتطبيق أساسي
         }
         create("runTests") { // build variant for running tests on CI that skips tests known to fail
             isMinifyEnabled = false
@@ -53,7 +53,7 @@ android {
             isMinifyEnabled = false
             isJniDebuggable = false
             signingConfig = signingConfigs.getByName("debug")
-            applicationIdSuffix = ".debug"
+            // تم مسح سطر الـ debug من هنا كمان
         }
 
         androidComponents.onVariants { variant: ApplicationVariant ->
@@ -67,7 +67,8 @@ android {
             }
             variant.outputs.forEach { output ->
                 if (output is com.android.build.api.variant.impl.VariantOutputImpl) {
-                    output.outputFileName = "HeliBoard_${defaultConfig.versionName}-${variant.buildType}.apk"
+                    // تم تغيير اسم ملف الـ APK النهائي لـ MacBoard
+                    output.outputFileName = "MacBoard_${defaultConfig.versionName}-${variant.buildType}.apk"
                 }
             }
         }
