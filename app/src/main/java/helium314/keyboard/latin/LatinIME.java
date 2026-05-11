@@ -1394,11 +1394,97 @@ public class LatinIME extends InputMethodService implements
         mKeyboardActionListener.onCodeInput(codePoint, x, y, isKeyRepeat);
     }
 
+    // --- بداية كود محرك الاستماع الذكي ---
+    private android.speech.SpeechRecognizer mSpeechRecognizer;
+    private boolean mIsListening = false;
+
+    private void startInlineVoiceInput() {
+        if (androidx.core.content.ContextCompat.checkSelfPermission(this, android.Manifest.permission.RECORD_AUDIO) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            android.widget.Toast.makeText(this, "يرجى إعطاء صلاحية الميكروفون للتطبيق من الإعدادات", android.widget.Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (mIsListening) {
+                    if (mSpeechRecognizer != null) {
+                        mSpeechRecognizer.stopListening();
+                    }
+                    return;
+                }
+
+                if (mSpeechRecognizer == null) {
+                    mSpeechRecognizer = android.speech.SpeechRecognizer.createSpeechRecognizer(LatinIME.this);
+                    mSpeechRecognizer.setRecognitionListener(new android.speech.RecognitionListener() {
+                        @Override
+                        public void onReadyForSpeech(Bundle params) {
+                            mIsListening = true;
+                            android.widget.Toast.makeText(LatinIME.this, "🎤 تحدث الآن...", android.widget.Toast.LENGTH_SHORT).show();
+                        }
+                        @Override
+                        public void onBeginningOfSpeech() {}
+                        @Override
+                        public void onRmsChanged(float rmsdB) {}
+                        @Override
+                        public void onBufferReceived(byte[] buffer) {}
+                        @Override
+                        public void onEndOfSpeech() {
+                            mIsListening = false;
+                        }
+                        @Override
+                        public void onError(int error) {
+                            mIsListening = false;
+                            String message;
+                            switch (error) {
+                                case android.speech.SpeechRecognizer.ERROR_AUDIO: message = "خطأ في تسجيل الصوت"; break;
+                                case android.speech.SpeechRecognizer.ERROR_CLIENT: message = "خطأ في العميل"; break;
+                                case android.speech.SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS: message = "صلاحيات غير كافية"; break;
+                                case android.speech.SpeechRecognizer.ERROR_NETWORK: message = "خطأ في الشبكة"; break;
+                                case android.speech.SpeechRecognizer.ERROR_NETWORK_TIMEOUT: message = "انتهى وقت الشبكة"; break;
+                                case android.speech.SpeechRecognizer.ERROR_NO_MATCH: message = "لم يتم التعرف على كلام"; break;
+                                case android.speech.SpeechRecognizer.ERROR_RECOGNIZER_BUSY: message = "المحرك مشغول"; break;
+                                case android.speech.SpeechRecognizer.ERROR_SERVER: message = "خطأ في الخادم"; break;
+                                case android.speech.SpeechRecognizer.ERROR_SPEECH_TIMEOUT: message = "لم يتم إدخال صوت"; break;
+                                default: message = "حدث خطأ، حاول مرة أخرى"; break;
+                            }
+                            android.widget.Toast.makeText(LatinIME.this, "🎤 " + message, android.widget.Toast.LENGTH_SHORT).show();
+                        }
+                        @Override
+                        public void onResults(Bundle results) {
+                            mIsListening = false;
+                            ArrayList<String> matches = results.getStringArrayList(android.speech.SpeechRecognizer.RESULTS_RECOGNITION);
+                            if (matches != null && !matches.isEmpty()) {
+                                String text = matches.get(0) + " ";
+                                onTextInput(text);
+                            }
+                        }
+                        @Override
+                        public void onPartialResults(Bundle partialResults) {}
+                        @Override
+                        public void onEvent(int eventType, Bundle params) {}
+                    });
+                }
+
+                Intent intent = new Intent(android.speech.RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+                intent.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL, android.speech.RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+                
+                Locale currentLocale = mRichImm.getCurrentSubtypeLocale();
+                if (currentLocale != null) {
+                    intent.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE, currentLocale.toString());
+                }
+                
+                mSpeechRecognizer.startListening(intent);
+            }
+        });
+    }
+    // --- نهاية كود محرك الاستماع الذكي ---
+
     // This method is public for testability of LatinIME, but also in the future it should
     // completely replace #onCodeInput.
     public void onEvent(@NonNull final Event event) {
         if (KeyCode.VOICE_INPUT == event.getKeyCode()) {
-            mRichImm.switchToShortcutIme(this);
+            startInlineVoiceInput();
         }
         final InputTransaction completeInputTransaction =
                 mInputLogic.onCodeInput(mSettings.getCurrent(), event,
@@ -1765,95 +1851,4 @@ public class LatinIME extends InputMethodService implements
     }
 
     @Override
-    protected void dump(final FileDescriptor fd, final PrintWriter fout, final String[] args) {
-        super.dump(fd, fout, args);
-
-        final Printer p = new PrintWriterPrinter(fout);
-        p.println("LatinIME state :");
-        p.println("  VersionCode = " + BuildConfig.VERSION_CODE);
-        p.println("  VersionName = " + BuildConfig.VERSION_NAME);
-        final Keyboard keyboard = mKeyboardSwitcher.getKeyboard();
-        final int keyboardMode = keyboard != null ? keyboard.mId.mMode : -1;
-        p.println("  Keyboard mode = " + keyboardMode);
-        final SettingsValues settingsValues = mSettings.getCurrent();
-        p.println(settingsValues.dump());
-        p.println(mDictionaryFacilitator.dump(this));
-    }
-
-    // slightly modified from Simple Keyboard: https://github.com/rkkr/simple-keyboard/blob/master/app/src/main/java/rkr/simplekeyboard/inputmethod/latin/LatinIME.java
-    @SuppressWarnings("deprecation")
-    private void setNavigationBarColor() {
-        final SettingsValues settingsValues = mSettings.getCurrent();
-        if (!settingsValues.mCustomNavBarColor)
-            return;
-        final int color = settingsValues.mColors.get(ColorType.NAVIGATION_BAR);
-        final Window window = getWindow().getWindow();
-        if (window == null)
-            return;
-        mOriginalNavBarColor = window.getNavigationBarColor();
-        window.setNavigationBarColor(color);
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
-            return;
-        final View view = window.getDecorView();
-        mOriginalNavBarFlags = view.getSystemUiVisibility();
-        if (ColorUtilKt.isBrightColor(color)) {
-            view.setSystemUiVisibility(mOriginalNavBarFlags | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
-        } else {
-            view.setSystemUiVisibility(mOriginalNavBarFlags & ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
-        }
-    }
-
-    @SuppressWarnings("deprecation")
-    private void clearNavigationBarColor() {
-        final SettingsValues settingsValues = mSettings.getCurrent();
-        if (!settingsValues.mCustomNavBarColor)
-            return;
-        final Window window = getWindow().getWindow();
-        if (window == null) {
-            return;
-        }
-        window.setNavigationBarColor(mOriginalNavBarColor);
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
-            return;
-        final View view = window.getDecorView();
-        view.setSystemUiVisibility(mOriginalNavBarFlags);
-    }
-
-    // On HUAWEI devices with Android 12: a white bar may appear in landscape mode (issue #231)
-    // We therefore need to make the color of the status bar transparent
-    private void workaroundForHuaweiStatusBarIssue() {
-        final Window window = getWindow().getWindow();
-        if (window == null) {
-            return;
-        }
-        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.S && Build.MANUFACTURER.equals("HUAWEI")) {
-            window.setStatusBarColor(Color.TRANSPARENT);
-        }
-    }
-
-    @SuppressLint("SwitchIntDef")
-    @Override
-    public void onTrimMemory(int level) {
-        super.onTrimMemory(level);
-        switch (level) {
-            case TRIM_MEMORY_RUNNING_LOW, TRIM_MEMORY_RUNNING_CRITICAL, TRIM_MEMORY_COMPLETE -> {
-                KeyboardLayoutSet.onSystemLocaleChanged(); // clears caches, nothing else
-                mKeyboardSwitcher.trimMemory();
-            }
-            // deallocateMemory always called on hiding, and should not be called when showing
-        }
-    }
-
-    private void setGestureDataGatheringMode(EditorInfo editorInfo) {
-        // only for active gesture data gathering, remove when data gathering phase is done (end of 2026 latest)
-        if (GestureDataGatheringSettings.INSTANCE.isInActiveGatheringMode(editorInfo)) {
-            mDictionaryFacilitator = GestureDataGatheringKt.getGestureDataActiveFacilitator();
-        } else {
-            mDictionaryFacilitator = mOriginalDictionaryFacilitator;
-        }
-        GestureDataGatheringSettings.INSTANCE.showEndNotificationIfNecessary(this); // will do nothing for a long time
-        mInputLogic.setFacilitator(mDictionaryFacilitator);
-    }
-}
+    protected void dump(final FileDescriptor fd, final PrintWriter fout, final String
