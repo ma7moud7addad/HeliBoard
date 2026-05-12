@@ -1398,9 +1398,12 @@ public class LatinIME extends InputMethodService implements
     // completely replace #onCodeInput.
         public void onEvent(@NonNull final Event event) {
         if (KeyCode.VOICE_INPUT == event.getKeyCode()) {
-            // --- بداية تعديل MacBoard النهائي (حل مشكلة التكرار تماماً) ---
+            // --- بداية تعديل MacBoard النهائي (الحل الجذري لمنع التكرار) ---
             
             new android.os.Handler(android.os.Looper.getMainLooper()).post(new Runnable() {
+                // المتغير ده هيحفظ طول آخر كلام اتكتب عشان نعرف نمسحه بالظبط
+                private int mLastPartialLength = 0;
+
                 @Override
                 public void run() {
                     try {
@@ -1417,37 +1420,67 @@ public class LatinIME extends InputMethodService implements
                         } catch (Exception e) { }
 
                         speechRecognizer.setRecognitionListener(new android.speech.RecognitionListener() {
-                            @Override public void onReadyForSpeech(android.os.Bundle params) {}
+                            @Override public void onReadyForSpeech(android.os.Bundle params) {
+                                mLastPartialLength = 0; // تصفير العداد مع بداية الاستماع
+                            }
                             @Override public void onBeginningOfSpeech() {}
                             @Override public void onRmsChanged(float rmsdB) {}
                             @Override public void onBufferReceived(byte[] buffer) {}
                             @Override public void onEndOfSpeech() {}
+                            
                             @Override public void onError(int error) {
+                                android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
+                                if (ic != null) {
+                                    ic.finishComposingText();
+                                }
+                                mLastPartialLength = 0;
                                 speechRecognizer.destroy();
                             }
                             
+                            // الكتابة اللحظية مع المسح اليدوي الدقيق
                             @Override public void onPartialResults(android.os.Bundle partialResults) {
                                 java.util.ArrayList<String> matches = partialResults.getStringArrayList(android.speech.SpeechRecognizer.RESULTS_RECOGNITION);
                                 if (matches != null && !matches.isEmpty()) {
-                                    String currentText = matches.get(0);
+                                    String newPartial = matches.get(0);
                                     android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
-                                    if (ic != null) {
-                                        // السر هنا: بنجبر الكيبورد يستبدل النص القيد التكوين فقط
-                                        ic.setComposingText(currentText, 1);
+                                    if (ic != null && newPartial != null) {
+                                        ic.beginBatchEdit();
+                                        
+                                        // 1. نمسح الكلام القديم بناءً على طوله
+                                        if (mLastPartialLength > 0) {
+                                            ic.deleteSurroundingText(mLastPartialLength, 0);
+                                        }
+                                        
+                                        // 2. نكتب الكلام الجديد
+                                        ic.setComposingText(newPartial, 1);
+                                        
+                                        // 3. نحفظ طول الكلام الجديد للمرة الجاية
+                                        mLastPartialLength = newPartial.length();
+                                        
+                                        ic.endBatchEdit();
                                     }
                                 }
                             }
 
+                            // تثبيت النص النهائي
                             @Override public void onResults(android.os.Bundle results) {
                                 java.util.ArrayList<String> matches = results.getStringArrayList(android.speech.SpeechRecognizer.RESULTS_RECOGNITION);
                                 if (matches != null && !matches.isEmpty()) {
-                                    String finalText = matches.get(0);
+                                    String finalHypothesis = matches.get(0);
                                     android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
-                                    if (ic != null) {
-                                        // بننهي التكوين اللحظي ونحط النص النهائي مرة واحدة
+                                    if (ic != null && finalHypothesis != null) {
                                         ic.beginBatchEdit();
-                                        ic.finishComposingText(); // بنقفل أي كلام مؤقت كان مكتوب
-                                        ic.commitText(finalText + " ", 1);
+                                        ic.finishComposingText();
+                                        
+                                        // نمسح آخر كلام مؤقت اتكتب عشان ميحصلش دبلجة
+                                        if (mLastPartialLength > 0) {
+                                            ic.deleteSurroundingText(mLastPartialLength, 0);
+                                        }
+                                        
+                                        // نكتب النتيجة النهائية ونحط مسافة
+                                        ic.commitText(finalHypothesis + " ", 1);
+                                        
+                                        mLastPartialLength = 0; // تصفير العداد
                                         ic.endBatchEdit();
                                     }
                                 }
