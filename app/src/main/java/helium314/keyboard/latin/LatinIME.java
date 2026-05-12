@@ -1396,141 +1396,61 @@ public class LatinIME extends InputMethodService implements
 
     // This method is public for testability of LatinIME, but also in the future it should
     // completely replace #onCodeInput.
-        // --- متغيرات ودوال تعديل MacBoard للإدخال الصوتي (نظام الجلسات المعزولة) ---
-    private android.speech.SpeechRecognizer mSpeechRecognizer;
-    private int mVoiceSessionId = 0;
-    private String mLastVoiceDraft = "";
-    private boolean mVoiceDraftActive = false;
-
-    private void clearVoiceDraftState() {
-        mLastVoiceDraft = "";
-        mVoiceDraftActive = false;
-    }
-
-    private void stopAndDestroySpeechRecognizer() {
-        if (mSpeechRecognizer != null) {
-            try { mSpeechRecognizer.cancel(); } catch (Exception ignored) { }
-            try { mSpeechRecognizer.destroy(); } catch (Exception ignored) { }
-            mSpeechRecognizer = null;
-        }
-    }
-
-    private void startInlineVoiceTyping() {
-        new android.os.Handler(android.os.Looper.getMainLooper()).post(new Runnable() {
-            @Override
-            public void run() {
-                final int sessionId = ++mVoiceSessionId; // إصدار تذكرة جديدة للجلسة
-                stopAndDestroySpeechRecognizer(); // قتل أي شبح قديم
-                clearVoiceDraftState();
-
-                final android.speech.SpeechRecognizer sr = android.speech.SpeechRecognizer.createSpeechRecognizer(LatinIME.this);
-                mSpeechRecognizer = sr;
-                android.content.Intent speechIntent = new android.content.Intent(android.speech.RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-                speechIntent.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL, android.speech.RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-                speechIntent.putExtra(android.speech.RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
-
-                try {
-                    android.view.inputmethod.InputMethodSubtype subtype = mRichImm.getCurrentSubtype().getRawSubtype();
-                    if (subtype != null && subtype.getLocale() != null && !subtype.getLocale().isEmpty()) {
-                        speechIntent.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE, subtype.getLocale());
-                    }
-                } catch (Exception ignored) { }
-
-                sr.setRecognitionListener(new android.speech.RecognitionListener() {
-                    // دالة للتأكد إن الجلسة دي هي اللي شغالة دلوقتي مش جلسة قديمة
-                    private boolean isStaleSession() {
-                        return sessionId != mVoiceSessionId || mSpeechRecognizer != sr;
-                    }
-
-                    private void finishThisSession() {
-                        if (sessionId != mVoiceSessionId) return;
-                        if (mSpeechRecognizer == sr) {
-                            try { sr.cancel(); } catch (Exception ignored) { }
-                            try { sr.destroy(); } catch (Exception ignored) { }
-                            mSpeechRecognizer = null;
-                        }
-                        clearVoiceDraftState();
-                    }
-
-                    private void replaceDraftText(String newText) {
-                        android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
-                        if (ic == null) return;
-                        ic.beginBatchEdit();
-                        try {
-                            if (mVoiceDraftActive && !mLastVoiceDraft.isEmpty()) {
-                                // استخدام codePoints أدق جداً مع اللغة العربية
-                                int codePoints = mLastVoiceDraft.codePointCount(0, mLastVoiceDraft.length());
-                                ic.deleteSurroundingTextInCodePoints(codePoints, 0);
-                            }
-                            ic.commitText(newText, 1);
-                            mLastVoiceDraft = newText;
-                            mVoiceDraftActive = true;
-                        } finally {
-                            ic.endBatchEdit();
-                        }
-                    }
-
-                    @Override public void onReadyForSpeech(android.os.Bundle params) { if (!isStaleSession()) clearVoiceDraftState(); }
-                    @Override public void onBeginningOfSpeech() {}
-                    @Override public void onRmsChanged(float rmsdB) {}
-                    @Override public void onBufferReceived(byte[] buffer) {}
-                    @Override public void onEndOfSpeech() {}
-                    @Override public void onError(int error) { if (!isStaleSession()) finishThisSession(); }
-
-                    @Override public void onPartialResults(android.os.Bundle results) {
-                        if (isStaleSession()) return; // تجاهل الأشباح
-                        java.util.ArrayList<String> matches = results.getStringArrayList(android.speech.SpeechRecognizer.RESULTS_RECOGNITION);
-                        if (matches == null || matches.isEmpty()) return;
-                        String partial = matches.get(0);
-                        if (partial == null || partial.equals(mLastVoiceDraft)) return;
-                        replaceDraftText(partial);
-                    }
-
-                    @Override public void onResults(android.os.Bundle results) {
-                        if (isStaleSession()) return; // تجاهل الأشباح
-                        java.util.ArrayList<String> matches = results.getStringArrayList(android.speech.SpeechRecognizer.RESULTS_RECOGNITION);
-                        String finalText = (matches != null && !matches.isEmpty()) ? matches.get(0) : "";
-                        if (finalText == null) finalText = "";
+        public void onEvent(@NonNull final Event event) {
+        if (KeyCode.VOICE_INPUT == event.getKeyCode()) {
+            // --- بداية تعديل MacBoard للإدخال الصوتي المدمج (النسخة المستقرة بدون توست) ---
+            
+            new android.os.Handler(android.os.Looper.getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        final android.speech.SpeechRecognizer speechRecognizer = android.speech.SpeechRecognizer.createSpeechRecognizer(LatinIME.this);
+                        android.content.Intent speechIntent = new android.content.Intent(android.speech.RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+                        speechIntent.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL, android.speech.RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
                         
-                        android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
-                        if (ic != null) {
-                            ic.beginBatchEdit();
-                            try {
-                                if (mVoiceDraftActive && !mLastVoiceDraft.isEmpty()) {
-                                    int codePoints = mLastVoiceDraft.codePointCount(0, mLastVoiceDraft.length());
-                                    ic.deleteSurroundingTextInCodePoints(codePoints, 0);
-                                }
-                                if (!finalText.isEmpty()) {
-                                    ic.commitText(finalText + " ", 1);
-                                }
-                            } finally {
-                                ic.endBatchEdit();
+                        // محاولة جلب لغة الكيبورد الحالية عشان يسمع بنفس اللغة
+                        try {
+                            android.view.inputmethod.InputMethodSubtype subtype = mRichImm.getCurrentSubtype().getRawSubtype();
+                            if (subtype != null && subtype.getLocale() != null && !subtype.getLocale().isEmpty()) {
+                                speechIntent.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE, subtype.getLocale());
                             }
-                        }
-                        finishThisSession();
-                    }
-                    @Override public void onEvent(int eventType, android.os.Bundle params) {}
-                });
+                        } catch (Exception e) { }
 
-                try {
-                    sr.startListening(speechIntent);
-                } catch (Exception e) {
-                    if (sessionId == mVoiceSessionId && mSpeechRecognizer == sr) {
-                        try { sr.destroy(); } catch (Exception ignored) { }
-                        mSpeechRecognizer = null;
-                        clearVoiceDraftState();
+                        speechRecognizer.setRecognitionListener(new android.speech.RecognitionListener() {
+                            @Override public void onReadyForSpeech(android.os.Bundle params) {}
+                            @Override public void onBeginningOfSpeech() {}
+                            @Override public void onRmsChanged(float rmsdB) {}
+                            @Override public void onBufferReceived(byte[] buffer) {}
+                            @Override public void onEndOfSpeech() {}
+                            @Override public void onError(int error) {
+                                speechRecognizer.destroy();
+                            }
+                            @Override public void onResults(android.os.Bundle results) {
+                                java.util.ArrayList<String> matches = results.getStringArrayList(android.speech.SpeechRecognizer.RESULTS_RECOGNITION);
+                                if (matches != null && !matches.isEmpty()) {
+                                    String text = matches.get(0);
+                                    android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
+                                    if (ic != null) {
+                                        // إدراج النص المسموع مباشرة في حقل الكتابة مع مسافة في النهاية
+                                        ic.commitText(text + " ", 1);
+                                    }
+                                }
+                                speechRecognizer.destroy();
+                            }
+                            @Override public void onPartialResults(android.os.Bundle partialResults) {}
+                            @Override public void onEvent(int eventType, android.os.Bundle params) {}
+                        });
+
+                        speechRecognizer.startListening(speechIntent);
+
+                    } catch (Exception e) {
+                        // تم إزالة التوست
                     }
                 }
-            }
-        });
-    }
-    // --- نهاية دوال MacBoard ---
-
-    // الدالة الأصلية تم تنظيفها لتنادي فقط على دالة الاستماع الجديدة
-    public void onEvent(@NonNull final Event event) {
-        if (KeyCode.VOICE_INPUT == event.getKeyCode()) {
-            startInlineVoiceTyping();
+            });
+            // --- نهاية تعديل MacBoard ---
         } else {
+            // معالجة باقي الأزرار العادية عشان الكيبورد يفضل شغال طبيعي
             final InputTransaction completeInputTransaction =
                     mInputLogic.onCodeInput(mSettings.getCurrent(), event,
                             mKeyboardSwitcher.getKeyboardShiftMode(),
