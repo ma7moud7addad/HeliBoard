@@ -1398,11 +1398,9 @@ public class LatinIME extends InputMethodService implements
     // completely replace #onCodeInput.
         public void onEvent(@NonNull final Event event) {
         if (KeyCode.VOICE_INPUT == event.getKeyCode()) {
-            // --- بداية تعديل MacBoard النهائي (الحل الجذري لمنع التكرار) ---
-            
+            // --- تعديل MacBoard النهائي (الطباعة الذكية بدون فلاش وبدون حذف الجمل السابقة) ---
             new android.os.Handler(android.os.Looper.getMainLooper()).post(new Runnable() {
-                // المتغير ده هيحفظ طول آخر كلام اتكتب عشان نعرف نمسحه بالظبط
-                private int mLastPartialLength = 0;
+                private String lastText = "";
 
                 @Override
                 public void run() {
@@ -1421,7 +1419,7 @@ public class LatinIME extends InputMethodService implements
 
                         speechRecognizer.setRecognitionListener(new android.speech.RecognitionListener() {
                             @Override public void onReadyForSpeech(android.os.Bundle params) {
-                                mLastPartialLength = 0; // تصفير العداد مع بداية الاستماع
+                                lastText = "";
                             }
                             @Override public void onBeginningOfSpeech() {}
                             @Override public void onRmsChanged(float rmsdB) {}
@@ -1429,58 +1427,79 @@ public class LatinIME extends InputMethodService implements
                             @Override public void onEndOfSpeech() {}
                             
                             @Override public void onError(int error) {
-                                android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
-                                if (ic != null) {
-                                    ic.finishComposingText();
-                                }
-                                mLastPartialLength = 0;
+                                lastText = "";
                                 speechRecognizer.destroy();
                             }
                             
-                            // الكتابة اللحظية مع المسح اليدوي الدقيق
                             @Override public void onPartialResults(android.os.Bundle partialResults) {
                                 java.util.ArrayList<String> matches = partialResults.getStringArrayList(android.speech.SpeechRecognizer.RESULTS_RECOGNITION);
                                 if (matches != null && !matches.isEmpty()) {
-                                    String newPartial = matches.get(0);
+                                    String newText = matches.get(0);
                                     android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
-                                    if (ic != null && newPartial != null) {
+                                    if (ic != null && newText != null) {
                                         ic.beginBatchEdit();
                                         
-                                        // 1. نمسح الكلام القديم بناءً على طوله
-                                        if (mLastPartialLength > 0) {
-                                            ic.deleteSurroundingText(mLastPartialLength, 0);
+                                        // 1. استخراج الحروف المشتركة لتجنب مسح الكلمة كلها (يمنع الفلاش)
+                                        int commonLen = 0;
+                                        int minLen = Math.min(lastText.length(), newText.length());
+                                        while (commonLen < minLen && lastText.charAt(commonLen) == newText.charAt(commonLen)) {
+                                            commonLen++;
                                         }
                                         
-                                        // 2. نكتب الكلام الجديد
-                                        ic.setComposingText(newPartial, 1);
+                                        // 2. اكتشاف لو جوجل بدأ جملة جديدة لوحده (يمنع مسح الجملة السابقة)
+                                        if (commonLen < 3 && lastText.length() > 5) {
+                                            ic.commitText(" ", 1); // إضافة مسافة بعد الجملة القديمة وحمايتها
+                                            lastText = "";
+                                            commonLen = 0;
+                                        }
                                         
-                                        // 3. نحفظ طول الكلام الجديد للمرة الجاية
-                                        mLastPartialLength = newPartial.length();
+                                        // 3. مسح الحروف اللي اتغيرت بس (زي الـ Backspace السريع)
+                                        int charsToDelete = lastText.length() - commonLen;
+                                        if (charsToDelete > 0) {
+                                            ic.deleteSurroundingText(charsToDelete, 0);
+                                        }
                                         
+                                        // 4. كتابة الحروف الجديدة بس
+                                        String charsToInsert = newText.substring(commonLen);
+                                        if (charsToInsert.length() > 0) {
+                                            ic.commitText(charsToInsert, 1);
+                                        }
+                                        
+                                        lastText = newText;
                                         ic.endBatchEdit();
                                     }
                                 }
                             }
 
-                            // تثبيت النص النهائي
                             @Override public void onResults(android.os.Bundle results) {
                                 java.util.ArrayList<String> matches = results.getStringArrayList(android.speech.SpeechRecognizer.RESULTS_RECOGNITION);
                                 if (matches != null && !matches.isEmpty()) {
-                                    String finalHypothesis = matches.get(0);
+                                    String finalText = matches.get(0);
                                     android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
-                                    if (ic != null && finalHypothesis != null) {
+                                    if (ic != null && finalText != null) {
                                         ic.beginBatchEdit();
-                                        ic.finishComposingText();
                                         
-                                        // نمسح آخر كلام مؤقت اتكتب عشان ميحصلش دبلجة
-                                        if (mLastPartialLength > 0) {
-                                            ic.deleteSurroundingText(mLastPartialLength, 0);
+                                        int commonLen = 0;
+                                        int minLen = Math.min(lastText.length(), finalText.length());
+                                        while (commonLen < minLen && lastText.charAt(commonLen) == finalText.charAt(commonLen)) {
+                                            commonLen++;
                                         }
                                         
-                                        // نكتب النتيجة النهائية ونحط مسافة
-                                        ic.commitText(finalHypothesis + " ", 1);
+                                        if (commonLen < 3 && lastText.length() > 5) {
+                                            ic.commitText(" ", 1);
+                                            lastText = "";
+                                            commonLen = 0;
+                                        }
                                         
-                                        mLastPartialLength = 0; // تصفير العداد
+                                        int charsToDelete = lastText.length() - commonLen;
+                                        if (charsToDelete > 0) {
+                                            ic.deleteSurroundingText(charsToDelete, 0);
+                                        }
+                                        
+                                        String charsToInsert = finalText.substring(commonLen);
+                                        ic.commitText(charsToInsert + " ", 1);
+                                        
+                                        lastText = "";
                                         ic.endBatchEdit();
                                     }
                                 }
