@@ -1398,18 +1398,19 @@ public class LatinIME extends InputMethodService implements
     // completely replace #onCodeInput.
         public void onEvent(@NonNull final Event event) {
         if (KeyCode.VOICE_INPUT == event.getKeyCode()) {
-            // --- بداية تعديل MacBoard للإدخال الصوتي المدمج (النسخة اللحظية وبدون توست) ---
+            // --- بداية تعديل MacBoard (الإدخال اللحظي الاحترافي - بدون تكرار وبدون توست) ---
             
             new android.os.Handler(android.os.Looper.getMainLooper()).post(new Runnable() {
+                // مخزن مؤقت عشان نعرف طول الكلام اللي بعتناه قبل كده ونعرف نمسحه ونحدثه
+                private String lastPartialText = "";
+
                 @Override
                 public void run() {
                     try {
                         final android.speech.SpeechRecognizer speechRecognizer = android.speech.SpeechRecognizer.createSpeechRecognizer(LatinIME.this);
                         android.content.Intent speechIntent = new android.content.Intent(android.speech.RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
                         speechIntent.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL, android.speech.RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-                        
-                        // تفعيل إرسال النتائج اللحظية أثناء الكلام
-                        speechIntent.putExtra(android.speech.RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
+                        speechIntent.putExtra(android.speech.RecognizerIntent.EXTRA_PARTIAL_RESULTS, true); // تفعيل النتائج اللحظية
                         
                         try {
                             android.view.inputmethod.InputMethodSubtype subtype = mRichImm.getCurrentSubtype().getRawSubtype();
@@ -1419,38 +1420,43 @@ public class LatinIME extends InputMethodService implements
                         } catch (Exception e) { }
 
                         speechRecognizer.setRecognitionListener(new android.speech.RecognitionListener() {
-                            @Override public void onReadyForSpeech(android.os.Bundle params) {}
+                            @Override public void onReadyForSpeech(android.os.Bundle params) {
+                                lastPartialText = ""; // تصفير المخزن عند بدء الكلام
+                            }
                             @Override public void onBeginningOfSpeech() {}
                             @Override public void onRmsChanged(float rmsdB) {}
                             @Override public void onBufferReceived(byte[] buffer) {}
                             @Override public void onEndOfSpeech() {}
                             @Override public void onError(int error) {
-                                // تم إزالة التوست، فقط نغلق المستمع
                                 speechRecognizer.destroy();
                             }
                             
-                            // معالجة الكتابة اللحظية أثناء التحدث
+                            // هتا بتم عملية "التحديث اللحظي" السحرية
                             @Override public void onPartialResults(android.os.Bundle partialResults) {
                                 java.util.ArrayList<String> matches = partialResults.getStringArrayList(android.speech.SpeechRecognizer.RESULTS_RECOGNITION);
                                 if (matches != null && !matches.isEmpty()) {
-                                    String text = matches.get(0);
+                                    String currentText = matches.get(0);
                                     android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
                                     if (ic != null) {
-                                        // استخدام setComposingText لكتابة النص وتحديثه لحظياً بدون تكرار
-                                        ic.setComposingText(text, 1);
+                                        ic.beginBatchEdit();
+                                        // 1. بنحدد النص القديم كـ "نص قيد الكتابة" عشان الأندرويد يستبدله تلقائياً بالجديد
+                                        ic.setComposingText(currentText, 1);
+                                        ic.endBatchEdit();
+                                        lastPartialText = currentText;
                                     }
                                 }
                             }
 
-                            // تثبيت النص النهائي بعد التوقف عن التحدث
                             @Override public void onResults(android.os.Bundle results) {
                                 java.util.ArrayList<String> matches = results.getStringArrayList(android.speech.SpeechRecognizer.RESULTS_RECOGNITION);
                                 if (matches != null && !matches.isEmpty()) {
-                                    String text = matches.get(0);
+                                    String finalText = matches.get(0);
                                     android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
                                     if (ic != null) {
-                                        // تثبيت النص النهائي وإضافة مسافة
-                                        ic.commitText(text + " ", 1);
+                                        ic.beginBatchEdit();
+                                        // 2. بننهي "وضعية الكتابة" ونثبت النص النهائي ونحط مسافة
+                                        ic.commitText(finalText + " ", 1);
+                                        ic.endBatchEdit();
                                     }
                                 }
                                 speechRecognizer.destroy();
@@ -1461,14 +1467,11 @@ public class LatinIME extends InputMethodService implements
 
                         speechRecognizer.startListening(speechIntent);
 
-                    } catch (Exception e) {
-                        // تم إزالة التوست
-                    }
+                    } catch (Exception e) { }
                 }
             });
             // --- نهاية تعديل MacBoard ---
         } else {
-            // معالجة باقي الأزرار العادية عشان الكيبورد يفضل شغال طبيعي
             final InputTransaction completeInputTransaction =
                     mInputLogic.onCodeInput(mSettings.getCurrent(), event,
                             mKeyboardSwitcher.getKeyboardShiftMode(),
