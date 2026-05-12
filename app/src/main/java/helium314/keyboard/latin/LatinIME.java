@@ -1398,22 +1398,27 @@ public class LatinIME extends InputMethodService implements
     // completely replace #onCodeInput.
         public void onEvent(@NonNull final Event event) {
         if (KeyCode.VOICE_INPUT == event.getKeyCode()) {
-            // --- بداية تعديل MacBoard النهائي (الحل المضمون 100% من الذكاء الاصطناعي الآخر) ---
+            // --- تعديل MacBoard المطور (حل مشكلة حذف الجلسات السابقة) ---
+            
+            final android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
+            if (ic != null) {
+                // أهم خطوة: تثبيت أي كلام قديم فوراً قبل بدء المايك
+                ic.beginBatchEdit();
+                ic.finishComposingText(); 
+                ic.endBatchEdit();
+            }
+
             new android.os.Handler(android.os.Looper.getMainLooper()).post(new Runnable() {
-                
-                // المتغيرات لحفظ النص المؤقت وحالة الاستماع
+                // متغيرات الجلسة (خاصة بكل ضغطة زرار ميكروفون بشكل مستقل)
                 private String mLastVoiceDraft = "";
                 private boolean mVoiceSessionActive = false;
-
-                private void clearVoiceDraftState() {
-                    mLastVoiceDraft = "";
-                    mVoiceSessionActive = false;
-                }
 
                 @Override
                 public void run() {
                     try {
+                        // محاولة إغلاق أي جلسة "شبح" قديمة كانت شغالة في الخلفية
                         final android.speech.SpeechRecognizer speechRecognizer = android.speech.SpeechRecognizer.createSpeechRecognizer(LatinIME.this);
+                        
                         android.content.Intent speechIntent = new android.content.Intent(android.speech.RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
                         speechIntent.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL, android.speech.RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
                         speechIntent.putExtra(android.speech.RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
@@ -1427,72 +1432,71 @@ public class LatinIME extends InputMethodService implements
 
                         speechRecognizer.setRecognitionListener(new android.speech.RecognitionListener() {
                             @Override public void onReadyForSpeech(android.os.Bundle params) {
-                                clearVoiceDraftState(); // تصفير الذاكرة مع بداية الاستماع
+                                // تصفير يدوي صارم عند جهوزية المايك
+                                mLastVoiceDraft = "";
+                                mVoiceSessionActive = false;
                             }
+                            
                             @Override public void onBeginningOfSpeech() {}
                             @Override public void onRmsChanged(float rmsdB) {}
                             @Override public void onBufferReceived(byte[] buffer) {}
                             @Override public void onEndOfSpeech() {}
-                            
+
                             @Override public void onError(int error) {
-                                clearVoiceDraftState();
+                                mLastVoiceDraft = "";
+                                mVoiceSessionActive = false;
                                 speechRecognizer.destroy();
                             }
-                            
+
                             @Override public void onPartialResults(android.os.Bundle results) {
                                 java.util.ArrayList<String> matches = results.getStringArrayList(android.speech.SpeechRecognizer.RESULTS_RECOGNITION);
                                 if (matches == null || matches.isEmpty()) return;
-                                
+
                                 String partial = matches.get(0);
-                                if (partial == null || partial.equals(mLastVoiceDraft)) return; // تجاوز لو مفيش جديد
+                                if (partial == null || partial.equals(mLastVoiceDraft)) return;
 
-                                android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
-                                if (ic == null) return;
+                                android.view.inputmethod.InputConnection currentIc = getCurrentInputConnection();
+                                if (currentIc == null) return;
 
-                                ic.beginBatchEdit();
+                                currentIc.beginBatchEdit();
                                 try {
-                                    // 1. مسح المسودة القديمة لو موجودة
+                                    // حذف المسودة الحالية فقط في إطار الجلسة النشطة
                                     if (mVoiceSessionActive && !mLastVoiceDraft.isEmpty()) {
-                                        ic.deleteSurroundingText(mLastVoiceDraft.length(), 0);
+                                        currentIc.deleteSurroundingText(mLastVoiceDraft.length(), 0);
                                     }
-                                    // 2. كتابة المسودة الجديدة وتحديث الذاكرة
-                                    ic.commitText(partial, 1);
+                                    
+                                    // كتابة النص الجديد
+                                    currentIc.commitText(partial, 1);
                                     mLastVoiceDraft = partial;
-                                    mVoiceSessionActive = true;
+                                    mVoiceSessionActive = true; 
                                 } finally {
-                                    ic.endBatchEdit();
+                                    currentIc.endBatchEdit();
                                 }
                             }
 
                             @Override public void onResults(android.os.Bundle results) {
                                 java.util.ArrayList<String> matches = results.getStringArrayList(android.speech.SpeechRecognizer.RESULTS_RECOGNITION);
                                 String finalText = (matches != null && !matches.isEmpty()) ? matches.get(0) : "";
-                                if (finalText == null) finalText = "";
 
-                                android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
-                                if (ic == null) {
-                                    clearVoiceDraftState();
-                                    speechRecognizer.destroy();
-                                    return;
-                                }
-
-                                ic.beginBatchEdit();
-                                try {
-                                    // مسح آخر مسودة اتكتبت
+                                android.view.inputmethod.InputConnection currentIc = getCurrentInputConnection();
+                                if (currentIc != null) {
+                                    currentIc.beginBatchEdit();
+                                    // حذف آخر مسودة قبل وضع النص النهائي النظيف
                                     if (mVoiceSessionActive && !mLastVoiceDraft.isEmpty()) {
-                                        ic.deleteSurroundingText(mLastVoiceDraft.length(), 0);
+                                        currentIc.deleteSurroundingText(mLastVoiceDraft.length(), 0);
                                     }
-                                    // كتابة النتيجة النهائية وإضافة مسافة
-                                    if (!finalText.isEmpty()) {
-                                        ic.commitText(finalText + " ", 1);
+                                    if (finalText != null && !finalText.isEmpty()) {
+                                        currentIc.commitText(finalText + " ", 1);
                                     }
-                                } finally {
-                                    ic.endBatchEdit();
-                                    clearVoiceDraftState();
-                                    speechRecognizer.destroy();
+                                    currentIc.endBatchEdit();
                                 }
+                                
+                                // تنظيف شامل لإنهاء الجلسة
+                                mLastVoiceDraft = "";
+                                mVoiceSessionActive = false;
+                                speechRecognizer.destroy();
                             }
-                            
+
                             @Override public void onEvent(int eventType, android.os.Bundle params) {}
                         });
 
@@ -1503,7 +1507,6 @@ public class LatinIME extends InputMethodService implements
             });
             // --- نهاية التعديل ---
         } else {
-            // باقي الكود الطبيعي بتاع الكيبورد
             final InputTransaction completeInputTransaction =
                     mInputLogic.onCodeInput(mSettings.getCurrent(), event,
                             mKeyboardSwitcher.getKeyboardShiftMode(),
