@@ -1396,15 +1396,69 @@ public class LatinIME extends InputMethodService implements
 
     // This method is public for testability of LatinIME, but also in the future it should
     // completely replace #onCodeInput.
-    public void onEvent(@NonNull final Event event) {
+        public void onEvent(@NonNull final Event event) {
         if (KeyCode.VOICE_INPUT == event.getKeyCode()) {
-            mRichImm.switchToShortcutIme(this);
+            // --- بداية تعديل MacBoard للإدخال الصوتي المدمج ---
+            android.widget.Toast.makeText(this, "🎤 جاري الاستماع...", android.widget.Toast.LENGTH_SHORT).show();
+            
+            new android.os.Handler(android.os.Looper.getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        final android.speech.SpeechRecognizer speechRecognizer = android.speech.SpeechRecognizer.createSpeechRecognizer(LatinIME.this);
+                        android.content.Intent speechIntent = new android.content.Intent(android.speech.RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+                        speechIntent.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL, android.speech.RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+                        
+                        // محاولة جلب لغة الكيبورد الحالية عشان يسمع بنفس اللغة
+                        try {
+                            android.view.inputmethod.InputMethodSubtype subtype = mRichImm.getCurrentSubtype().getRawSubtype();
+                            if (subtype != null && subtype.getLocale() != null && !subtype.getLocale().isEmpty()) {
+                                speechIntent.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE, subtype.getLocale());
+                            }
+                        } catch (Exception e) { }
+
+                        speechRecognizer.setRecognitionListener(new android.speech.RecognitionListener() {
+                            @Override public void onReadyForSpeech(android.os.Bundle params) {}
+                            @Override public void onBeginningOfSpeech() {}
+                            @Override public void onRmsChanged(float rmsdB) {}
+                            @Override public void onBufferReceived(byte[] buffer) {}
+                            @Override public void onEndOfSpeech() {}
+                            @Override public void onError(int error) {
+                                android.widget.Toast.makeText(LatinIME.this, "❌ توقف الاستماع", android.widget.Toast.LENGTH_SHORT).show();
+                                speechRecognizer.destroy();
+                            }
+                            @Override public void onResults(android.os.Bundle results) {
+                                java.util.ArrayList<String> matches = results.getStringArrayList(android.speech.SpeechRecognizer.RESULTS_RECOGNITION);
+                                if (matches != null && !matches.isEmpty()) {
+                                    String text = matches.get(0);
+                                    android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
+                                    if (ic != null) {
+                                        // إدراج النص المسموع مباشرة في حقل الكتابة مع مسافة في النهاية
+                                        ic.commitText(text + " ", 1);
+                                    }
+                                }
+                                speechRecognizer.destroy();
+                            }
+                            @Override public void onPartialResults(android.os.Bundle partialResults) {}
+                            @Override public void onEvent(int eventType, android.os.Bundle params) {}
+                        });
+
+                        speechRecognizer.startListening(speechIntent);
+
+                    } catch (Exception e) {
+                        android.widget.Toast.makeText(LatinIME.this, "❌ تعذر تشغيل الإدخال الصوتي", android.widget.Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+            // --- نهاية تعديل MacBoard ---
+        } else {
+            // معالجة باقي الأزرار العادية عشان الكيبورد يفضل شغال طبيعي
+            final InputTransaction completeInputTransaction =
+                    mInputLogic.onCodeInput(mSettings.getCurrent(), event,
+                            mKeyboardSwitcher.getKeyboardShiftMode(),
+                            mKeyboardSwitcher.getCurrentKeyboardScript(), mHandler);
+            updateStateAfterInputTransaction(completeInputTransaction);
         }
-        final InputTransaction completeInputTransaction =
-                mInputLogic.onCodeInput(mSettings.getCurrent(), event,
-                        mKeyboardSwitcher.getKeyboardShiftMode(),
-                        mKeyboardSwitcher.getCurrentKeyboardScript(), mHandler);
-        updateStateAfterInputTransaction(completeInputTransaction);
         mKeyboardSwitcher.onEvent(event, getCurrentAutoCapsState(), getCurrentRecapitalizeState());
     }
 
