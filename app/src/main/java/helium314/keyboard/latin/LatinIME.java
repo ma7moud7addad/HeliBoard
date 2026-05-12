@@ -1396,116 +1396,140 @@ public class LatinIME extends InputMethodService implements
 
     // This method is public for testability of LatinIME, but also in the future it should
     // completely replace #onCodeInput.
-        public void onEvent(@NonNull final Event event) {
-        if (KeyCode.VOICE_INPUT == event.getKeyCode()) {
-            // --- تعديل MacBoard المطور (حل مشكلة حذف الجلسات السابقة) ---
-            
-            final android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
-            if (ic != null) {
-                // أهم خطوة: تثبيت أي كلام قديم فوراً قبل بدء المايك
-                ic.beginBatchEdit();
-                ic.finishComposingText(); 
-                ic.endBatchEdit();
-            }
+        // --- متغيرات ودوال تعديل MacBoard للإدخال الصوتي (نظام الجلسات المعزولة) ---
+    private android.speech.SpeechRecognizer mSpeechRecognizer;
+    private int mVoiceSessionId = 0;
+    private String mLastVoiceDraft = "";
+    private boolean mVoiceDraftActive = false;
 
-            new android.os.Handler(android.os.Looper.getMainLooper()).post(new Runnable() {
-                // متغيرات الجلسة (خاصة بكل ضغطة زرار ميكروفون بشكل مستقل)
-                private String mLastVoiceDraft = "";
-                private boolean mVoiceSessionActive = false;
+    private void clearVoiceDraftState() {
+        mLastVoiceDraft = "";
+        mVoiceDraftActive = false;
+    }
 
-                @Override
-                public void run() {
-                    try {
-                        // محاولة إغلاق أي جلسة "شبح" قديمة كانت شغالة في الخلفية
-                        final android.speech.SpeechRecognizer speechRecognizer = android.speech.SpeechRecognizer.createSpeechRecognizer(LatinIME.this);
-                        
-                        android.content.Intent speechIntent = new android.content.Intent(android.speech.RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-                        speechIntent.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL, android.speech.RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-                        speechIntent.putExtra(android.speech.RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
-                        
+    private void stopAndDestroySpeechRecognizer() {
+        if (mSpeechRecognizer != null) {
+            try { mSpeechRecognizer.cancel(); } catch (Exception ignored) { }
+            try { mSpeechRecognizer.destroy(); } catch (Exception ignored) { }
+            mSpeechRecognizer = null;
+        }
+    }
+
+    private void startInlineVoiceTyping() {
+        new android.os.Handler(android.os.Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                final int sessionId = ++mVoiceSessionId; // إصدار تذكرة جديدة للجلسة
+                stopAndDestroySpeechRecognizer(); // قتل أي شبح قديم
+                clearVoiceDraftState();
+
+                final android.speech.SpeechRecognizer sr = android.speech.SpeechRecognizer.createSpeechRecognizer(LatinIME.this);
+                mSpeechRecognizer = sr;
+                android.content.Intent speechIntent = new android.content.Intent(android.speech.RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+                speechIntent.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL, android.speech.RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+                speechIntent.putExtra(android.speech.RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
+
+                try {
+                    android.view.inputmethod.InputMethodSubtype subtype = mRichImm.getCurrentSubtype().getRawSubtype();
+                    if (subtype != null && subtype.getLocale() != null && !subtype.getLocale().isEmpty()) {
+                        speechIntent.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE, subtype.getLocale());
+                    }
+                } catch (Exception ignored) { }
+
+                sr.setRecognitionListener(new android.speech.RecognitionListener() {
+                    // دالة للتأكد إن الجلسة دي هي اللي شغالة دلوقتي مش جلسة قديمة
+                    private boolean isStaleSession() {
+                        return sessionId != mVoiceSessionId || mSpeechRecognizer != sr;
+                    }
+
+                    private void finishThisSession() {
+                        if (sessionId != mVoiceSessionId) return;
+                        if (mSpeechRecognizer == sr) {
+                            try { sr.cancel(); } catch (Exception ignored) { }
+                            try { sr.destroy(); } catch (Exception ignored) { }
+                            mSpeechRecognizer = null;
+                        }
+                        clearVoiceDraftState();
+                    }
+
+                    private void replaceDraftText(String newText) {
+                        android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
+                        if (ic == null) return;
+                        ic.beginBatchEdit();
                         try {
-                            android.view.inputmethod.InputMethodSubtype subtype = mRichImm.getCurrentSubtype().getRawSubtype();
-                            if (subtype != null && subtype.getLocale() != null && !subtype.getLocale().isEmpty()) {
-                                speechIntent.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE, subtype.getLocale());
+                            if (mVoiceDraftActive && !mLastVoiceDraft.isEmpty()) {
+                                // استخدام codePoints أدق جداً مع اللغة العربية
+                                int codePoints = mLastVoiceDraft.codePointCount(0, mLastVoiceDraft.length());
+                                ic.deleteSurroundingTextInCodePoints(codePoints, 0);
                             }
-                        } catch (Exception e) { }
+                            ic.commitText(newText, 1);
+                            mLastVoiceDraft = newText;
+                            mVoiceDraftActive = true;
+                        } finally {
+                            ic.endBatchEdit();
+                        }
+                    }
 
-                        speechRecognizer.setRecognitionListener(new android.speech.RecognitionListener() {
-                            @Override public void onReadyForSpeech(android.os.Bundle params) {
-                                // تصفير يدوي صارم عند جهوزية المايك
-                                mLastVoiceDraft = "";
-                                mVoiceSessionActive = false;
-                            }
-                            
-                            @Override public void onBeginningOfSpeech() {}
-                            @Override public void onRmsChanged(float rmsdB) {}
-                            @Override public void onBufferReceived(byte[] buffer) {}
-                            @Override public void onEndOfSpeech() {}
+                    @Override public void onReadyForSpeech(android.os.Bundle params) { if (!isStaleSession()) clearVoiceDraftState(); }
+                    @Override public void onBeginningOfSpeech() {}
+                    @Override public void onRmsChanged(float rmsdB) {}
+                    @Override public void onBufferReceived(byte[] buffer) {}
+                    @Override public void onEndOfSpeech() {}
+                    @Override public void onError(int error) { if (!isStaleSession()) finishThisSession(); }
 
-                            @Override public void onError(int error) {
-                                mLastVoiceDraft = "";
-                                mVoiceSessionActive = false;
-                                speechRecognizer.destroy();
-                            }
+                    @Override public void onPartialResults(android.os.Bundle results) {
+                        if (isStaleSession()) return; // تجاهل الأشباح
+                        java.util.ArrayList<String> matches = results.getStringArrayList(android.speech.SpeechRecognizer.RESULTS_RECOGNITION);
+                        if (matches == null || matches.isEmpty()) return;
+                        String partial = matches.get(0);
+                        if (partial == null || partial.equals(mLastVoiceDraft)) return;
+                        replaceDraftText(partial);
+                    }
 
-                            @Override public void onPartialResults(android.os.Bundle results) {
-                                java.util.ArrayList<String> matches = results.getStringArrayList(android.speech.SpeechRecognizer.RESULTS_RECOGNITION);
-                                if (matches == null || matches.isEmpty()) return;
-
-                                String partial = matches.get(0);
-                                if (partial == null || partial.equals(mLastVoiceDraft)) return;
-
-                                android.view.inputmethod.InputConnection currentIc = getCurrentInputConnection();
-                                if (currentIc == null) return;
-
-                                currentIc.beginBatchEdit();
-                                try {
-                                    // حذف المسودة الحالية فقط في إطار الجلسة النشطة
-                                    if (mVoiceSessionActive && !mLastVoiceDraft.isEmpty()) {
-                                        currentIc.deleteSurroundingText(mLastVoiceDraft.length(), 0);
-                                    }
-                                    
-                                    // كتابة النص الجديد
-                                    currentIc.commitText(partial, 1);
-                                    mLastVoiceDraft = partial;
-                                    mVoiceSessionActive = true; 
-                                } finally {
-                                    currentIc.endBatchEdit();
+                    @Override public void onResults(android.os.Bundle results) {
+                        if (isStaleSession()) return; // تجاهل الأشباح
+                        java.util.ArrayList<String> matches = results.getStringArrayList(android.speech.SpeechRecognizer.RESULTS_RECOGNITION);
+                        String finalText = (matches != null && !matches.isEmpty()) ? matches.get(0) : "";
+                        if (finalText == null) finalText = "";
+                        
+                        android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
+                        if (ic != null) {
+                            ic.beginBatchEdit();
+                            try {
+                                if (mVoiceDraftActive && !mLastVoiceDraft.isEmpty()) {
+                                    int codePoints = mLastVoiceDraft.codePointCount(0, mLastVoiceDraft.length());
+                                    ic.deleteSurroundingTextInCodePoints(codePoints, 0);
                                 }
-                            }
-
-                            @Override public void onResults(android.os.Bundle results) {
-                                java.util.ArrayList<String> matches = results.getStringArrayList(android.speech.SpeechRecognizer.RESULTS_RECOGNITION);
-                                String finalText = (matches != null && !matches.isEmpty()) ? matches.get(0) : "";
-
-                                android.view.inputmethod.InputConnection currentIc = getCurrentInputConnection();
-                                if (currentIc != null) {
-                                    currentIc.beginBatchEdit();
-                                    // حذف آخر مسودة قبل وضع النص النهائي النظيف
-                                    if (mVoiceSessionActive && !mLastVoiceDraft.isEmpty()) {
-                                        currentIc.deleteSurroundingText(mLastVoiceDraft.length(), 0);
-                                    }
-                                    if (finalText != null && !finalText.isEmpty()) {
-                                        currentIc.commitText(finalText + " ", 1);
-                                    }
-                                    currentIc.endBatchEdit();
+                                if (!finalText.isEmpty()) {
+                                    ic.commitText(finalText + " ", 1);
                                 }
-                                
-                                // تنظيف شامل لإنهاء الجلسة
-                                mLastVoiceDraft = "";
-                                mVoiceSessionActive = false;
-                                speechRecognizer.destroy();
+                            } finally {
+                                ic.endBatchEdit();
                             }
+                        }
+                        finishThisSession();
+                    }
+                    @Override public void onEvent(int eventType, android.os.Bundle params) {}
+                });
 
-                            @Override public void onEvent(int eventType, android.os.Bundle params) {}
-                        });
-
-                        speechRecognizer.startListening(speechIntent);
-
-                    } catch (Exception e) { }
+                try {
+                    sr.startListening(speechIntent);
+                } catch (Exception e) {
+                    if (sessionId == mVoiceSessionId && mSpeechRecognizer == sr) {
+                        try { sr.destroy(); } catch (Exception ignored) { }
+                        mSpeechRecognizer = null;
+                        clearVoiceDraftState();
+                    }
                 }
-            });
-            // --- نهاية التعديل ---
+            }
+        });
+    }
+    // --- نهاية دوال MacBoard ---
+
+    // الدالة الأصلية تم تنظيفها لتنادي فقط على دالة الاستماع الجديدة
+    public void onEvent(@NonNull final Event event) {
+        if (KeyCode.VOICE_INPUT == event.getKeyCode()) {
+            startInlineVoiceTyping();
         } else {
             final InputTransaction completeInputTransaction =
                     mInputLogic.onCodeInput(mSettings.getCurrent(), event,
