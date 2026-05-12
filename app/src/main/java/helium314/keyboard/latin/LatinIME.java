@@ -1398,19 +1398,16 @@ public class LatinIME extends InputMethodService implements
     // completely replace #onCodeInput.
         public void onEvent(@NonNull final Event event) {
         if (KeyCode.VOICE_INPUT == event.getKeyCode()) {
-            // --- بداية تعديل MacBoard (الإدخال اللحظي الاحترافي - بدون تكرار وبدون توست) ---
+            // --- بداية تعديل MacBoard النهائي (حل مشكلة التكرار تماماً) ---
             
             new android.os.Handler(android.os.Looper.getMainLooper()).post(new Runnable() {
-                // مخزن مؤقت عشان نعرف طول الكلام اللي بعتناه قبل كده ونعرف نمسحه ونحدثه
-                private String lastPartialText = "";
-
                 @Override
                 public void run() {
                     try {
                         final android.speech.SpeechRecognizer speechRecognizer = android.speech.SpeechRecognizer.createSpeechRecognizer(LatinIME.this);
                         android.content.Intent speechIntent = new android.content.Intent(android.speech.RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
                         speechIntent.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL, android.speech.RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-                        speechIntent.putExtra(android.speech.RecognizerIntent.EXTRA_PARTIAL_RESULTS, true); // تفعيل النتائج اللحظية
+                        speechIntent.putExtra(android.speech.RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
                         
                         try {
                             android.view.inputmethod.InputMethodSubtype subtype = mRichImm.getCurrentSubtype().getRawSubtype();
@@ -1420,9 +1417,7 @@ public class LatinIME extends InputMethodService implements
                         } catch (Exception e) { }
 
                         speechRecognizer.setRecognitionListener(new android.speech.RecognitionListener() {
-                            @Override public void onReadyForSpeech(android.os.Bundle params) {
-                                lastPartialText = ""; // تصفير المخزن عند بدء الكلام
-                            }
+                            @Override public void onReadyForSpeech(android.os.Bundle params) {}
                             @Override public void onBeginningOfSpeech() {}
                             @Override public void onRmsChanged(float rmsdB) {}
                             @Override public void onBufferReceived(byte[] buffer) {}
@@ -1431,18 +1426,14 @@ public class LatinIME extends InputMethodService implements
                                 speechRecognizer.destroy();
                             }
                             
-                            // هتا بتم عملية "التحديث اللحظي" السحرية
                             @Override public void onPartialResults(android.os.Bundle partialResults) {
                                 java.util.ArrayList<String> matches = partialResults.getStringArrayList(android.speech.SpeechRecognizer.RESULTS_RECOGNITION);
                                 if (matches != null && !matches.isEmpty()) {
                                     String currentText = matches.get(0);
                                     android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
                                     if (ic != null) {
-                                        ic.beginBatchEdit();
-                                        // 1. بنحدد النص القديم كـ "نص قيد الكتابة" عشان الأندرويد يستبدله تلقائياً بالجديد
+                                        // السر هنا: بنجبر الكيبورد يستبدل النص القيد التكوين فقط
                                         ic.setComposingText(currentText, 1);
-                                        ic.endBatchEdit();
-                                        lastPartialText = currentText;
                                     }
                                 }
                             }
@@ -1453,8 +1444,9 @@ public class LatinIME extends InputMethodService implements
                                     String finalText = matches.get(0);
                                     android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
                                     if (ic != null) {
+                                        // بننهي التكوين اللحظي ونحط النص النهائي مرة واحدة
                                         ic.beginBatchEdit();
-                                        // 2. بننهي "وضعية الكتابة" ونثبت النص النهائي ونحط مسافة
+                                        ic.finishComposingText(); // بنقفل أي كلام مؤقت كان مكتوب
                                         ic.commitText(finalText + " ", 1);
                                         ic.endBatchEdit();
                                     }
