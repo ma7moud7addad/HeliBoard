@@ -1398,8 +1398,7 @@ public class LatinIME extends InputMethodService implements
     // completely replace #onCodeInput.
         public void onEvent(@NonNull final Event event) {
         if (KeyCode.VOICE_INPUT == event.getKeyCode()) {
-            // --- بداية تعديل MacBoard للإدخال الصوتي المدمج ---
-            android.widget.Toast.makeText(this, "🎤 جاري الاستماع...", android.widget.Toast.LENGTH_SHORT).show();
+            // --- بداية تعديل MacBoard للإدخال الصوتي المدمج (النسخة اللحظية وبدون توست) ---
             
             new android.os.Handler(android.os.Looper.getMainLooper()).post(new Runnable() {
                 @Override
@@ -1409,7 +1408,9 @@ public class LatinIME extends InputMethodService implements
                         android.content.Intent speechIntent = new android.content.Intent(android.speech.RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
                         speechIntent.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL, android.speech.RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
                         
-                        // محاولة جلب لغة الكيبورد الحالية عشان يسمع بنفس اللغة
+                        // تفعيل إرسال النتائج اللحظية أثناء الكلام
+                        speechIntent.putExtra(android.speech.RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
+                        
                         try {
                             android.view.inputmethod.InputMethodSubtype subtype = mRichImm.getCurrentSubtype().getRawSubtype();
                             if (subtype != null && subtype.getLocale() != null && !subtype.getLocale().isEmpty()) {
@@ -1424,29 +1425,44 @@ public class LatinIME extends InputMethodService implements
                             @Override public void onBufferReceived(byte[] buffer) {}
                             @Override public void onEndOfSpeech() {}
                             @Override public void onError(int error) {
-                                android.widget.Toast.makeText(LatinIME.this, "❌ توقف الاستماع", android.widget.Toast.LENGTH_SHORT).show();
+                                // تم إزالة التوست، فقط نغلق المستمع
                                 speechRecognizer.destroy();
                             }
+                            
+                            // معالجة الكتابة اللحظية أثناء التحدث
+                            @Override public void onPartialResults(android.os.Bundle partialResults) {
+                                java.util.ArrayList<String> matches = partialResults.getStringArrayList(android.speech.SpeechRecognizer.RESULTS_RECOGNITION);
+                                if (matches != null && !matches.isEmpty()) {
+                                    String text = matches.get(0);
+                                    android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
+                                    if (ic != null) {
+                                        // استخدام setComposingText لكتابة النص وتحديثه لحظياً بدون تكرار
+                                        ic.setComposingText(text, 1);
+                                    }
+                                }
+                            }
+
+                            // تثبيت النص النهائي بعد التوقف عن التحدث
                             @Override public void onResults(android.os.Bundle results) {
                                 java.util.ArrayList<String> matches = results.getStringArrayList(android.speech.SpeechRecognizer.RESULTS_RECOGNITION);
                                 if (matches != null && !matches.isEmpty()) {
                                     String text = matches.get(0);
                                     android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
                                     if (ic != null) {
-                                        // إدراج النص المسموع مباشرة في حقل الكتابة مع مسافة في النهاية
+                                        // تثبيت النص النهائي وإضافة مسافة
                                         ic.commitText(text + " ", 1);
                                     }
                                 }
                                 speechRecognizer.destroy();
                             }
-                            @Override public void onPartialResults(android.os.Bundle partialResults) {}
+                            
                             @Override public void onEvent(int eventType, android.os.Bundle params) {}
                         });
 
                         speechRecognizer.startListening(speechIntent);
 
                     } catch (Exception e) {
-                        android.widget.Toast.makeText(LatinIME.this, "❌ تعذر تشغيل الإدخال الصوتي", android.widget.Toast.LENGTH_SHORT).show();
+                        // تم إزالة التوست
                     }
                 }
             });
@@ -1461,6 +1477,7 @@ public class LatinIME extends InputMethodService implements
         }
         mKeyboardSwitcher.onEvent(event, getCurrentAutoCapsState(), getCurrentRecapitalizeState());
     }
+
 
     public void onTextInput(final String rawText) {
         // TODO: have the keyboard pass the correct key code when we need it.
