@@ -124,6 +124,7 @@ SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
             android:theme="@style/TransparentActivityTheme"
             android:excludeFromRecents="true"
             android:exported="false"
+            android:windowSoftInputMode="stateUnchanged"
             android:taskAffinity="" />
     </application>
 
