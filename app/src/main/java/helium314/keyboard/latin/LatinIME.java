@@ -1398,7 +1398,8 @@ public class LatinIME extends InputMethodService implements
     // completely replace #onCodeInput.
         public void onEvent(@NonNull final Event event) {
         if (KeyCode.VOICE_INPUT == event.getKeyCode()) {
-            // --- بداية تعديل MacBoard للإدخال الصوتي المدمج (النسخة المستقرة بدون توست) ---
+            // --- بداية تعديل MacBoard للإدخال الصوتي المدمج ---
+            android.widget.Toast.makeText(this, "🎤 جاري الاستماع...", android.widget.Toast.LENGTH_SHORT).show();
             
             new android.os.Handler(android.os.Looper.getMainLooper()).post(new Runnable() {
                 @Override
@@ -1423,6 +1424,7 @@ public class LatinIME extends InputMethodService implements
                             @Override public void onBufferReceived(byte[] buffer) {}
                             @Override public void onEndOfSpeech() {}
                             @Override public void onError(int error) {
+                                android.widget.Toast.makeText(LatinIME.this, "❌ توقف الاستماع", android.widget.Toast.LENGTH_SHORT).show();
                                 speechRecognizer.destroy();
                             }
                             @Override public void onResults(android.os.Bundle results) {
@@ -1444,7 +1446,7 @@ public class LatinIME extends InputMethodService implements
                         speechRecognizer.startListening(speechIntent);
 
                     } catch (Exception e) {
-                        // تم إزالة التوست
+                        android.widget.Toast.makeText(LatinIME.this, "❌ تعذر تشغيل الإدخال الصوتي", android.widget.Toast.LENGTH_SHORT).show();
                     }
                 }
             });
@@ -1459,7 +1461,6 @@ public class LatinIME extends InputMethodService implements
         }
         mKeyboardSwitcher.onEvent(event, getCurrentAutoCapsState(), getCurrentRecapitalizeState());
     }
-
 
     public void onTextInput(final String rawText) {
         // TODO: have the keyboard pass the correct key code when we need it.
@@ -1779,14 +1780,24 @@ public class LatinIME extends InputMethodService implements
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         // --- بداية تعديل استقبال البصمة (MacBoard) ---
-        if (intent != null && "com.mahmoud.OPEN_CLIPBOARD_NATIVE".equals(intent.getAction())) {
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    mKeyboardActionListener.onCodeInput(KeyCode.CLIPBOARD, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false);
-                }
-            }, 50);
-            return START_NOT_STICKY;
+        if (intent != null) {
+            String action = intent.getAction();
+            if ("com.mahmoud.OPEN_CLIPBOARD_NATIVE".equals(action)) {
+                requestShowSelf(0); // إجبار الكيبورد على الظهور فوراً
+                
+                // نأخر أمر فتح الحافظة 400 ملي ثانية عشان الكيبورد يلحق يظهر على الشاشة
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mKeyboardActionListener.onCodeInput(KeyCode.CLIPBOARD, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false);
+                    }
+                }, 400); 
+                return START_NOT_STICKY;
+                
+            } else if ("com.mahmoud.RESTORE_KEYBOARD".equals(action)) {
+                requestShowSelf(0); // إرجاع الكيبورد فقط في حالة إلغاء البصمة
+                return START_NOT_STICKY;
+            }
         }
         // --- نهاية التعديل ---
 
