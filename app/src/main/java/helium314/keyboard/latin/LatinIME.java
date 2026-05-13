@@ -1783,19 +1783,8 @@ public class LatinIME extends InputMethodService implements
         if (intent != null) {
             String action = intent.getAction();
             if ("com.mahmoud.OPEN_CLIPBOARD_NATIVE".equals(action)) {
-                requestShowSelf(1); // 1 = SHOW_IMPLICIT للتأكيد
-                
-                // قللنا التأخير لـ 100 ملي ثانية فقط لأن الكيبورد لن يغلق أصلاً
-                mHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        mKeyboardActionListener.onCodeInput(KeyCode.CLIPBOARD, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false);
-                    }
-                }, 100); 
-                return START_NOT_STICKY;
-                
-            } else if ("com.mahmoud.RESTORE_KEYBOARD".equals(action)) {
-                requestShowSelf(1);
+                // الكيبورد لم يغلق أصلاً، نفتح الحافظة فوراً بدون أي تأخير!
+                mKeyboardActionListener.onCodeInput(KeyCode.CLIPBOARD, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false);
                 return START_NOT_STICKY;
             }
         }
