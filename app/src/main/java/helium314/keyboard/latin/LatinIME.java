@@ -1778,6 +1778,18 @@ public class LatinIME extends InputMethodService implements
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        // --- بداية تعديل استقبال البصمة (MacBoard) ---
+        if (intent != null && "com.mahmoud.OPEN_CLIPBOARD_NATIVE".equals(intent.getAction())) {
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mKeyboardActionListener.onCodeInput(KeyCode.CLIPBOARD, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false);
+                }
+            }, 50);
+            return START_NOT_STICKY;
+        }
+        // --- نهاية التعديل ---
+
         if (intent != null && EmojiSearchActivity.EMOJI_SEARCH_DONE_ACTION.equals(intent.getAction()) && ! isEmojiSearch()) {
             if (intent.getBooleanExtra(EmojiSearchActivity.IME_CLOSED_KEY, false)) {
                 requestHideSelf(0);
