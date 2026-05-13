@@ -120,6 +120,11 @@ SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/gesture_data_path"/>
         </provider>
+        <activity android:name=".BiometricActivity"
+            android:theme="@style/TransparentActivityTheme"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:taskAffinity="" />
     </application>
 
     <queries>
