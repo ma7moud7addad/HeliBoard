@@ -18,17 +18,18 @@ public class BiometricActivity extends FragmentActivity {
             @Override
             public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
                 super.onAuthenticationError(errorCode, errString);
-                finish(); // لو حصل خطأ أو المستخدم قفلها، الشاشة الشفافة تختفي
+                restoreKeyboardOnly(); // نرجع الكيبورد لو قفلنا البصمة
+                finish(); 
             }
 
             @Override
             public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
                 super.onAuthenticationSucceeded(result);
-                // البصمة نجحت! نبعت إشارة سرية للكيبورد عشان يفتح الحافظة
+                // البصمة نجحت! نبعت إشارة سرية للكيبورد عشان يظهر ويفتح الحافظة
                 Intent intent = new Intent(BiometricActivity.this, LatinIME.class);
                 intent.setAction("com.mahmoud.OPEN_CLIPBOARD_NATIVE");
                 startService(intent);
-                finish(); // نقفل الشاشة الشفافة
+                finish(); 
             }
 
             @Override
@@ -45,5 +46,12 @@ public class BiometricActivity extends FragmentActivity {
                 .build();
 
         biometricPrompt.authenticate(promptInfo);
+    }
+
+    // دالة صغيرة لإرجاع الكيبورد بدون فتح الحافظة
+    private void restoreKeyboardOnly() {
+        Intent intent = new Intent(this, LatinIME.class);
+        intent.setAction("com.mahmoud.RESTORE_KEYBOARD");
+        startService(intent);
     }
 }
