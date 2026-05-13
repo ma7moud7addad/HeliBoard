@@ -12,8 +12,11 @@ import java.util.concurrent.Executor;
 public class BiometricActivity extends FragmentActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // السر هنا: منع الشاشة الشفافة من إخفاء الكيبورد الأصلي أو سحب التركيز منه
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+        // السر الحقيقي للشركات الكبرى: جعل الشاشة "شبح" لا تسحب التركيز أبداً
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
+                             WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
+                             WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+                             
         super.onCreate(savedInstanceState);
         
         Executor executor = ContextCompat.getMainExecutor(this);
@@ -21,17 +24,17 @@ public class BiometricActivity extends FragmentActivity {
             @Override
             public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
                 super.onAuthenticationError(errorCode, errString);
-                restoreKeyboardOnly(); 
-                finish(); 
+                finish(); // نقفل الشبح
             }
 
             @Override
             public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
                 super.onAuthenticationSucceeded(result);
+                // البصمة نجحت! نبعت إشارة للكيبورد يفتح الحافظة
                 Intent intent = new Intent(BiometricActivity.this, LatinIME.class);
                 intent.setAction("com.mahmoud.OPEN_CLIPBOARD_NATIVE");
                 startService(intent);
-                finish(); 
+                finish(); // نقفل الشبح
             }
 
             @Override
@@ -47,11 +50,5 @@ public class BiometricActivity extends FragmentActivity {
                 .build();
 
         biometricPrompt.authenticate(promptInfo);
-    }
-
-    private void restoreKeyboardOnly() {
-        Intent intent = new Intent(this, LatinIME.class);
-        intent.setAction("com.mahmoud.RESTORE_KEYBOARD");
-        startService(intent);
     }
 }
