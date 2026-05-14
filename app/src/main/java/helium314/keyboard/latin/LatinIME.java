@@ -581,7 +581,10 @@ public class LatinIME extends InputMethodService implements
             restartAfterUnlockFilter.addAction(Intent.ACTION_USER_UNLOCKED);
         registerReceiver(mRestartAfterDeviceUnlockReceiver, restartAfterUnlockFilter);
 // تشغيل راديو MacBoard
-        final IntentFilter macroFilter = new IntentFilter("com.mahmoud.MACRO_OPEN_CLIPBOARD");
+        // تشغيل راديو MacBoard
+        final IntentFilter macroFilter = new IntentFilter();
+        macroFilter.addAction("com.mahmoud.MACRO_OPEN_CLIPBOARD");
+        macroFilter.addAction("com.mahmoud.MACRO_AUTH_FAILED");
         ContextCompat.registerReceiver(this, mMacroDroidReceiver, macroFilter, ContextCompat.RECEIVER_EXPORTED);
         StatsUtils.onCreate(mSettings.getCurrent(), mRichImm);
     }
@@ -1398,19 +1401,28 @@ public class LatinIME extends InputMethodService implements
     // Implementation of {@link SuggestionStripView.Listener}.
     // Implementation of {@link SuggestionStripView.Listener}.
     // Implementation of {@link SuggestionStripView.Listener}.
+    // Implementation of {@link SuggestionStripView.Listener}.
     @Override
     public void onCodeInput(final int codePoint, final int x, final int y, final boolean isKeyRepeat) {
         // --- بداية الحماية الشاملة للحافظة (MacBoard) ---
         if (codePoint == KeyCode.CLIPBOARD) {
             if (!mIsClipboardAuthenticated) {
-                mIsWaitingForBiometricResult = true; // تفعيل حالة انتظار البصمة
+                mIsWaitingForBiometricResult = true; 
                 try {
                     Intent intent = new Intent("com.mahmoud.MACRO_REQ_FINGERPRINT");
                     sendBroadcast(intent);
                 } catch (Exception e) {}
-                return; // منع فتح الحافظة
+
+                // مؤقت أمني: إلغاء حالة الانتظار تلقائياً بعد 10 ثوانٍ إذا لم يصل رد
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mIsWaitingForBiometricResult = false;
+                    }
+                }, 10000);
+
+                return; 
             } else {
-                // تم استلام تصريح الدخول من MacroDroid، نسحب التصريح ونسمح بالمرور
                 mIsClipboardAuthenticated = false;
             }
         }
@@ -1763,24 +1775,31 @@ public class LatinIME extends InputMethodService implements
     // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid عبر الراديو) ---
     // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid عبر الراديو) ---
     // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid عبر الراديو) ---
+    // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid عبر الراديو) ---
     private final BroadcastReceiver mMacroDroidReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, final Intent intent) {
-            if (intent != null && "com.mahmoud.MACRO_OPEN_CLIPBOARD".equals(intent.getAction())) {
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        // الشرط الجديد: هل طلبنا البصمة فعلاً؟ وهل الكيبورد ظاهر؟
-                        if (mIsWaitingForBiometricResult && isInputViewShown()) {
-                            mIsWaitingForBiometricResult = false; // تصفير حالة الانتظار
-                            mIsClipboardAuthenticated = true; // إعطاء تصريح الدخول
-                            onCodeInput(KeyCode.CLIPBOARD, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false);
+            if (intent != null) {
+                String action = intent.getAction();
+                if ("com.mahmoud.MACRO_OPEN_CLIPBOARD".equals(action)) {
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (mIsWaitingForBiometricResult && isInputViewShown()) {
+                                mIsWaitingForBiometricResult = false; 
+                                mIsClipboardAuthenticated = true; 
+                                onCodeInput(KeyCode.CLIPBOARD, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false);
+                            }
                         }
-                    }
-                });
+                    });
+                } else if ("com.mahmoud.MACRO_AUTH_FAILED".equals(action)) {
+                    // إلغاء حالة الانتظار فوراً إذا فشلت البصمة
+                    mIsWaitingForBiometricResult = false;
+                }
             }
         }
     };
+    // --- نهاية التعديل ---
     // --- نهاية التعديل ---
     private final BroadcastReceiver mRingerModeChangeReceiver = new BroadcastReceiver() {
         @Override
