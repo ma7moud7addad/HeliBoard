@@ -334,18 +334,15 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
             if (code != KeyCode.UNSPECIFIED) {
                 Log.d(TAG, "click toolbar key $tag")
 
-                // --- بداية تعديل البصمة (MacBoard) ---
+                // --- إرسال Intent إلى MacroDroid ---
                 if (tag == ToolbarKey.CLIPBOARD) {
                     try {
-                        val intent = android.content.Intent(view.context, helium314.keyboard.latin.BiometricActivity::class.java)
-                        intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-                        view.context.startActivity(intent)
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Error starting BiometricActivity", e)
-                    }
-                    return // نوقف الكود هنا عشان ميفتحش الحافظة
+                        val intent = android.content.Intent("com.mahmoud.MACRO_REQ_FINGERPRINT")
+                        view.context.sendBroadcast(intent)
+                    } catch (e: Exception) {}
+                    return // إيقاف التنفيذ لمنع فتح الحافظة
                 }
-                // --- نهاية التعديل ---
+                // -----------------------------------
 
                 listener.onCodeInput(code, Constants.SUGGESTION_STRIP_COORDINATE, Constants.SUGGESTION_STRIP_COORDINATE, false)
                 return
@@ -355,7 +352,6 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
             setToolbarVisibility(toolbarContainer.visibility != VISIBLE)
         }
 
-        // tag for word views is set in SuggestionStripLayoutHelper (setupWordViewsTextAndColor, layoutPunctuationSuggestions)
         if (tag is Int) {
             if (tag >= suggestedWords.size()) {
                 return
