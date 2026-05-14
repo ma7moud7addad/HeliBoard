@@ -995,6 +995,29 @@ public class LatinIME extends InputMethodService implements
                 currentSettingsValues.mGestureFloatingPreviewTextEnabled);
 
       if (TRACE) Debug.startMethodTracing("/data/trace/latinime");
+
+        // --- بداية تعديل MacBoard (الحل النهائي باستخدام isShown) ---
+        if (sPendingOpenClipboard && mInputView != null) {
+            mInputView.getViewTreeObserver().addOnGlobalLayoutListener(
+                new android.view.ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        // الشرط السحري: هل الكيبورد مرئي فعلياً للمستخدم الآن؟
+                        if (mInputView != null && mInputView.isShown()) {
+                            // 1. إزالة المراقب فوراً لمنع التكرار
+                            mInputView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                            
+                            // 2. استهلاك الأمر (مسح النوتة) الآن فقط لأننا تأكدنا من الظهور
+                            sPendingOpenClipboard = false;
+                            
+                            // 3. فتح الحافظة
+                            mKeyboardActionListener.onCodeInput(KeyCode.CLIPBOARD, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false);
+                        }
+                    }
+                }
+            );
+        }
+        // --- نهاية التعديل ---
     }
 
   @Override
@@ -1003,17 +1026,6 @@ public class LatinIME extends InputMethodService implements
         if (isInputViewShown()) {
             setNavigationBarColor();
             workaroundForHuaweiStatusBarIssue();
-        }
-
-        // بدء العداد فقط عندما يظهر الكيبورد فعلياً على الشاشة
-        if (sPendingOpenClipboard) {
-            sPendingOpenClipboard = false;
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    mKeyboardActionListener.onCodeInput(KeyCode.CLIPBOARD, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false);
-                }
-            }, 150); // 150 ملي ثانية كافية لضمان جاهزية الواجهة بعد الظهور
         }
     }
 
