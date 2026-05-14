@@ -185,6 +185,8 @@ public class LatinIME extends InputMethodService implements
 
     private final ClipboardHistoryManager mClipboardHistoryManager = new ClipboardHistoryManager(this);
 
+    private boolean mIsClipboardAuthenticated = false;
+    
     public static final class UIHandler extends LeakGuardHandlerWrapper<LatinIME> {
         private static final int MSG_UPDATE_SHIFT_STATE = 0;
         private static final int MSG_PENDING_IMS_CALLBACK = 1;
@@ -1392,8 +1394,25 @@ public class LatinIME extends InputMethodService implements
     }
 
     // Implementation of {@link SuggestionStripView.Listener}.
+    // Implementation of {@link SuggestionStripView.Listener}.
     @Override
     public void onCodeInput(final int codePoint, final int x, final int y, final boolean isKeyRepeat) {
+        // --- بداية الحماية الشاملة للحافظة (MacBoard) ---
+        if (codePoint == KeyCode.CLIPBOARD) {
+            if (!mIsClipboardAuthenticated) {
+                // أي زرار يرسل كود الحافظة سيتم إيقافه هنا وطلب البصمة
+                try {
+                    Intent intent = new Intent("com.mahmoud.MACRO_REQ_FINGERPRINT");
+                    sendBroadcast(intent);
+                } catch (Exception e) {}
+                return; // منع فتح الحافظة
+            } else {
+                // تم استلام تصريح الدخول من MacroDroid، نسحب التصريح ونسمح بالمرور
+                mIsClipboardAuthenticated = false;
+            }
+        }
+        // --- نهاية التعديل ---
+
         mKeyboardActionListener.onCodeInput(codePoint, x, y, isKeyRepeat);
     }
 
@@ -1738,6 +1757,7 @@ public class LatinIME extends InputMethodService implements
 
     // receive ringer mode change.
     // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid عبر الراديو) ---
+    // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid عبر الراديو) ---
     private final BroadcastReceiver mMacroDroidReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, final Intent intent) {
@@ -1745,12 +1765,14 @@ public class LatinIME extends InputMethodService implements
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
+                        mIsClipboardAuthenticated = true; // إعطاء تصريح الدخول
                         mKeyboardActionListener.onCodeInput(KeyCode.CLIPBOARD, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false);
                     }
                 });
             }
         }
     };
+    // --- نهاية التعديل ---
     // --- نهاية التعديل ---
     private final BroadcastReceiver mRingerModeChangeReceiver = new BroadcastReceiver() {
         @Override
