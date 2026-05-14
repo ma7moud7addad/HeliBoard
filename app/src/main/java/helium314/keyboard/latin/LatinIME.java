@@ -187,6 +187,8 @@ public class LatinIME extends InputMethodService implements
 
     private boolean mIsClipboardAuthenticated = false;
     
+    private boolean mIsWaitingForBiometricResult = false;
+    
     public static final class UIHandler extends LeakGuardHandlerWrapper<LatinIME> {
         private static final int MSG_UPDATE_SHIFT_STATE = 0;
         private static final int MSG_PENDING_IMS_CALLBACK = 1;
@@ -1395,12 +1397,13 @@ public class LatinIME extends InputMethodService implements
 
     // Implementation of {@link SuggestionStripView.Listener}.
     // Implementation of {@link SuggestionStripView.Listener}.
+    // Implementation of {@link SuggestionStripView.Listener}.
     @Override
     public void onCodeInput(final int codePoint, final int x, final int y, final boolean isKeyRepeat) {
         // --- بداية الحماية الشاملة للحافظة (MacBoard) ---
         if (codePoint == KeyCode.CLIPBOARD) {
             if (!mIsClipboardAuthenticated) {
-                // أي زرار يرسل كود الحافظة سيتم إيقافه هنا وطلب البصمة
+                mIsWaitingForBiometricResult = true; // تفعيل حالة انتظار البصمة
                 try {
                     Intent intent = new Intent("com.mahmoud.MACRO_REQ_FINGERPRINT");
                     sendBroadcast(intent);
@@ -1759,6 +1762,7 @@ public class LatinIME extends InputMethodService implements
     // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid عبر الراديو) ---
     // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid عبر الراديو) ---
     // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid عبر الراديو) ---
+    // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid عبر الراديو) ---
     private final BroadcastReceiver mMacroDroidReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, final Intent intent) {
@@ -1766,15 +1770,17 @@ public class LatinIME extends InputMethodService implements
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        mIsClipboardAuthenticated = true; // إعطاء تصريح الدخول
-                        // التعديل هنا: ننده على البوابة الرئيسية عشان تسحب التصريح، بدل ما نكلم المحرك مباشرة
-                        onCodeInput(KeyCode.CLIPBOARD, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false);
+                        // الشرط الجديد: هل طلبنا البصمة فعلاً؟ وهل الكيبورد ظاهر؟
+                        if (mIsWaitingForBiometricResult && isInputViewShown()) {
+                            mIsWaitingForBiometricResult = false; // تصفير حالة الانتظار
+                            mIsClipboardAuthenticated = true; // إعطاء تصريح الدخول
+                            onCodeInput(KeyCode.CLIPBOARD, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false);
+                        }
                     }
                 });
             }
         }
     };
-    // --- نهاية التعديل ---
     // --- نهاية التعديل ---
     private final BroadcastReceiver mRingerModeChangeReceiver = new BroadcastReceiver() {
         @Override
