@@ -995,6 +995,17 @@ public class LatinIME extends InputMethodService implements
                 currentSettingsValues.mGestureFloatingPreviewTextEnabled);
 
         if (TRACE) Debug.startMethodTracing("/data/trace/latinime");
+        // --- بداية تعديل MacBoard (فتح الحافظة بعد اكتمال ظهور الكيبورد) ---
+        if (sPendingOpenClipboard) {
+            sPendingOpenClipboard = false;
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mKeyboardActionListener.onCodeInput(KeyCode.CLIPBOARD, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false);
+                }
+            });
+        }
+        // --- نهاية التعديل ---
     }
 
     @Override
@@ -1004,19 +1015,6 @@ public class LatinIME extends InputMethodService implements
             setNavigationBarColor();
             workaroundForHuaweiStatusBarIssue();
         }
-        
-        // --- بداية تعديل MacBoard (الذاكرة الفولاذية) ---
-        if (sPendingOpenClipboard) {
-            sPendingOpenClipboard = false;
-            // تأخير بسيط جداً لضمان رسم الكيبورد بالكامل قبل فتح الحافظة
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    mKeyboardActionListener.onCodeInput(KeyCode.CLIPBOARD, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false);
-                }
-            }, 150);
-        }
-        // --- نهاية التعديل ---
     }
 
     @Override
