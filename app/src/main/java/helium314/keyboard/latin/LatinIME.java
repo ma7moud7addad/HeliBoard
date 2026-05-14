@@ -997,30 +997,21 @@ public class LatinIME extends InputMethodService implements
       if (TRACE) Debug.startMethodTracing("/data/trace/latinime");
 
         // --- بداية تعديل MacBoard (الحل النهائي باستخدام isShown) ---
-        if (sPendingOpenClipboard && mInputView != null) {
-            mInputView.getViewTreeObserver().addOnGlobalLayoutListener(
-                new android.view.ViewTreeObserver.OnGlobalLayoutListener() {
-                    @Override
-                    public void onGlobalLayout() {
-                        // الشرط السحري: هل الكيبورد مرئي فعلياً للمستخدم الآن؟
-                        if (mInputView != null && mInputView.isShown()) {
-                            // 1. إزالة المراقب فوراً لمنع التكرار
-                            mInputView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                            
-                            // 2. استهلاك الأمر (مسح النوتة) الآن فقط لأننا تأكدنا من الظهور
-                            sPendingOpenClipboard = false;
-                            
-                            // 3. فتح الحافظة
-                            mKeyboardActionListener.onCodeInput(KeyCode.CLIPBOARD, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false);
-                        }
-                    }
+                // --- تعديل MacBoard لفتح الحافظة بأمان ---
+        if (sPendingOpenClipboard) {
+            sPendingOpenClipboard = false;
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mKeyboardActionListener.onCodeInput(KeyCode.CLIPBOARD, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false);
                 }
-            );
+            });
         }
         // --- نهاية التعديل ---
+
     }
 
-  @Override
+      @Override
     public void onWindowShown() {
         super.onWindowShown();
         if (isInputViewShown()) {
@@ -1028,6 +1019,7 @@ public class LatinIME extends InputMethodService implements
             workaroundForHuaweiStatusBarIssue();
         }
     }
+
 
     @Override
     public void onWindowHidden() {
