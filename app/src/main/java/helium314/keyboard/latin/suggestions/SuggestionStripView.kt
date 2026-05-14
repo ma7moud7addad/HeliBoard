@@ -333,17 +333,6 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
             val code = getCodeForToolbarKey(tag)
             if (code != KeyCode.UNSPECIFIED) {
                 Log.d(TAG, "click toolbar key $tag")
-
-                // --- إرسال Intent إلى MacroDroid ---
-                if (tag == ToolbarKey.CLIPBOARD) {
-                    try {
-                        val intent = android.content.Intent("com.mahmoud.MACRO_REQ_FINGERPRINT")
-                        view.context.sendBroadcast(intent)
-                    } catch (e: Exception) {}
-                    return // إيقاف التنفيذ لمنع فتح الحافظة
-                }
-                // -----------------------------------
-
                 listener.onCodeInput(code, Constants.SUGGESTION_STRIP_COORDINATE, Constants.SUGGESTION_STRIP_COORDINATE, false)
                 return
             }
