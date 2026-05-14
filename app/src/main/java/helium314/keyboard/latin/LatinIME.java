@@ -185,8 +185,7 @@ public class LatinIME extends InputMethodService implements
 
     private final ClipboardHistoryManager mClipboardHistoryManager = new ClipboardHistoryManager(this);
     
-    // متغير لتخزين حالة فتح الحافظة بعد البصمة
-    private boolean mPendingOpenClipboard = false;
+    private static boolean sPendingOpenClipboard = false;
 
     public static final class UIHandler extends LeakGuardHandlerWrapper<LatinIME> {
         private static final int MSG_UPDATE_SHIFT_STATE = 0;
@@ -1006,10 +1005,16 @@ public class LatinIME extends InputMethodService implements
             workaroundForHuaweiStatusBarIssue();
         }
         
-        // --- بداية تعديل MacBoard (فتح الحافظة بمجرد ظهور الكيبورد) ---
-        if (mPendingOpenClipboard) {
-            mPendingOpenClipboard = false;
-            mKeyboardActionListener.onCodeInput(KeyCode.CLIPBOARD, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false);
+        // --- بداية تعديل MacBoard (الذاكرة الفولاذية) ---
+        if (sPendingOpenClipboard) {
+            sPendingOpenClipboard = false;
+            // تأخير بسيط جداً لضمان رسم الكيبورد بالكامل قبل فتح الحافظة
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mKeyboardActionListener.onCodeInput(KeyCode.CLIPBOARD, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false);
+                }
+            }, 150);
         }
         // --- نهاية التعديل ---
     }
@@ -1793,8 +1798,8 @@ public class LatinIME extends InputMethodService implements
         if (intent != null) {
             String action = intent.getAction();
             if ("com.mahmoud.OPEN_CLIPBOARD_NATIVE".equals(action)) {
-                mPendingOpenClipboard = true; // نبلغ الكيبورد إنه يفتح الحافظة لما يظهر
-                requestShowSelf(0); // نطلب من الأندرويد إظهار الكيبورد
+                sPendingOpenClipboard = true; // تسجيل المهمة في الذاكرة الفولاذية
+                requestShowSelf(0); // محاولة إظهار الكيبورد أوتوماتيكياً
                 return START_NOT_STICKY;
                 
             } else if ("com.mahmoud.RESTORE_KEYBOARD".equals(action)) {
