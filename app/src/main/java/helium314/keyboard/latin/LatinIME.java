@@ -1013,8 +1013,9 @@ public class LatinIME extends InputMethodService implements
                 public void run() {
                     mKeyboardActionListener.onCodeInput(KeyCode.CLIPBOARD, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false);
                 }
-            }, 1500);
+            }, 150); // 150 ملي ثانية كافية لضمان جاهزية الواجهة بعد الظهور
         }
+    }
 
     @Override
     public void onWindowHidden() {
