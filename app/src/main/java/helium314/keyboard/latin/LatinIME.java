@@ -184,6 +184,9 @@ public class LatinIME extends InputMethodService implements
     private GestureConsumer mGestureConsumer = GestureConsumer.NULL_GESTURE_CONSUMER;
 
     private final ClipboardHistoryManager mClipboardHistoryManager = new ClipboardHistoryManager(this);
+    
+    // متغير لتخزين حالة فتح الحافظة بعد البصمة
+    private boolean mPendingOpenClipboard = false;
 
     public static final class UIHandler extends LeakGuardHandlerWrapper<LatinIME> {
         private static final int MSG_UPDATE_SHIFT_STATE = 0;
@@ -1002,6 +1005,13 @@ public class LatinIME extends InputMethodService implements
             setNavigationBarColor();
             workaroundForHuaweiStatusBarIssue();
         }
+        
+        // --- بداية تعديل MacBoard (فتح الحافظة بمجرد ظهور الكيبورد) ---
+        if (mPendingOpenClipboard) {
+            mPendingOpenClipboard = false;
+            mKeyboardActionListener.onCodeInput(KeyCode.CLIPBOARD, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false);
+        }
+        // --- نهاية التعديل ---
     }
 
     @Override
@@ -1783,8 +1793,12 @@ public class LatinIME extends InputMethodService implements
         if (intent != null) {
             String action = intent.getAction();
             if ("com.mahmoud.OPEN_CLIPBOARD_NATIVE".equals(action)) {
-                // الكيبورد لم يغلق أصلاً، نفتح الحافظة فوراً بدون أي تأخير!
-                mKeyboardActionListener.onCodeInput(KeyCode.CLIPBOARD, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false);
+                mPendingOpenClipboard = true; // نبلغ الكيبورد إنه يفتح الحافظة لما يظهر
+                requestShowSelf(0); // نطلب من الأندرويد إظهار الكيبورد
+                return START_NOT_STICKY;
+                
+            } else if ("com.mahmoud.RESTORE_KEYBOARD".equals(action)) {
+                requestShowSelf(0);
                 return START_NOT_STICKY;
             }
         }
