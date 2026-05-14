@@ -995,15 +995,23 @@ public class LatinIME extends InputMethodService implements
                 currentSettingsValues.mGestureFloatingPreviewTextEnabled);
 
         if (TRACE) Debug.startMethodTracing("/data/trace/latinime");
-        // --- بداية تعديل MacBoard (فتح الحافظة بعد اكتمال ظهور الكيبورد) ---
+
+        // --- بداية تعديل MacBoard (الحل الجذري والنهائي من DeepSeek) ---
         if (sPendingOpenClipboard) {
             sPendingOpenClipboard = false;
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    mKeyboardActionListener.onCodeInput(KeyCode.CLIPBOARD, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false);
-                }
-            });
+            if (mInputView != null) {
+                mInputView.getViewTreeObserver().addOnGlobalLayoutListener(new android.view.ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        // نحذف المراقب فوراً عشان يشتغل مرة واحدة بس وميعملش تكرار
+                        mInputView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                        
+                        // في اللحظة دي، الكيبورد خلص كل تحميلاته ورسم نفسه بالكامل
+                        // نضرب أمر فتح الحافظة وإحنا متأكدين إن مفيش حاجة هتمسحه!
+                        mKeyboardActionListener.onCodeInput(KeyCode.CLIPBOARD, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false);
+                    }
+                });
+            }
         }
         // --- نهاية التعديل ---
     }
