@@ -997,6 +997,7 @@ public class LatinIME extends InputMethodService implements
         if (TRACE) Debug.startMethodTracing("/data/trace/latinime");
 
         // --- بداية تعديل MacBoard (الحل الجذري والنهائي من DeepSeek) ---
+        // --- بداية تعديل MacBoard (الحل الجذري والنهائي من DeepSeek) ---
         if (sPendingOpenClipboard) {
             sPendingOpenClipboard = false;
             if (mInputView != null) {
@@ -1013,6 +1014,7 @@ public class LatinIME extends InputMethodService implements
                 });
             }
         }
+        // --- نهاية التعديل ---
         // --- نهاية التعديل ---
     }
 
