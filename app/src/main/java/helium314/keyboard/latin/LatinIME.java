@@ -995,27 +995,25 @@ public class LatinIME extends InputMethodService implements
                 currentSettingsValues.mGestureFloatingPreviewTextEnabled);
 
       if (TRACE) Debug.startMethodTracing("/data/trace/latinime");
-
-        // --- بداية تعديل MacBoard (الحل النووي الأخير) ---
-        if (sPendingOpenClipboard) {
-            sPendingOpenClipboard = false;
-            // ننتظر 300 ملي ثانية بعد بدء ظهور الكيبورد لضمان انتهاء كل التحميلات الداخلية
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    mKeyboardActionListener.onCodeInput(KeyCode.CLIPBOARD, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false);
-                }
-            }, 3000);
-        }
-        // --- نهاية التعديل ---
     }
 
-    @Override
+  @Override
     public void onWindowShown() {
         super.onWindowShown();
         if (isInputViewShown()) {
             setNavigationBarColor();
             workaroundForHuaweiStatusBarIssue();
+        }
+
+        // بدء العداد فقط عندما يظهر الكيبورد فعلياً على الشاشة
+        if (sPendingOpenClipboard) {
+            sPendingOpenClipboard = false;
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mKeyboardActionListener.onCodeInput(KeyCode.CLIPBOARD, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false);
+                }
+            }, 3000); // 150 ملي ثانية كافية لضمان جاهزية الواجهة بعد الظهور
         }
     }
 
