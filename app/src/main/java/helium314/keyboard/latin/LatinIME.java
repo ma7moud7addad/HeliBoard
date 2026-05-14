@@ -994,27 +994,19 @@ public class LatinIME extends InputMethodService implements
                 currentSettingsValues.mGestureTrailEnabled,
                 currentSettingsValues.mGestureFloatingPreviewTextEnabled);
 
-        if (TRACE) Debug.startMethodTracing("/data/trace/latinime");
+      if (TRACE) Debug.startMethodTracing("/data/trace/latinime");
 
-        // --- بداية تعديل MacBoard (الحل الجذري والنهائي من DeepSeek) ---
-        // --- بداية تعديل MacBoard (الحل الجذري والنهائي من DeepSeek) ---
+        // --- بداية تعديل MacBoard (الحل النووي الأخير) ---
         if (sPendingOpenClipboard) {
             sPendingOpenClipboard = false;
-            if (mInputView != null) {
-                mInputView.getViewTreeObserver().addOnGlobalLayoutListener(new android.view.ViewTreeObserver.OnGlobalLayoutListener() {
-                    @Override
-                    public void onGlobalLayout() {
-                        // نحذف المراقب فوراً عشان يشتغل مرة واحدة بس وميعملش تكرار
-                        mInputView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                        
-                        // في اللحظة دي، الكيبورد خلص كل تحميلاته ورسم نفسه بالكامل
-                        // نضرب أمر فتح الحافظة وإحنا متأكدين إن مفيش حاجة هتمسحه!
-                        mKeyboardActionListener.onCodeInput(KeyCode.CLIPBOARD, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false);
-                    }
-                });
-            }
+            // ننتظر 300 ملي ثانية بعد بدء ظهور الكيبورد لضمان انتهاء كل التحميلات الداخلية
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mKeyboardActionListener.onCodeInput(KeyCode.CLIPBOARD, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false);
+                }
+            }, 3000);
         }
-        // --- نهاية التعديل ---
         // --- نهاية التعديل ---
     }
 
