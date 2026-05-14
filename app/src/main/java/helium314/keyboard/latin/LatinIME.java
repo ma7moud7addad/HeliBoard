@@ -184,8 +184,6 @@ public class LatinIME extends InputMethodService implements
     private GestureConsumer mGestureConsumer = GestureConsumer.NULL_GESTURE_CONSUMER;
 
     private final ClipboardHistoryManager mClipboardHistoryManager = new ClipboardHistoryManager(this);
-    
-    private static boolean sPendingOpenClipboard = false;
 
     public static final class UIHandler extends LeakGuardHandlerWrapper<LatinIME> {
         private static final int MSG_UPDATE_SHIFT_STATE = 0;
@@ -578,7 +576,9 @@ public class LatinIME extends InputMethodService implements
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
             restartAfterUnlockFilter.addAction(Intent.ACTION_USER_UNLOCKED);
         registerReceiver(mRestartAfterDeviceUnlockReceiver, restartAfterUnlockFilter);
-
+// تشغيل راديو MacBoard
+        final IntentFilter macroFilter = new IntentFilter("com.mahmoud.MACRO_OPEN_CLIPBOARD");
+        ContextCompat.registerReceiver(this, mMacroDroidReceiver, macroFilter, ContextCompat.RECEIVER_EXPORTED);
         StatsUtils.onCreate(mSettings.getCurrent(), mRichImm);
     }
 
@@ -700,6 +700,7 @@ public class LatinIME extends InputMethodService implements
         unregisterReceiver(mDictionaryPackInstallReceiver);
         unregisterReceiver(mDictionaryDumpBroadcastReceiver);
         unregisterReceiver(mRestartAfterDeviceUnlockReceiver);
+        unregisterReceiver(mMacroDroidReceiver);
         mStatsUtilsManager.onDestroy(this /* context */);
         super.onDestroy();
         mHandler.removeCallbacksAndMessages(null);
@@ -994,33 +995,10 @@ public class LatinIME extends InputMethodService implements
                 currentSettingsValues.mGestureTrailEnabled,
                 currentSettingsValues.mGestureFloatingPreviewTextEnabled);
 
-      if (TRACE) Debug.startMethodTracing("/data/trace/latinime");
-
-                // --- تعديل MacBoard لفتح الحافظة بأمان (الحل الدبابة) ---
-        if (sPendingOpenClipboard && mInputView != null) {
-            mInputView.getViewTreeObserver().addOnGlobalLayoutListener(
-                new android.view.ViewTreeObserver.OnGlobalLayoutListener() {
-                    @Override
-                    public void onGlobalLayout() {
-                        // الشرط ده هو الحارس: هل الكيبورد مرئي فعلياً للمستخدم الآن؟
-                        if (mInputView != null && mInputView.isShown()) {
-                            // 1. إزالة المراقب فوراً لمنع التكرار
-                            mInputView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                            
-                            // 2. تصفير المتغير الآن فقط لأننا تأكدنا مليون في المية من الظهور
-                            sPendingOpenClipboard = false;
-                            
-                            // 3. فتح الحافظة
-                            mKeyboardActionListener.onCodeInput(KeyCode.CLIPBOARD, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false);
-                        }
-                    }
-                }
-            );
-        }
-
+        if (TRACE) Debug.startMethodTracing("/data/trace/latinime");
     }
 
-  @Override
+    @Override
     public void onWindowShown() {
         super.onWindowShown();
         if (isInputViewShown()) {
@@ -1759,6 +1737,21 @@ public class LatinIME extends InputMethodService implements
     // boolean onKeyMultiple(final int keyCode, final int count, final KeyEvent event);
 
     // receive ringer mode change.
+    // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid عبر الراديو) ---
+    private final BroadcastReceiver mMacroDroidReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(final Context context, final Intent intent) {
+            if (intent != null && "com.mahmoud.MACRO_OPEN_CLIPBOARD".equals(intent.getAction())) {
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mKeyboardActionListener.onCodeInput(KeyCode.CLIPBOARD, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false);
+                    }
+                });
+            }
+        }
+    };
+    // --- نهاية التعديل ---
     private final BroadcastReceiver mRingerModeChangeReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, final Intent intent) {
@@ -1804,21 +1797,6 @@ public class LatinIME extends InputMethodService implements
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        // --- بداية تعديل استقبال البصمة (MacBoard) ---
-        if (intent != null) {
-            String action = intent.getAction();
-            if ("com.mahmoud.OPEN_CLIPBOARD_NATIVE".equals(action)) {
-                sPendingOpenClipboard = true; // تسجيل المهمة في الذاكرة الفولاذية
-                requestShowSelf(0); // محاولة إظهار الكيبورد أوتوماتيكياً
-                return START_NOT_STICKY;
-                
-            } else if ("com.mahmoud.RESTORE_KEYBOARD".equals(action)) {
-                requestShowSelf(0);
-                return START_NOT_STICKY;
-            }
-        }
-        // --- نهاية التعديل ---
-
         if (intent != null && EmojiSearchActivity.EMOJI_SEARCH_DONE_ACTION.equals(intent.getAction()) && ! isEmojiSearch()) {
             if (intent.getBooleanExtra(EmojiSearchActivity.IME_CLOSED_KEY, false)) {
                 requestHideSelf(0);
