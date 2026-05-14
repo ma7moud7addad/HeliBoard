@@ -1758,6 +1758,7 @@ public class LatinIME extends InputMethodService implements
     // receive ringer mode change.
     // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid عبر الراديو) ---
     // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid عبر الراديو) ---
+    // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid عبر الراديو) ---
     private final BroadcastReceiver mMacroDroidReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, final Intent intent) {
@@ -1766,7 +1767,8 @@ public class LatinIME extends InputMethodService implements
                     @Override
                     public void run() {
                         mIsClipboardAuthenticated = true; // إعطاء تصريح الدخول
-                        mKeyboardActionListener.onCodeInput(KeyCode.CLIPBOARD, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false);
+                        // التعديل هنا: ننده على البوابة الرئيسية عشان تسحب التصريح، بدل ما نكلم المحرك مباشرة
+                        onCodeInput(KeyCode.CLIPBOARD, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false);
                     }
                 });
             }
