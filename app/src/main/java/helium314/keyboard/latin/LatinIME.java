@@ -1776,31 +1776,40 @@ public class LatinIME extends InputMethodService implements
     // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid عبر الراديو) ---
     // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid عبر الراديو) ---
     // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid عبر الراديو) ---
+    // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid مع حماية بكلمة سر) ---
     private final BroadcastReceiver mMacroDroidReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, final Intent intent) {
             if (intent != null) {
                 String action = intent.getAction();
+                
                 if ("com.mahmoud.MACRO_OPEN_CLIPBOARD".equals(action)) {
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (mIsWaitingForBiometricResult && isInputViewShown()) {
-                                mIsWaitingForBiometricResult = false; 
-                                mIsClipboardAuthenticated = true; 
-                                onCodeInput(KeyCode.CLIPBOARD, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false);
+                    // استخراج كلمة السر من الإشارة
+                    String token = intent.getStringExtra("auth_token");
+                    
+                    // التحقق من كلمة السر (يجب أن تتطابق مع ما كتبته في MacroDroid)
+                    if ("M3aB2gK6+U8Wm7F6^s8,JlY:o=3h~c".equals(token)) {
+                        mHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (mIsWaitingForBiometricResult && isInputViewShown()) {
+                                    mIsWaitingForBiometricResult = false; 
+                                    mIsClipboardAuthenticated = true; 
+                                    onCodeInput(KeyCode.CLIPBOARD, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false);
+                                }
                             }
-                        }
-                    });
+                        });
+                    } else {
+                        Log.w(TAG, "محاولة اختراق: إشارة فتح الحافظة بدون كلمة سر صحيحة!");
+                    }
+                    
                 } else if ("com.mahmoud.MACRO_AUTH_FAILED".equals(action)) {
-                    // إلغاء حالة الانتظار فوراً إذا فشلت البصمة
                     mIsWaitingForBiometricResult = false;
                 }
             }
         }
     };
-    // --- نهاية التعديل ---
-    // --- نهاية التعديل ---
+    
     private final BroadcastReceiver mRingerModeChangeReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, final Intent intent) {
