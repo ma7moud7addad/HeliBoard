@@ -1419,7 +1419,7 @@ public class LatinIME extends InputMethodService implements
                     public void run() {
                         mIsWaitingForBiometricResult = false;
                     }
-                }, 10000);
+                }, 7000);
 
                 return; 
             } else {
