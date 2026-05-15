@@ -7,7 +7,9 @@
 package helium314.keyboard.latin;
 
 import android.content.Context;
+import android.media.AudioAttributes;
 import android.media.AudioManager;
+import android.media.SoundPool;
 import android.os.Vibrator;
 import android.view.HapticFeedbackConstants;
 import android.view.View;
@@ -19,13 +21,17 @@ import helium314.keyboard.latin.settings.SettingsValues;
 
 /**
  * This class gathers audio feedback and haptic feedback functions.
- * <p>
- * It offers a consistent and simple interface that allows LatinIME to forget about the
- * complexity of settings and the like.
  */
 public final class AudioAndHapticFeedbackManager {
     private AudioManager mAudioManager;
     private Vibrator mVibrator;
+    
+    // --- إضافة SoundPool لتشغيل الأصوات المخصصة (MacBoard) ---
+    private SoundPool mSoundPool;
+    private int mSoundStandard;
+    private int mSoundSpacebar;
+    private int mSoundDelete;
+    private int mSoundReturn;
 
     private SettingsValues mSettingsValues;
     private boolean mSoundOn;
@@ -49,6 +55,24 @@ public final class AudioAndHapticFeedbackManager {
     private void initInternal(final Context context) {
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         mVibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+
+        // --- بداية تعديل MacBoard (تهيئة الأصوات المخصصة) ---
+        AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .build();
+
+        mSoundPool = new SoundPool.Builder()
+                .setMaxStreams(4)
+                .setAudioAttributes(audioAttributes)
+                .build();
+
+        // تحميل الأصوات من مجلد raw
+        mSoundStandard = mSoundPool.load(context, R.raw.keypress_standard, 1);
+        mSoundSpacebar = mSoundPool.load(context, R.raw.keypress_spacebar, 1);
+        mSoundDelete = mSoundPool.load(context, R.raw.keypress_delete, 1);
+        mSoundReturn = mSoundPool.load(context, R.raw.keypress_return, 1);
+        // --- نهاية التعديل ---
     }
 
     public void performHapticAndAudioFeedback(
@@ -79,7 +103,6 @@ public final class AudioAndHapticFeedbackManager {
     }
 
     public void performAudioFeedback(final int code, final HapticEvent hapticEvent) {
-        // if mAudioManager is null, we can't play a sound anyway, so return
         if (mAudioManager == null) {
             return;
         }
@@ -89,13 +112,33 @@ public final class AudioAndHapticFeedbackManager {
         if (hapticEvent != HapticEvent.KEY_PRESS) {
             return;
         }
-        final int sound = switch (code) {
-            case KeyCode.DELETE -> AudioManager.FX_KEYPRESS_DELETE;
-            case Constants.CODE_ENTER -> AudioManager.FX_KEYPRESS_RETURN;
-            case Constants.CODE_SPACE -> AudioManager.FX_KEYPRESS_SPACEBAR;
-            default -> AudioManager.FX_KEYPRESS_STANDARD;
-        };
-        mAudioManager.playSoundEffect(sound, mSettingsValues.mKeypressSoundVolume);
+        
+        // --- بداية تعديل MacBoard (تشغيل الأصوات المخصصة) ---
+        int soundId = mSoundStandard;
+        switch (code) {
+            case KeyCode.DELETE:
+                soundId = mSoundDelete;
+                break;
+            case Constants.CODE_ENTER:
+                soundId = mSoundReturn;
+                break;
+            case Constants.CODE_SPACE:
+                soundId = mSoundSpacebar;
+                break;
+            default:
+                soundId = mSoundStandard;
+                break;
+        }
+        
+        // حساب مستوى الصوت بناءً على إعدادات الكيبورد
+        float volume = mSettingsValues.mKeypressSoundVolume;
+        if (volume < 0.0f) volume = 0.0f;
+        if (volume > 1.0f) volume = 1.0f;
+
+        if (mSoundPool != null) {
+            mSoundPool.play(soundId, volume, volume, 1, 0, 1.0f);
+        }
+        // --- نهاية التعديل ---
     }
 
     public void performHapticFeedback(final View viewToPerformHapticFeedbackOn, final HapticEvent hapticEvent) {
