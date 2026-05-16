@@ -53,6 +53,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalConfiguration
@@ -145,17 +146,17 @@ fun GestureDataScreen(
     // ideally we'd move all the active gathering stuff into a separate (non-local) function,
     // but either it has issues with the floating button positioning (if they are in the function)
     // or the keyboard flashes during recomposition if they are outside the function
-    var wordFromDict by rememberSaveable { mutableStateOf<String?>(null) } // some word from the dictionary
+    var wordFromDict by remember { mutableStateOf<String?>(null) } // some word from the dictionary
     var lastData by remember { mutableStateOf<WordData?>(null) }
-    var sessionWordCount by rememberSaveable { mutableIntStateOf(0) }
-    var dbActiveWordCount by rememberSaveable { mutableIntStateOf(dao.count(activeMode = true)) }
+    var sessionWordCount by remember { mutableIntStateOf(0) }
+    var dbActiveWordCount by remember { mutableIntStateOf(dao.count(activeMode = true)) }
     var showMuchDataDialog by rememberSaveable { mutableStateOf(true) }
     var showEndDialog by rememberSaveable { mutableStateOf(true) }
     val focusRequester = remember { FocusRequester() }
     val keyboard = LocalSoftwareKeyboardController.current
-    val words = rememberSaveable { mutableListOf<Pair<String, Long>>() }
+    val words = remember { mutableListOf<Pair<String, Long>>() }
     val scope = rememberCoroutineScope { Dispatchers.IO }
-    var activeGathering by rememberSaveable { mutableStateOf(false) }
+    var activeGathering by remember { mutableStateOf(false) }
     var showActiveInfoDialog by remember { mutableStateOf(false) }
     val maybeNotEnoughSpace = activeGathering && useWideLayout
     fun nextWord(save: Boolean) {
@@ -346,7 +347,7 @@ fun GestureDataScreen(
                     mutableIntStateOf(dbActiveWordCount + exportedAndDeletedCount)
                 }
                 Text(stringResource(R.string.gesture_data_active_count, sessionWordCount, sessionWordCount + oldActiveWords, exportedAndDeletedCount))
-                Box(Modifier.size(1.dp)) { // box hides the field, but we can still interact with it
+                Box(Modifier.size(1.dp).alpha(0f)) { // box hides the field, but we can still interact with it
                     TextField(
                         value = TextFieldValue(),
                         enabled = wordFromDict != null,

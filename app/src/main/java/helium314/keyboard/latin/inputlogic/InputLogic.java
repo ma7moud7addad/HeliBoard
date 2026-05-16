@@ -959,32 +959,6 @@ public final class InputLogic {
         }
     }
 
-    private void addToHistoryIfEmoji(final String text, final SettingsValues settingsValues) {
-        if (mLastComposedWord == LastComposedWord.NOT_A_COMPOSED_WORD // we want a last composed word, also to avoid storing consecutive emojis
-                || mWordComposer.isComposingWord() // emoji will be part of the word in this case, better do nothing
-                || !settingsValues.mBigramPredictionEnabled // this is only for next word suggestions, so they need to be enabled
-                || settingsValues.mIncognitoModeEnabled
-                || !settingsValues.isSuggestionsEnabledPerUserSettings() // see comment in performAdditionToUserHistoryDictionary
-                || !StringUtilsKt.isEmoji(text)
-        ) return;
-        if (mConnection.hasSlowInputConnection()) {
-            // Since we don't unlearn when the user backspaces on a slow InputConnection,
-            // turn off learning to guard against adding typos that the user later deletes.
-            Log.w(TAG, "Skipping learning due to slow InputConnection.");
-            return;
-        }
-        mLastComposedWord = LastComposedWord.NOT_A_COMPOSED_WORD; // avoid storing consecutive emojis
-
-        // commit emoji to dictionary, so it ends up in history and can be suggested as next word
-        mDictionaryFacilitator.addToUserHistory(
-                text,
-                false,
-                mConnection.getNgramContextFromNthPreviousWord(settingsValues.mSpacingAndPunctuations, 2),
-                (int) TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()),
-                settingsValues.mBlockPotentiallyOffensive
-        );
-    }
-
     /**
      * Handle a non-separator.
      * @param event The event to handle.
@@ -1663,16 +1637,16 @@ public final class InputLogic {
 
     private void performAdditionToUserHistoryDictionary(final SettingsValues settingsValues,
             final String suggestion, @NonNull final NgramContext ngramContext) {
-        // If correction is not enabled, we don't add words to the user history dictionary.
+        // For addition to user history we want suggestions (even if just for autocorrect) or a gestured word.
         // That's to avoid unintended additions in some sensitive fields, or fields that
         // expect to receive non-words.
-        // mInputTypeNoAutoCorrect changed to !isSuggestionsEnabledPerUserSettings because this was cancelling learning way too often
-        if (!settingsValues.isSuggestionsEnabledPerUserSettings() || TextUtils.isEmpty(suggestion))
+        if ((!settingsValues.needsToLookupSuggestions() && !mWordComposer.isBatchMode()) || TextUtils.isEmpty(suggestion))
             return;
-        final boolean wasAutoCapitalized = mWordComposer.wasAutoCapitalized() && !mWordComposer.isMostlyCaps();
-        final String word = stripWordSeparatorsFromEnd(suggestion, settingsValues);
+        boolean wasAutoCapitalized = mWordComposer.wasAutoCapitalized() && !mWordComposer.isMostlyCaps();
+        String word = StringUtilsKt.stripTrailingSeparatorsAndConnectors(suggestion, settingsValues.mSpacingAndPunctuations);
         if (settingsValues.mIncognitoModeEnabled) {
-            // still adjust confidences, otherwise incognito input fields can be very annoying when wrong language is active
+            // don't add to history, but still adjust confidences
+            // otherwise incognito input fields can be very annoying when the wrong language is active
             mDictionaryFacilitator.adjustConfidences(word, wasAutoCapitalized);
             return;
         }
@@ -1689,18 +1663,25 @@ public final class InputLogic {
                 timeStampInSeconds, settingsValues.mBlockPotentiallyOffensive);
     }
 
-    // strip word separators from end (may be necessary for urls, e.g. when the user has typed
-    //  "go to example.com, and" -> we don't want the ",")
-    private String stripWordSeparatorsFromEnd(final String word, final SettingsValues settingsValues) {
-        final String result;
-        if (settingsValues.mSpacingAndPunctuations.isWordSeparator(word.codePointBefore(word.length()))) {
-            int endIndex = word.length() - 1;
-            while (endIndex != 0 && settingsValues.mSpacingAndPunctuations.isWordSeparator(word.codePointBefore(endIndex)))
-                --endIndex;
-            result = (endIndex > 0) ? word.substring(0, endIndex) : word;
-        } else
-            result = word;
-        return result;
+    private void addToHistoryIfEmoji(final String text, final SettingsValues settingsValues) {
+        if (mLastComposedWord == LastComposedWord.NOT_A_COMPOSED_WORD // we want a last composed word, also to avoid storing consecutive emojis
+            || mWordComposer.isComposingWord() // emoji will be part of the word in this case, better do nothing
+            || !settingsValues.mBigramPredictionEnabled // this is only for next word suggestions, so they need to be enabled
+            || settingsValues.mIncognitoModeEnabled
+            || !settingsValues.needsToLookupSuggestions()
+            || !StringUtilsKt.isEmoji(text)
+            || mConnection.hasSlowInputConnection()
+        ) return;
+        mLastComposedWord = LastComposedWord.NOT_A_COMPOSED_WORD; // avoid storing consecutive emojis
+
+        // commit emoji to dictionary, so it ends up in history and can be suggested as next word
+        mDictionaryFacilitator.addToUserHistory(
+            text,
+            false,
+            mConnection.getNgramContextFromNthPreviousWord(settingsValues.mSpacingAndPunctuations, 2),
+            (int) TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()),
+            settingsValues.mBlockPotentiallyOffensive
+        );
     }
 
     public void performUpdateSuggestionStripSync(final SettingsValues settingsValues, final int inputStyle) {
@@ -1753,7 +1734,7 @@ public final class InputLogic {
                     && mLatinIME.tryShowClipboardSuggestion())) {
                 mSuggestionStripViewAccessor.setSuggestions(suggestedWords);
             }
-            if (! suggestedWords.isEmpty() && settingsValues.isSuggestionsEnabledPerUserSettings() && isInlineEmojiSearchAction()) {
+            if (!suggestedWords.isEmpty() && settingsValues.mSuggestionsEnabled && isInlineEmojiSearchAction()) {
                 mSuggestionStripViewAccessor.showSuggestionStrip();
             }
         }
