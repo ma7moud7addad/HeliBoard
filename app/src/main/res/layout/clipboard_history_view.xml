@@ -13,30 +13,43 @@
     android:background="@android:color/transparent"
     style="?attr/clipboardHistoryViewStyle">
 
-    <FrameLayout
+    <!-- إضافة نظام الطبقات -->
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent">
 
-        <TextView
-            android:id="@+id/clipboard_empty_view"
+        <!-- طبقة الخلفية: الحافظة تملأ الشاشة بالكامل -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/clipboard_empty_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="invisible"
+                android:text="No items"
+                tools:ignore="HardcodedText" />
+
+            <helium314.keyboard.keyboard.clipboard.ClipboardHistoryRecyclerView
+                android:id="@+id/clipboard_list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"/>
+
+        </FrameLayout>
+
+        <!-- طبقة الأمام: زرار عائم أسفل اليمين -->
+        <helium314.keyboard.keyboard.MainKeyboardView
+            android:id="@+id/bottom_row_keyboard"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:visibility="invisible"
-            android:text="¯\\_(ツ)_/¯"
-            tools:ignore="HardcodedText" />
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:background="@android:color/transparent" />
 
-        <helium314.keyboard.keyboard.clipboard.ClipboardHistoryRecyclerView
-            android:id="@+id/clipboard_list"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"/>
-
-    </FrameLayout>
-
-    <helium314.keyboard.keyboard.MainKeyboardView
-        android:id="@+id/bottom_row_keyboard"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+    </RelativeLayout>
 
 </helium314.keyboard.keyboard.clipboard.ClipboardHistoryView>
