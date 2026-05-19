@@ -8,6 +8,7 @@ package helium314.keyboard.keyboard.emoji
 import android.content.res.Resources
 import android.view.View
 import android.widget.FrameLayout
+import android.widget.LinearLayout
 import androidx.viewpager2.widget.ViewPager2
 import helium314.keyboard.keyboard.internal.KeyboardParams
 import helium314.keyboard.latin.R
@@ -35,22 +36,35 @@ internal class EmojiLayoutParams(res: Resources) {
         
         val offset = 1.25f * res.displayMetrics.density * sv.mKeyboardHeightScale
         
-        // القائمة تأخذ الارتفاع بالكامل لتصل للحافة السفلية
         emojiKeyboardHeight = defaultKeyboardHeight + offset.toInt()
     }
 
     fun setEmojiListProperties(vp: ViewPager2) {
-        val lp = vp.layoutParams as FrameLayout.LayoutParams
+        val lp = vp.layoutParams as LinearLayout.LayoutParams
         lp.height = emojiKeyboardHeight
         vp.layoutParams = lp
         
         val recyclerView = vp.getChildAt(0) as? androidx.recyclerview.widget.RecyclerView
         recyclerView?.clipToPadding = false
-        // تعويض المسافة السفلية (الأزرار + البادينج السفلي)
         recyclerView?.setPadding(0, 0, 0, bottomRowKeyboardHeight + bottomPadding)
+
+        // إزالة الفراغ السفلي من الحاوية الرئيسية ونقله للأزرار
+        try {
+            val parentLayout = vp.parent as? View
+            val frameLayout = parentLayout?.parent as? FrameLayout
+            val root = frameLayout?.parent as? View
+            
+            root?.setPadding(root.paddingLeft, root.paddingTop, root.paddingRight, 0)
+            
+            val bottomRow = frameLayout?.findViewById<View>(R.id.bottom_row_keyboard)
+            if (bottomRow != null) {
+                val bottomRowLp = bottomRow.layoutParams as FrameLayout.LayoutParams
+                bottomRowLp.bottomMargin = bottomPadding
+                bottomRow.layoutParams = bottomRowLp
+            }
+        } catch (e: Exception) {}
     }
 
     fun setCategoryPageIdViewProperties(v: View) {
-        // تم إخفاء الشريط الأزرق، لا حاجة لضبط مقاساته
     }
 }
