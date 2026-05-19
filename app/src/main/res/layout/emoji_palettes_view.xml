@@ -13,20 +13,20 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <!-- القائمة تأخذ المساحة كاملة -->
+        <!-- شبكة الإيموجي تأخذ المساحة كاملة -->
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/emoji_pager"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
             
-        <!-- شريط التمرير يطفو في الأسفل -->
+        <!-- إخفاء الشريط الأزرق لأنه مبرمج للرسم أفقياً فقط -->
         <helium314.keyboard.keyboard.emoji.EmojiCategoryPageIndicatorView
             android:id="@+id/emoji_category_page_id_view"
             android:layout_width="match_parent"
-            android:layout_height="2dip"
-            android:layout_gravity="bottom" />
+            android:layout_height="0dp"
+            android:visibility="gone" />
 
-        <!-- الأزرار تطفو في الأسفل -->
+        <!-- الأزرار تطفو في الأسفل بخلفية شفافة -->
         <helium314.keyboard.keyboard.MainKeyboardView
             android:id="@+id/bottom_row_keyboard"
             android:layout_width="match_parent"
