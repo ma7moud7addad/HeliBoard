@@ -37,7 +37,9 @@ class ClipboardLayoutParams(ctx: Context) {
         bottomRowKeyboardHeight = (((defaultKeyboardHeight - bottomPadding - topPadding) / rowCount - keyVerticalGap / 2) * 0.7).toInt()
         // height calculation is not good enough, probably also because keyboard top padding might be off by a pixel (see KeyboardParser)
         val offset = 1.25f * res.displayMetrics.density * sv.mKeyboardHeightScale
-        listHeight = defaultKeyboardHeight - bottomRowKeyboardHeight - bottomPadding + offset.toInt()
+        
+        // --- تعديل MacBoard: جعل القائمة تأخذ الارتفاع بالكامل ---
+        listHeight = defaultKeyboardHeight - bottomPadding + offset.toInt()
     }
 
     fun setListProperties(recycler: RecyclerView) {
@@ -45,6 +47,9 @@ class ClipboardLayoutParams(ctx: Context) {
             height = listHeight
             recycler.layoutParams = this
         }
+        // --- تعديل MacBoard: إضافة مسافة سفلية وهمية لعمل سكرول تحت الأزرار الشفافة ---
+        recycler.clipToPadding = false
+        recycler.setPadding(0, 0, 0, bottomRowKeyboardHeight)
     }
 
     fun setItemProperties(view: View) {
