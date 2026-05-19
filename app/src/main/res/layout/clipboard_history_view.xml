@@ -1,7 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-    SPDX-License-Identifier: GPL-3.0-only
--->
 <helium314.keyboard.keyboard.clipboard.ClipboardHistoryView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
@@ -15,7 +12,7 @@
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent">
 
         <TextView
             android:id="@+id/clipboard_empty_view"
@@ -29,14 +26,17 @@
         <helium314.keyboard.keyboard.clipboard.ClipboardHistoryRecyclerView
             android:id="@+id/clipboard_list"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
             android:orientation="vertical"/>
 
-    </FrameLayout>
+        <helium314.keyboard.keyboard.MainKeyboardView
+            android:id="@+id/bottom_row_keyboard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:background="@android:color/transparent" />
 
-    <helium314.keyboard.keyboard.MainKeyboardView
-        android:id="@+id/bottom_row_keyboard"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+    </FrameLayout>
 
 </helium314.keyboard.keyboard.clipboard.ClipboardHistoryView>
