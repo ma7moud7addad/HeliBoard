@@ -17,6 +17,7 @@ class ClipboardLayoutParams(ctx: Context) {
     private val keyHorizontalGap: Int
     private val listHeight: Int
     val bottomRowKeyboardHeight: Int
+    private val bottomPadding: Int // تم تحويله لمتغير عام
 
     init {
         val res = ctx.resources
@@ -28,18 +29,17 @@ class ClipboardLayoutParams(ctx: Context) {
             defaultKeyboardHeight, defaultKeyboardHeight) * sv.mKeyGapScale).toInt()
         keyHorizontalGap = (res.getFraction(R.fraction.config_key_horizontal_gap_holo,
             defaultKeyboardWidth, defaultKeyboardWidth) * sv.mKeyGapScale).toInt()
-        val bottomPadding = (res.getFraction(R.fraction.config_keyboard_bottom_padding_holo,
+        bottomPadding = (res.getFraction(R.fraction.config_keyboard_bottom_padding_holo,
                 defaultKeyboardHeight, defaultKeyboardHeight) * sv.mBottomPaddingScale).toInt()
         val topPadding = res.getFraction(R.fraction.config_keyboard_top_padding_holo,
                 defaultKeyboardHeight, defaultKeyboardHeight).toInt()
 
         val rowCount = KeyboardParams.DEFAULT_KEYBOARD_ROWS + if (sv.mShowsNumberRow) 1 else 0
         bottomRowKeyboardHeight = (((defaultKeyboardHeight - bottomPadding - topPadding) / rowCount - keyVerticalGap / 2) * 0.7).toInt()
-        // height calculation is not good enough, probably also because keyboard top padding might be off by a pixel (see KeyboardParser)
         val offset = 1.25f * res.displayMetrics.density * sv.mKeyboardHeightScale
         
-        // --- تعديل MacBoard: جعل القائمة تأخذ الارتفاع بالكامل ---
-        listHeight = defaultKeyboardHeight - bottomPadding + offset.toInt()
+        // القائمة تأخذ الارتفاع بالكامل لتصل للحافة السفلية
+        listHeight = defaultKeyboardHeight + offset.toInt()
     }
 
     fun setListProperties(recycler: RecyclerView) {
@@ -47,9 +47,9 @@ class ClipboardLayoutParams(ctx: Context) {
             height = listHeight
             recycler.layoutParams = this
         }
-        // --- تعديل MacBoard: إضافة مسافة سفلية وهمية لعمل سكرول تحت الأزرار الشفافة ---
         recycler.clipToPadding = false
-        recycler.setPadding(0, 0, 0, bottomRowKeyboardHeight)
+        // تعويض المسافة السفلية (الأزرار + البادينج السفلي)
+        recycler.setPadding(0, 0, 0, bottomRowKeyboardHeight + bottomPadding)
     }
 
     fun setItemProperties(view: View) {
