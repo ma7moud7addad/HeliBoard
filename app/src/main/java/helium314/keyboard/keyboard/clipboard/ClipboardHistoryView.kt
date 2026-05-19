@@ -158,7 +158,6 @@ class ClipboardHistoryView @JvmOverloads constructor(
 
         val params = KeyDrawParams()
         params.updateParams(clipboardLayoutParams.bottomRowKeyboardHeight, keyVisualAttr)
-        params.mLabelSize = (params.mLabelSize * 1.25f).toInt()
         val settings = Settings.getInstance()
         KeyboardTypeface.customTypeface()?.let { params.mTypeface = it }
         setupClipKey(params)
