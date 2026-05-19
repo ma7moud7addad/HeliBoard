@@ -7,7 +7,7 @@ package helium314.keyboard.keyboard.emoji
 
 import android.content.res.Resources
 import android.view.View
-import android.widget.LinearLayout
+import android.widget.FrameLayout
 import androidx.viewpager2.widget.ViewPager2
 import helium314.keyboard.keyboard.internal.KeyboardParams
 import helium314.keyboard.latin.R
@@ -19,6 +19,7 @@ internal class EmojiLayoutParams(res: Resources) {
     val emojiKeyboardHeight: Int
     private val emojiCategoryPageIdViewHeight: Int
     val bottomRowKeyboardHeight: Int
+    private val bottomPadding: Int // تم تحويله لمتغير عام لاستخدامه في الدوال
 
     init {
         val sv = Settings.getValues()
@@ -26,7 +27,7 @@ internal class EmojiLayoutParams(res: Resources) {
 
         val keyVerticalGap = (res.getFraction(R.fraction.config_key_vertical_gap_holo,
             defaultKeyboardHeight, defaultKeyboardHeight) * sv.mKeyGapScale).toInt()
-        val bottomPadding = (res.getFraction(R.fraction.config_keyboard_bottom_padding_holo,
+        bottomPadding = (res.getFraction(R.fraction.config_keyboard_bottom_padding_holo,
             defaultKeyboardHeight, defaultKeyboardHeight) * sv.mBottomPaddingScale).toInt()
         val topPadding = res.getFraction(R.fraction.config_keyboard_top_padding_holo,
             defaultKeyboardHeight, defaultKeyboardHeight).toInt()
@@ -35,29 +36,32 @@ internal class EmojiLayoutParams(res: Resources) {
         bottomRowKeyboardHeight = (((defaultKeyboardHeight - bottomPadding - topPadding) / rowCount - keyVerticalGap / 2) * 0.7).toInt()
         val pageIdHeight = res.getDimension(R.dimen.config_emoji_category_page_id_height)
         emojiCategoryPageIdViewHeight = pageIdHeight.toInt()
-        val offset = 1.25f * res.displayMetrics.density * sv.mKeyboardHeightScale // like ClipboardLayoutParams
+        val offset = 1.25f * res.displayMetrics.density * sv.mKeyboardHeightScale
         
-        // --- تعديل MacBoard: جعل القائمة تأخذ الارتفاع بالكامل ---
-        val emojiListHeight = defaultKeyboardHeight - bottomPadding + (offset.toInt())
+        // القائمة تأخذ الارتفاع بالكامل لتصل للحافة السفلية
+        emojiKeyboardHeight = defaultKeyboardHeight + offset.toInt()
         emojiListBottomMargin = 0
-        emojiKeyboardHeight = emojiListHeight - emojiCategoryPageIdViewHeight - emojiListBottomMargin
     }
 
     fun setEmojiListProperties(vp: ViewPager2) {
-        val lp = vp.layoutParams as LinearLayout.LayoutParams
+        val lp = vp.layoutParams as FrameLayout.LayoutParams
         lp.height = emojiKeyboardHeight
         lp.bottomMargin = emojiListBottomMargin
         vp.layoutParams = lp
         
-        // --- تعديل MacBoard: إضافة مسافة سفلية لشبكة الإيموجي لتظهر فوق الأزرار عند التمرير للأسفل ---
         val recyclerView = vp.getChildAt(0) as? androidx.recyclerview.widget.RecyclerView
         recyclerView?.clipToPadding = false
-        recyclerView?.setPadding(0, 0, 0, bottomRowKeyboardHeight)
+        // تعويض المسافة السفلية (الأزرار + شريط التمرير + البادينج السفلي)
+        val totalBottomClearance = bottomRowKeyboardHeight + emojiCategoryPageIdViewHeight + bottomPadding
+        recyclerView?.setPadding(0, 0, 0, totalBottomClearance)
     }
 
     fun setCategoryPageIdViewProperties(v: View) {
-        val lp = v.layoutParams as LinearLayout.LayoutParams
+        val lp = v.layoutParams as FrameLayout.LayoutParams
         lp.height = emojiCategoryPageIdViewHeight
+        lp.gravity = android.view.Gravity.BOTTOM
+        // رفع شريط التمرير ليكون فوق الأزرار والبادينج السفلي مباشرة
+        lp.bottomMargin = bottomRowKeyboardHeight + bottomPadding
         v.layoutParams = lp
     }
 }
