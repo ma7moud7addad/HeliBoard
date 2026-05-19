@@ -46,24 +46,11 @@ internal class EmojiLayoutParams(res: Resources) {
         
         val recyclerView = vp.getChildAt(0) as? androidx.recyclerview.widget.RecyclerView
         recyclerView?.clipToPadding = false
+        // تعويض المسافة السفلية (الأزرار + البادينج السفلي)
         recyclerView?.setPadding(0, 0, 0, bottomRowKeyboardHeight + bottomPadding)
-
-        // إزالة الفراغ السفلي من الحاوية الرئيسية ونقله للأزرار
-        try {
-            val frameLayout = vp.parent as? FrameLayout
-            val root = frameLayout?.parent as? View
-            
-            root?.setPadding(root.paddingLeft, root.paddingTop, root.paddingRight, 0)
-            
-            val bottomRow = frameLayout?.findViewById<View>(R.id.bottom_row_keyboard)
-            if (bottomRow != null) {
-                val bottomRowLp = bottomRow.layoutParams as FrameLayout.LayoutParams
-                bottomRowLp.bottomMargin = bottomPadding
-                bottomRow.layoutParams = bottomRowLp
-            }
-        } catch (e: Exception) {}
     }
 
     fun setCategoryPageIdViewProperties(v: View) {
+        // تم إخفاء الشريط الأزرق، لا حاجة لضبط مقاساته
     }
 }
