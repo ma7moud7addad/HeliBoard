@@ -8,7 +8,6 @@ package helium314.keyboard.keyboard.emoji
 import android.content.res.Resources
 import android.view.View
 import android.widget.FrameLayout
-import android.widget.LinearLayout
 import androidx.viewpager2.widget.ViewPager2
 import helium314.keyboard.keyboard.internal.KeyboardParams
 import helium314.keyboard.latin.R
@@ -36,11 +35,12 @@ internal class EmojiLayoutParams(res: Resources) {
         
         val offset = 1.25f * res.displayMetrics.density * sv.mKeyboardHeightScale
         
+        // القائمة تأخذ الارتفاع بالكامل لتصل للحافة السفلية
         emojiKeyboardHeight = defaultKeyboardHeight + offset.toInt()
     }
 
     fun setEmojiListProperties(vp: ViewPager2) {
-        val lp = vp.layoutParams as LinearLayout.LayoutParams
+        val lp = vp.layoutParams as FrameLayout.LayoutParams
         lp.height = emojiKeyboardHeight
         vp.layoutParams = lp
         
@@ -50,8 +50,7 @@ internal class EmojiLayoutParams(res: Resources) {
 
         // إزالة الفراغ السفلي من الحاوية الرئيسية ونقله للأزرار
         try {
-            val parentLayout = vp.parent as? View
-            val frameLayout = parentLayout?.parent as? FrameLayout
+            val frameLayout = vp.parent as? FrameLayout
             val root = frameLayout?.parent as? View
             
             root?.setPadding(root.paddingLeft, root.paddingTop, root.paddingRight, 0)
