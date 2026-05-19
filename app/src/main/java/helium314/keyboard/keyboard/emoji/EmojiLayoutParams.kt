@@ -36,7 +36,9 @@ internal class EmojiLayoutParams(res: Resources) {
         val pageIdHeight = res.getDimension(R.dimen.config_emoji_category_page_id_height)
         emojiCategoryPageIdViewHeight = pageIdHeight.toInt()
         val offset = 1.25f * res.displayMetrics.density * sv.mKeyboardHeightScale // like ClipboardLayoutParams
-        val emojiListHeight = defaultKeyboardHeight - bottomRowKeyboardHeight - bottomPadding + (offset.toInt())
+        
+        // --- تعديل MacBoard: جعل القائمة تأخذ الارتفاع بالكامل ---
+        val emojiListHeight = defaultKeyboardHeight - bottomPadding + (offset.toInt())
         emojiListBottomMargin = 0
         emojiKeyboardHeight = emojiListHeight - emojiCategoryPageIdViewHeight - emojiListBottomMargin
     }
@@ -46,6 +48,11 @@ internal class EmojiLayoutParams(res: Resources) {
         lp.height = emojiKeyboardHeight
         lp.bottomMargin = emojiListBottomMargin
         vp.layoutParams = lp
+        
+        // --- تعديل MacBoard: إضافة مسافة سفلية لشبكة الإيموجي لتظهر فوق الأزرار عند التمرير للأسفل ---
+        val recyclerView = vp.getChildAt(0) as? androidx.recyclerview.widget.RecyclerView
+        recyclerView?.clipToPadding = false
+        recyclerView?.setPadding(0, 0, 0, bottomRowKeyboardHeight)
     }
 
     fun setCategoryPageIdViewProperties(v: View) {
