@@ -15,11 +15,9 @@ import helium314.keyboard.latin.settings.Settings
 import helium314.keyboard.latin.utils.ResourceUtils
 
 internal class EmojiLayoutParams(res: Resources) {
-    private val emojiListBottomMargin: Int
     val emojiKeyboardHeight: Int
-    private val emojiCategoryPageIdViewHeight: Int
     val bottomRowKeyboardHeight: Int
-    private val bottomPadding: Int // تم تحويله لمتغير عام لاستخدامه في الدوال
+    private val bottomPadding: Int
 
     init {
         val sv = Settings.getValues()
@@ -34,34 +32,25 @@ internal class EmojiLayoutParams(res: Resources) {
 
         val rowCount = KeyboardParams.DEFAULT_KEYBOARD_ROWS + if (sv.mShowsNumberRow) 1 else 0
         bottomRowKeyboardHeight = (((defaultKeyboardHeight - bottomPadding - topPadding) / rowCount - keyVerticalGap / 2) * 0.7).toInt()
-        val pageIdHeight = res.getDimension(R.dimen.config_emoji_category_page_id_height)
-        emojiCategoryPageIdViewHeight = pageIdHeight.toInt()
+        
         val offset = 1.25f * res.displayMetrics.density * sv.mKeyboardHeightScale
         
         // القائمة تأخذ الارتفاع بالكامل لتصل للحافة السفلية
         emojiKeyboardHeight = defaultKeyboardHeight + offset.toInt()
-        emojiListBottomMargin = 0
     }
 
     fun setEmojiListProperties(vp: ViewPager2) {
         val lp = vp.layoutParams as FrameLayout.LayoutParams
         lp.height = emojiKeyboardHeight
-        lp.bottomMargin = emojiListBottomMargin
         vp.layoutParams = lp
         
         val recyclerView = vp.getChildAt(0) as? androidx.recyclerview.widget.RecyclerView
         recyclerView?.clipToPadding = false
-        // تعويض المسافة السفلية (الأزرار + شريط التمرير + البادينج السفلي)
-        val totalBottomClearance = bottomRowKeyboardHeight + emojiCategoryPageIdViewHeight + bottomPadding
-        recyclerView?.setPadding(0, 0, 0, totalBottomClearance)
+        // تعويض المسافة السفلية (الأزرار + البادينج السفلي)
+        recyclerView?.setPadding(0, 0, 0, bottomRowKeyboardHeight + bottomPadding)
     }
 
     fun setCategoryPageIdViewProperties(v: View) {
-        val lp = v.layoutParams as FrameLayout.LayoutParams
-        lp.height = emojiCategoryPageIdViewHeight
-        lp.gravity = android.view.Gravity.BOTTOM
-        // رفع شريط التمرير ليكون فوق الأزرار والبادينج السفلي مباشرة
-        lp.bottomMargin = bottomRowKeyboardHeight + bottomPadding
-        v.layoutParams = lp
+        // تم إخفاء الشريط الأزرق، لا حاجة لضبط مقاساته
     }
 }
