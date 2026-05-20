@@ -103,6 +103,11 @@ public final class Settings implements SharedPreferences.OnSharedPreferenceChang
     public static final String PREF_BOTTOM_PADDING_SCALE_PREFIX = "bottom_padding_scale";
     public static final String PREF_SIDE_PADDING_SCALE_PREFIX = "side_padding_scale";
     public static final String PREF_KEY_GAP_SCALE_PREFIX = "key_gap_scale";
+    public static final String PREF_FLOATING_HEIGHT_PREFIX = "floating_height";
+    public static final String PREF_FLOATING_WIDTH_PREFIX = "floating_width";
+    public static final String PREF_FLOATING_ENABLED_PREFIX = "floating_enabled";
+    public static final String PREF_FLOATING_POS_X_PREFIX = "floating_pos_x";
+    public static final String PREF_FLOATING_POS_Y_PREFIX = "floating_pos_y";
     public static final String PREF_FONT_SCALE = "font_scale";
     public static final String PREF_EMOJI_FONT_SCALE = "emoji_font_scale";
     public static final String PREF_EMOJI_KEY_FIT = "emoji_key_fit";
@@ -214,7 +219,7 @@ public final class Settings implements SharedPreferences.OnSharedPreferenceChang
         return switch (key) {
             case PREF_LAST_SHOWN_EMOJI_CATEGORY_PAGE_ID, PREF_LAST_SHOWN_EMOJI_CATEGORY_ID, PREF_EMOJI_RECENT_KEYS,
                  PREF_DONT_SHOW_MISSING_DICTIONARY_DIALOG, PREF_SELECTED_SUBTYPE -> false;
-            default -> !key.startsWith(PREF_SAVED_APP_SUBTYPE_PREFIX);
+            default -> !key.startsWith(PREF_SAVED_APP_SUBTYPE_PREFIX) && !key.startsWith("floating_pos");
         };
     }
 
