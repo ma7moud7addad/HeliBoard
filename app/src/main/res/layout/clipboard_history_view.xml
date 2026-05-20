@@ -20,7 +20,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:visibility="invisible"
-            android:text="¯\\_(ツ)_/¯"
+            android:text="No Items"
             tools:ignore="HardcodedText" />
 
         <helium314.keyboard.keyboard.clipboard.ClipboardHistoryRecyclerView
