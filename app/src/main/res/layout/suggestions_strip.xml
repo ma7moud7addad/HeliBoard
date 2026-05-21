@@ -41,26 +41,6 @@
                 style="?attr/suggestionWordStyle">
             </LinearLayout>
         </HorizontalScrollView>
-
-        <!-- --- بداية تعديل MacBoard (حاوية اقتراح الصور) --- -->
-        <FrameLayout
-            android:id="@+id/clipboard_image_container"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:visibility="gone"
-            android:padding="4dp">
-
-            <ImageView
-                android:id="@+id/clipboard_image_suggestion"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:adjustViewBounds="true"
-                android:scaleType="centerInside"
-                android:background="?attr/selectableItemBackground"
-                android:contentDescription="Image Suggestion" />
-        </FrameLayout>
-        <!-- --- نهاية التعديل --- -->
-
         <!-- Provide audio and haptic feedback by ourselves based on the keyboard settings.
              We just need to ignore the system's audio and haptic feedback settings. -->
         <!-- todo: sth is fishy with that maxwidth
