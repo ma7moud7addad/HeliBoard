@@ -20,7 +20,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:visibility="invisible"
-            android:text="No Items"
+            android:text=""
             tools:ignore="HardcodedText" />
 
         <helium314.keyboard.keyboard.clipboard.ClipboardHistoryRecyclerView
