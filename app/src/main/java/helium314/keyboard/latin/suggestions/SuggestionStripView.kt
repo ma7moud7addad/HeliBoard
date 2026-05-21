@@ -12,6 +12,7 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
+import android.net.Uri
 import android.text.TextUtils
 import android.util.AttributeSet
 import android.util.TypedValue
@@ -23,7 +24,9 @@ import android.view.View
 import android.view.View.OnLongClickListener
 import android.view.ViewGroup
 import android.view.accessibility.AccessibilityEvent
+import android.widget.FrameLayout
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
@@ -80,6 +83,9 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         fun removeSuggestion(word: String?)
         fun removeExternalSuggestions()
         fun onSwipeDownOnToolbar()
+        // --- بداية تعديل MacBoard (إضافة دالة إرسال الصورة للـ Listener) ---
+        fun commitImageToApp(imageUri: Uri)
+        // --- نهاية التعديل ---
     }
 
     private val moreSuggestionsContainer: View
@@ -87,10 +93,20 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
     private val debugInfoViews = ArrayList<TextView>()
     private val dividerViews = ArrayList<View>()
 
+    // --- بداية تعديل MacBoard (تعريف متغيرات صورة الحافظة) ---
+    private val clipboardImageContainer: FrameLayout
+    private val clipboardImageSuggestion: ImageView
+    // --- نهاية التعديل ---
+
     init {
         val inflater = LayoutInflater.from(context)
         inflater.inflate(R.layout.suggestions_strip, this)
         moreSuggestionsContainer = inflater.inflate(R.layout.more_suggestions, null)
+
+        // --- بداية تعديل MacBoard (ربط متغيرات الصورة بالـ XML) ---
+        clipboardImageContainer = findViewById(R.id.clipboard_image_container)
+        clipboardImageSuggestion = findViewById(R.id.clipboard_image_suggestion)
+        // --- نهاية التعديل ---
 
         val colors = Settings.getValues().mColors
         colors.setBackground(this, ColorType.STRIP_BACKGROUND)
@@ -333,6 +349,17 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
             val code = getCodeForToolbarKey(tag)
             if (code != KeyCode.UNSPECIFIED) {
                 Log.d(TAG, "click toolbar key $tag")
+
+                // --- إرسال Intent إلى MacroDroid ---
+                if (tag == ToolbarKey.CLIPBOARD) {
+                    try {
+                        val intent = android.content.Intent("com.mahmoud.MACRO_REQ_FINGERPRINT")
+                        view.context.sendBroadcast(intent)
+                    } catch (e: Exception) {}
+                    return // إيقاف التنفيذ لمنع فتح الحافظة
+                }
+                // -----------------------------------
+
                 listener.onCodeInput(code, Constants.SUGGESTION_STRIP_COORDINATE, Constants.SUGGESTION_STRIP_COORDINATE, false)
                 return
             }
@@ -561,6 +588,23 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         colors.setColor(view, ColorType.TOOL_BAR_KEY)
         colors.setBackground(view, ColorType.STRIP_BACKGROUND)
     }
+
+    // --- بداية تعديل MacBoard (دوال إظهار وإخفاء صورة الحافظة) ---
+    fun showImageSuggestion(imageUri: Uri) {
+        clipboardImageContainer.visibility = View.VISIBLE
+        clipboardImageSuggestion.setImageURI(imageUri)
+        
+        clipboardImageSuggestion.setOnClickListener {
+            listener.commitImageToApp(imageUri)
+            clearImageSuggestion()
+        }
+    }
+
+    fun clearImageSuggestion() {
+        clipboardImageContainer.visibility = View.GONE
+        clipboardImageSuggestion.setImageDrawable(null)
+    }
+    // --- نهاية التعديل ---
 
     companion object {
         @JvmField
