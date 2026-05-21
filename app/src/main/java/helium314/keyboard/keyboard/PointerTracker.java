@@ -969,7 +969,7 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
             }
         } else if (code == KeyCode.DELETE) {
             // --- بداية تعديل MacBoard (زيادة سرعة وحساسية السحب للحذف) ---
-            int sensitivity = 2; 
+            int sensitivity = 7; 
             int deleteStep = Math.max(1, sPointerStep / sensitivity);
 
             // Delete slider
