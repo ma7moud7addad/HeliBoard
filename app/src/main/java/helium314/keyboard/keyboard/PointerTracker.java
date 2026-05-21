@@ -968,16 +968,21 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
                 }
             }
         } else if (code == KeyCode.DELETE) {
+            // --- بداية تعديل MacBoard (زيادة سرعة وحساسية السحب للحذف) ---
+            int sensitivity = 2; 
+            int deleteStep = Math.max(1, sPointerStep / sensitivity);
+
             // Delete slider
-            int steps = (x - mStartX) / sPointerStep;
+            int steps = (x - mStartX) / deleteStep;
             if (steps != 0) {
                 if (!mInHorizontalSwipe) {
                     sTimerProxy.cancelKeyTimersOf(this);
                     mInHorizontalSwipe = true;
                 }
-                mStartX += steps * sPointerStep;
+                mStartX += steps * deleteStep;
                 sListener.onMoveDeletePointer(steps);
             }
+            // --- نهاية التعديل ---
         }
     }
 
