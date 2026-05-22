@@ -1,4 +1,4 @@
-Package helium314.keyboard.keyboard.internal.keyboard_parser.floris
+package helium314.keyboard.keyboard.internal.keyboard_parser.floris
 
 import android.view.inputmethod.EditorInfo
 import helium314.keyboard.keyboard.KeyboardId
