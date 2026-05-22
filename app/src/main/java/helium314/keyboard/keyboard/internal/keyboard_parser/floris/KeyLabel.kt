@@ -112,7 +112,7 @@ object KeyLabel {
             CURRENCY5 -> params.mLocaleKeyboardInfos.currencyKey.second[4]
             CTRL, ALT, FN, META, ESCAPE -> label.uppercase(Locale.US)
             TAB -> "!icon/tab_key|!code/${KeyCode.TAB}"
-            TIMESTAMP -> if (params.mId.locale.language == "ar") "!icon/ic_now_ar" else "!icon/ic_now_en"
+            TIMESTAMP -> "⏱"
             EMOJI_SEARCH -> "!icon/search_key|!code/key_emoji_search"
             else -> if (label in toolbarKeyStrings.values)
                 "!icon/$label|!code/${getCodeForToolbarKey(ToolbarKey.valueOf(label.uppercase(Locale.US)))}"
