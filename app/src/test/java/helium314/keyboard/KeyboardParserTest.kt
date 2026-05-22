@@ -524,7 +524,7 @@ f""", // no newline at the end
         assertEquals(KeyCode.MULTIPLE_CODE_POINTS, keys[5].mPopupKeys?.first()?.mCode)
         assertEquals("tab_key", keys[6].mIconName)
         assertEquals(KeyCode.TAB, keys[6].mCode)
-        assertEquals("⌚", keys[6].mPopupKeys?.first()?.mLabel)
+        assertEquals("%Now", keys[6].mPopupKeys?.first()?.mLabel)
         assertEquals(KeyCode.TIMESTAMP, keys[6].mPopupKeys?.first()?.mCode)
     }
 
