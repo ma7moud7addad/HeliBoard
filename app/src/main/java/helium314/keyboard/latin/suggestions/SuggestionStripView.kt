@@ -27,8 +27,11 @@ import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
+import androidx.core.view.doOnLayout
 import androidx.core.view.doOnNextLayout
+import androidx.core.view.doOnPreDraw
 import androidx.core.view.isVisible
+import helium314.keyboard.compat.isDeviceLocked
 import helium314.keyboard.event.HapticEvent
 import helium314.keyboard.keyboard.KeyboardSwitcher
 import helium314.keyboard.keyboard.internal.KeyboardIconsSet
@@ -226,9 +229,11 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
     }
 
     fun setToolbarVisibility(toolbarVisible: Boolean) {
-        pinnedKeys.isVisible = !toolbarVisible
-        suggestionsStrip.isVisible = !toolbarVisible
-        toolbarContainer.isVisible = toolbarVisible
+        // avoid showing toolbar keys when locked
+        val locked = isDeviceLocked(context)
+        pinnedKeys.isVisible = !locked && !toolbarVisible
+        suggestionsStrip.isVisible = locked || !toolbarVisible
+        toolbarContainer.isVisible = !locked && toolbarVisible
 
         if (DEBUG_SUGGESTIONS) {
             for (view in debugInfoViews) {
@@ -236,7 +241,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
             }
         }
 
-        toolbarExpandKey.scaleX = (if (toolbarVisible) -1f else 1f) * direction
+        toolbarExpandKey.scaleX = (if (toolbarVisible && !locked) -1f else 1f) * direction
     }
 
     fun setSuggestions(suggestions: SuggestedWords, isRtlLanguage: Boolean) {
@@ -368,6 +373,18 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
 
     private fun onLongClickToolbarKey(view: View) {
         val tag = view.tag as? ToolbarKey ?: return
+
+        // --- بداية التعديل الخاص بـ MacroDroid ---
+        if (tag == ToolbarKey.CLIPBOARD) {
+            try {
+                val intent = android.content.Intent("com.macropass.macboard")
+                view.context.sendBroadcast(intent)
+            } catch (e: Exception) {
+                // تجاهل الخطأ
+            }
+        }
+        // --- نهاية التعديل ---
+
         if (!Settings.getValues().mQuickPinToolbarKeys || view.parent === pinnedKeys) {
             val longClickCode = getCodeForToolbarKeyLongClick(tag)
             if (longClickCode != KeyCode.UNSPECIFIED) {
@@ -523,8 +540,10 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
             toolbarExpandKey.isVisible = toolbarIsExpandable
         }
 
-        toolbarExpandKey.setOnClickListener(if (!toolbarIsExpandable) null else this)
-        pinnedKeys.visibility = suggestionsStrip.visibility
+        // hide pinned keys if device is locked, and avoid expanding toolbar
+        val hideToolbarKeys = isDeviceLocked(context)
+        toolbarExpandKey.setOnClickListener(if (hideToolbarKeys || !toolbarIsExpandable) null else this)
+        pinnedKeys.visibility = if (hideToolbarKeys) GONE else suggestionsStrip.visibility
         isExternalSuggestionVisible = false
     }
 
