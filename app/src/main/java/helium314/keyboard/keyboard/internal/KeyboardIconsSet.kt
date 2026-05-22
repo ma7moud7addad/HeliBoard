@@ -81,6 +81,7 @@ class KeyboardIconsSet private constructor() {
         const val NAME_TOGGLE_FLOATING = "toggle_floating"
         const val NAME_TOOLBAR_KEY = "toolbar_key"
         const val NAME_BIN = "bin"
+        const val NAME_TIME_STAMP = "time_stamp"
 
         // names used in the past, and we can't just delete them because they might still be in use in some layouts
         // (also some of them are in use for internal layouts, but there we could just remove them...)
@@ -100,6 +101,7 @@ class KeyboardIconsSet private constructor() {
         // todo: incognito and force incognito should not be the same? or not the same as toolbar key?
         private val keyboardIconsHolo by lazy { hashMapOf(
             NAME_SHIFT_KEY to                   R.drawable.sym_keyboard_shift_holo,
+            NAME_TIME_STAMP to                   R.drawable.ic_time_stamp,
             NAME_SHIFT_KEY_SHIFTED to           R.drawable.sym_keyboard_shifted_holo,
             NAME_SHIFT_KEY_LOCKED to            R.drawable.sym_keyboard_shift_lock_holo,
             NAME_DELETE_KEY to                  R.drawable.sym_keyboard_delete_holo,
@@ -163,6 +165,7 @@ class KeyboardIconsSet private constructor() {
 
         private val keyboardIconsMaterial by lazy { hashMapOf(
             NAME_SHIFT_KEY to                   R.drawable.sym_keyboard_shift_lxx,
+            NAME_TIME_STAMP to                   R.drawable.ic_time_stamp,
             NAME_SHIFT_KEY_SHIFTED to           R.drawable.sym_keyboard_shift_lxx,
             NAME_SHIFT_KEY_LOCKED to            R.drawable.sym_keyboard_shift_lock_lxx,
             NAME_DELETE_KEY to                  R.drawable.sym_keyboard_delete_lxx,
@@ -226,6 +229,7 @@ class KeyboardIconsSet private constructor() {
 
         private val keyboardIconsRounded by lazy { hashMapOf(
             NAME_SHIFT_KEY to                   R.drawable.sym_keyboard_shift_rounded,
+            NAME_TIME_STAMP to                   R.drawable.ic_time_stamp,
             NAME_SHIFT_KEY_SHIFTED to           R.drawable.sym_keyboard_shift_rounded,
             NAME_SHIFT_KEY_LOCKED to            R.drawable.sym_keyboard_shift_lock_rounded,
             NAME_DELETE_KEY to                  R.drawable.sym_keyboard_delete_rounded,
