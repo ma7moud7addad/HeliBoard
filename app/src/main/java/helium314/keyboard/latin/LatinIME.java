@@ -1445,7 +1445,7 @@ public class LatinIME extends InputMethodService implements
     // completely replace #onCodeInput.
         public void onEvent(@NonNull final Event event) {
         // --- بداية تعديل MacBoard (المسح الشامل من زرار الحذف) ---
-        if (event.getKeyCode() == 99999) {
+        if (event.getKeyCode() == -10052) {
             android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
             if (ic != null) {
                 ic.performContextMenuAction(android.R.id.selectAll);
