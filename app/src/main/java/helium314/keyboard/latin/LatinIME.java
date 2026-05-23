@@ -1412,21 +1412,8 @@ public class LatinIME extends InputMethodService implements
     // Implementation of {@link SuggestionStripView.Listener}.
     // Implementation of {@link SuggestionStripView.Listener}.
     // Implementation of {@link SuggestionStripView.Listener}.
-    // Implementation of {@link SuggestionStripView.Listener}.
     @Override
     public void onCodeInput(final int codePoint, final int x, final int y, final boolean isKeyRepeat) {
-        
-        // --- بداية تعديل MacBoard (المسح الشامل) ---
-        if (codePoint == 99999) {
-            android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
-            if (ic != null) {
-                ic.performContextMenuAction(android.R.id.selectAll);
-                ic.commitText("", 1);
-            }
-            return; // نوقف الكود هنا عشان ميكتبش الحرف الوهمي
-        }
-        // --- نهاية التعديل ---
-
         // --- بداية الحماية الشاملة للحافظة (MacBoard) ---
         if (codePoint == KeyCode.CLIPBOARD) {
             if (!mIsClipboardAuthenticated) {
@@ -1442,7 +1429,7 @@ public class LatinIME extends InputMethodService implements
                     public void run() {
                         mIsWaitingForBiometricResult = false;
                     }
-                }, 10000);
+                }, 7000);
 
                 return; 
             } else {
@@ -1457,6 +1444,17 @@ public class LatinIME extends InputMethodService implements
     // This method is public for testability of LatinIME, but also in the future it should
     // completely replace #onCodeInput.
         public void onEvent(@NonNull final Event event) {
+        // --- بداية تعديل MacBoard (المسح الشامل من زرار الحذف) ---
+        if (event.mCodePoint == 99999) {
+            android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
+            if (ic != null) {
+                ic.performContextMenuAction(android.R.id.selectAll);
+                ic.commitText("", 1);
+            }
+            return; // نوقف الكود هنا عشان ميكتبش المربع الغريب!
+        }
+        // --- نهاية التعديل ---
+
         if (KeyCode.VOICE_INPUT == event.getKeyCode()) {
             // --- بداية تعديل MacBoard للإدخال الصوتي المدمج ---
             android.widget.Toast.makeText(this, "🎤 جاري الاستماع...", android.widget.Toast.LENGTH_SHORT).show();
@@ -1521,7 +1519,7 @@ public class LatinIME extends InputMethodService implements
         }
         mKeyboardSwitcher.onEvent(event, getCurrentAutoCapsState(), getCurrentRecapitalizeState());
     }
-
+    
     public void onTextInput(final String rawText) {
         // TODO: have the keyboard pass the correct key code when we need it.
         final Event event = Event.createSoftwareTextEvent(rawText, KeyCode.MULTIPLE_CODE_POINTS, null);
