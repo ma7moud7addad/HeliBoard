@@ -1413,20 +1413,7 @@ public class LatinIME extends InputMethodService implements
     // Implementation of {@link SuggestionStripView.Listener}.
     // Implementation of {@link SuggestionStripView.Listener}.
     @Override
-    // Implementation of {@link SuggestionStripView.Listener}.
-    @Override
     public void onCodeInput(final int codePoint, final int x, final int y, final boolean isKeyRepeat) {
-        // --- بداية تعديل MacBoard (المسح الشامل) ---
-        if (codePoint == -9999) {
-            android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
-            if (ic != null) {
-                ic.performContextMenuAction(android.R.id.selectAll);
-                ic.commitText("", 1);
-            }
-            return; // نوقف الكود هنا عشان ميكملش
-        }
-        // --- نهاية التعديل ---
-
         // --- بداية الحماية الشاملة للحافظة (MacBoard) ---
         if (codePoint == KeyCode.CLIPBOARD) {
             if (!mIsClipboardAuthenticated) {
