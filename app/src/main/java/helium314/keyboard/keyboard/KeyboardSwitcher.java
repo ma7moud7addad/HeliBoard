@@ -250,6 +250,11 @@ public final class KeyboardSwitcher implements KeyboardState.SwitchActions {
     public void onFinishSlidingInput(final int currentAutoCapsState,
             @Nullable final RecapitalizeMode currentRecapitalizeState) {
         mState.onFinishSlidingInput(currentAutoCapsState, currentRecapitalizeState);
+        
+        // --- بداية تعديل MacBoard (العودة التلقائية للوحة الحروف) ---
+        setAlphabetKeyboard();
+        requestUpdatingShiftState(currentAutoCapsState, currentRecapitalizeState);
+        // --- نهاية التعديل ---
     }
 
     // Implements {@link KeyboardState.SwitchActions}.
