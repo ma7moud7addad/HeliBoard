@@ -1862,6 +1862,11 @@ public class LatinIME extends InputMethodService implements
     };
 
     public void commitImage(@NonNull final Uri imageUri) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N_MR1) {
+            Log.w(TAG, "commitImage: Image insertion requires API 25+");
+            return;
+        }
+
         final android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
         if (ic == null) {
             Log.w(TAG, "commitImage: InputConnection is null");
@@ -1884,15 +1889,12 @@ public class LatinIME extends InputMethodService implements
 
         final ClipDescription description = new ClipDescription("HeliBoard image",
                 new String[]{"image/png", "image/jpeg", "image/gif", "image/webp"});
-        final InputContentInfoCompat contentInfo = new InputContentInfoCompat(imageUri, description, null);
-
-        int flags = 0;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
-            flags = InputConnectionCompat.INPUT_CONTENT_GRANT_READ_URI_PERMISSION;
-        }
+        final InputContentInfoCompat contentInfo = InputContentInfoCompat.wrap(
+                new android.view.inputmethod.InputContentInfo(imageUri, description, null));
 
         final boolean committed = InputConnectionCompat.commitContent(
-                ic, editorInfo, contentInfo, flags, null);
+                ic, editorInfo, contentInfo,
+                InputConnectionCompat.INPUT_CONTENT_GRANT_READ_URI_PERMISSION, null);
         if (!committed) {
             Log.w(TAG, "commitImage: commitContent failed for " + imageUri);
         } else {
