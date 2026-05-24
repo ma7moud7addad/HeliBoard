@@ -22,7 +22,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.view.inputmethod.EditorInfoCompat
-import androidx.core.view.isGone
 import helium314.keyboard.event.HapticEvent
 import helium314.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode
 import helium314.keyboard.latin.common.ColorType
@@ -31,7 +30,6 @@ import helium314.keyboard.latin.utils.ToolbarKey
 class ImageSuggestionManager(private val latinIME: LatinIME) {
 
     private lateinit var clipboardManager: ClipboardManager
-    private var imageSuggestionView: View? = null
     private var latestImageUri: Uri? = null
     private var dontShowCurrentSuggestion = false
 
@@ -57,7 +55,9 @@ class ImageSuggestionManager(private val latinIME: LatinIME) {
     }
 
     fun onDestroy() {
-        clipboardManager.removePrimaryClipChangedListener(clipboardListener)
+        if (::clipboardManager.isInitialized) {
+            clipboardManager.removePrimaryClipChangedListener(clipboardListener)
+        }
         latinIME.contentResolver.unregisterContentObserver(screenshotObserver)
     }
 
@@ -99,21 +99,25 @@ class ImageSuggestionManager(private val latinIME: LatinIME) {
         val selectionArgs = arrayOf("%Screenshots%", timeThreshold.toString())
         val sortOrder = "${MediaStore.Images.Media.DATE_ADDED} DESC"
 
-        latinIME.contentResolver.query(
-            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-            projection,
-            selection,
-            selectionArgs,
-            sortOrder
-        )?.use { cursor ->
-            if (cursor.moveToFirst()) {
-                val idCol = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
-                val id = cursor.getLong(idCol)
-                val uri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
-                latestImageUri = uri
-                dontShowCurrentSuggestion = false
-                latinIME.setNeutralSuggestionStrip()
+        try {
+            latinIME.contentResolver.query(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                projection,
+                selection,
+                selectionArgs,
+                sortOrder
+            )?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    val idCol = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
+                    val id = cursor.getLong(idCol)
+                    val uri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
+                    latestImageUri = uri
+                    dontShowCurrentSuggestion = false
+                    latinIME.setNeutralSuggestionStrip()
+                }
             }
+        } catch (e: Exception) {
+            // Ignore permission/query errors
         }
     }
 
@@ -159,17 +163,18 @@ class ImageSuggestionManager(private val latinIME: LatinIME) {
             thumbnailView.setImageURI(uri)
         }
 
+        textView.text = latinIME.getString(R.string.image_suggestion_insert)
         textView.setOnClickListener {
             dontShowCurrentSuggestion = true
             latinIME.commitImage(uri)
             AudioAndHapticFeedbackManager.getInstance().performHapticAndAudioFeedback(
                 KeyCode.NOT_SPECIFIED, it, HapticEvent.KEY_PRESS
             )
-            view.isGone = true
+            view.visibility = View.GONE
         }
 
         closeButton.setImageDrawable(
-            keyboard.mIconsSet.getIconDrawable(ToolbarKey.CLOSE_HISTORY.name().lowercase())
+            keyboard.mIconsSet.getIconDrawable(ToolbarKey.CLOSE_HISTORY.name.lowercase())
         )
         closeButton.setOnClickListener {
             dontShowCurrentSuggestion = true
@@ -181,17 +186,12 @@ class ImageSuggestionManager(private val latinIME: LatinIME) {
         colors.setColor(closeButton, ColorType.REMOVE_SUGGESTION_ICON)
         colors.setBackground(view, ColorType.CLIPBOARD_SUGGESTION_BACKGROUND)
 
-        imageSuggestionView = view
-        return imageSuggestionView
+        return view
     }
 
     private fun removeImageSuggestion() {
         dontShowCurrentSuggestion = true
-        val view = imageSuggestionView ?: return
-        if (view.parent != null && !view.isGone) {
-            latinIME.setNeutralSuggestionStrip()
-            latinIME.mHandler.postResumeSuggestions(false)
-        }
-        view.isGone = true
+        latinIME.setNeutralSuggestionStrip()
+        latinIME.mHandler.postResumeSuggestions(false)
     }
 }
