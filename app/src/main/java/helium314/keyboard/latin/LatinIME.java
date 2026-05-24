@@ -190,6 +190,27 @@ public class LatinIME extends InputMethodService implements
     
     private boolean mIsWaitingForBiometricResult = false;
     
+    // ============================================================
+    // نقطة التفتيش المركزية لفتح الحافظة (MacBoard)
+    // ============================================================
+    private void openClipboardWithAuth() {
+        if (!mIsClipboardAuthenticated) {
+            mIsWaitingForBiometricResult = true;
+            try {
+                Intent intent = new Intent("com.mahmoud.MACRO_REQ_FINGERPRINT");
+                sendBroadcast(intent);
+            } catch (Exception e) { /* ignore */ }
+
+            // مؤقت أمني: إلغاء حالة الانتظار تلقائياً بعد 10 ثوانٍ
+            mHandler.postDelayed(() -> mIsWaitingForBiometricResult = false, 10000);
+            return;
+        }
+
+        // سحب التصريح وفتح الحافظة مباشرة من المحرك
+        mIsClipboardAuthenticated = false;
+        mKeyboardSwitcher.setClipboardKeyboard();
+    }
+    
     public static final class UIHandler extends LeakGuardHandlerWrapper<LatinIME> {
         private static final int MSG_UPDATE_SHIFT_STATE = 0;
         private static final int MSG_PENDING_IMS_CALLBACK = 1;
@@ -1412,53 +1433,33 @@ public class LatinIME extends InputMethodService implements
     // Implementation of {@link SuggestionStripView.Listener}.
     // Implementation of {@link SuggestionStripView.Listener}.
     // Implementation of {@link SuggestionStripView.Listener}.
+    // Implementation of {@link SuggestionStripView.Listener}.
     @Override
     public void onCodeInput(final int codePoint, final int x, final int y, final boolean isKeyRepeat) {
-        // --- بداية الحماية الشاملة للحافظة (MacBoard) ---
+        // حماية الحافظة من شريط الأدوات
         if (codePoint == KeyCode.CLIPBOARD) {
-            if (!mIsClipboardAuthenticated) {
-                mIsWaitingForBiometricResult = true; 
-                try {
-                    Intent intent = new Intent("com.mahmoud.MACRO_REQ_FINGERPRINT");
-                    sendBroadcast(intent);
-                } catch (Exception e) {}
-
-                // مؤقت أمني: إلغاء حالة الانتظار تلقائياً بعد 10 ثوانٍ إذا لم يصل رد
-                mHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        mIsWaitingForBiometricResult = false;
-                    }
-                }, 7000);
-
-                return; 
-            } else {
-                mIsClipboardAuthenticated = false;
-            }
+            openClipboardWithAuth();
+            return; 
         }
-        // --- نهاية التعديل ---
-
         mKeyboardActionListener.onCodeInput(codePoint, x, y, isKeyRepeat);
     }
 
     // This method is public for testability of LatinIME, but also in the future it should
     // completely replace #onCodeInput.
         public void onEvent(@NonNull final Event event) {
-        // --- بداية تعديل MacBoard (المسح الشامل من زرار الحذف) ---
+        // 1. المسح الشامل (MacBoard)
         if (event.getKeyCode() == -10052) {
             android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
             if (ic != null) {
                 ic.performContextMenuAction(android.R.id.selectAll);
                 ic.commitText("", 1);
             }
-            return; // نوقف الكود هنا عشان ميكتبش المربع الغريب!
+            return; 
         }
-        // --- نهاية التعديل ---
 
+        // 2. الإدخال الصوتي المدمج (MacBoard)
         if (KeyCode.VOICE_INPUT == event.getKeyCode()) {
-            // --- بداية تعديل MacBoard للإدخال الصوتي المدمج ---
             android.widget.Toast.makeText(this, "🎤 جاري الاستماع...", android.widget.Toast.LENGTH_SHORT).show();
-            
             new android.os.Handler(android.os.Looper.getMainLooper()).post(new Runnable() {
                 @Override
                 public void run() {
@@ -1467,7 +1468,6 @@ public class LatinIME extends InputMethodService implements
                         android.content.Intent speechIntent = new android.content.Intent(android.speech.RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
                         speechIntent.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL, android.speech.RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
                         
-                        // محاولة جلب لغة الكيبورد الحالية عشان يسمع بنفس اللغة
                         try {
                             android.view.inputmethod.InputMethodSubtype subtype = mRichImm.getCurrentSubtype().getRawSubtype();
                             if (subtype != null && subtype.getLocale() != null && !subtype.getLocale().isEmpty()) {
@@ -1491,7 +1491,6 @@ public class LatinIME extends InputMethodService implements
                                     String text = matches.get(0);
                                     android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
                                     if (ic != null) {
-                                        // إدراج النص المسموع مباشرة في حقل الكتابة مع مسافة في النهاية
                                         ic.commitText(text + " ", 1);
                                     }
                                 }
@@ -1500,17 +1499,20 @@ public class LatinIME extends InputMethodService implements
                             @Override public void onPartialResults(android.os.Bundle partialResults) {}
                             @Override public void onEvent(int eventType, android.os.Bundle params) {}
                         });
-
                         speechRecognizer.startListening(speechIntent);
-
                     } catch (Exception e) {
                         android.widget.Toast.makeText(LatinIME.this, "❌ تعذر تشغيل الإدخال الصوتي", android.widget.Toast.LENGTH_SHORT).show();
                     }
                 }
             });
-            // --- نهاية تعديل MacBoard ---
         } else {
-            // معالجة باقي الأزرار العادية عشان الكيبورد يفضل شغال طبيعي
+            // 3. حماية الحافظة من اللوحة الأساسية (MacBoard)
+            if (event.getKeyCode() == KeyCode.CLIPBOARD) {
+                openClipboardWithAuth();
+                return; // نوقف الكود هنا عشان الحافظة متفتحش
+            }
+
+            // 4. معالجة باقي الأزرار العادية
             final InputTransaction completeInputTransaction =
                     mInputLogic.onCodeInput(mSettings.getCurrent(), event,
                             mKeyboardSwitcher.getKeyboardShiftMode(),
@@ -1798,38 +1800,32 @@ public class LatinIME extends InputMethodService implements
     // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid عبر الراديو) ---
     // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid عبر الراديو) ---
     // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid مع حماية بكلمة سر) ---
+    // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid عبر الراديو) ---
     private final BroadcastReceiver mMacroDroidReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, final Intent intent) {
-            if (intent != null) {
-                String action = intent.getAction();
-                
-                if ("com.mahmoud.MACRO_OPEN_CLIPBOARD".equals(action)) {
-                    // استخراج كلمة السر من الإشارة
-                    String token = intent.getStringExtra("auth_token");
-                    
-                    // التحقق من كلمة السر (يجب أن تتطابق مع ما كتبته في MacroDroid)
-                    if ("M3aB2gK6+U8Wm7F6^s8,JlY:o=3h~c".equals(token)) {
-                        mHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (mIsWaitingForBiometricResult && isInputViewShown()) {
-                                    mIsWaitingForBiometricResult = false; 
-                                    mIsClipboardAuthenticated = true; 
-                                    onCodeInput(KeyCode.CLIPBOARD, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false);
-                                }
-                            }
-                        });
-                    } else {
-                        Log.w(TAG, "محاولة اختراق: إشارة فتح الحافظة بدون كلمة سر صحيحة!");
-                    }
-                    
-                } else if ("com.mahmoud.MACRO_AUTH_FAILED".equals(action)) {
-                    mIsWaitingForBiometricResult = false;
+            if (intent == null) return;
+            String action = intent.getAction();
+
+            if ("com.mahmoud.MACRO_OPEN_CLIPBOARD".equals(action)) {
+                String token = intent.getStringExtra("auth_token");
+                if ("M3aB2gK6+U8Wm7F6^s8,JlY:o=3h~c".equals(token)) {
+                    mHandler.post(() -> {
+                        if (mIsWaitingForBiometricResult && isInputViewShown()) {
+                            mIsWaitingForBiometricResult = false;
+                            mIsClipboardAuthenticated = true;
+                            openClipboardWithAuth(); // توجيه لنقطة التفتيش
+                        }
+                    });
+                } else {
+                    Log.w(TAG, "محاولة اختراق: إشارة فتح الحافظة بدون كلمة سر صحيحة!");
                 }
+            } else if ("com.mahmoud.MACRO_AUTH_FAILED".equals(action)) {
+                mIsWaitingForBiometricResult = false;
             }
         }
     };
+    // --- نهاية التعديل ---
     
     private final BroadcastReceiver mRingerModeChangeReceiver = new BroadcastReceiver() {
         @Override
