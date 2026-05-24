@@ -106,7 +106,6 @@ import androidx.core.view.inputmethod.EditorInfoCompat;
 import androidx.core.view.inputmethod.InputConnectionCompat;
 import androidx.core.view.inputmethod.InputContentInfoCompat;
 
-
 /**
  * Input method implementation for Qwerty'ish keyboard.
  */
