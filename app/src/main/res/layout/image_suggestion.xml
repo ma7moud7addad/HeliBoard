@@ -31,5 +31,5 @@
         android:layout_height="wrap_content"
         android:padding="12dp"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="@string/dialog_close" />
+        android:contentDescription="@string/close" />
 </LinearLayout>
