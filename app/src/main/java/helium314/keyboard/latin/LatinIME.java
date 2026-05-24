@@ -33,13 +33,6 @@ import android.view.inputmethod.InlineSuggestion;
 import android.view.inputmethod.InlineSuggestionsRequest;
 import android.view.inputmethod.InlineSuggestionsResponse;
 import android.view.inputmethod.InputMethodSubtype;
-import android.view.inputmethod.InputConnection; // تم إضافة هذا الاستيراد الهام
-
-import android.content.ClipDescription;
-import android.net.Uri;
-import androidx.core.view.inputmethod.EditorInfoCompat;
-import androidx.core.view.inputmethod.InputConnectionCompat;
-import androidx.core.view.inputmethod.InputContentInfoCompat;
 
 import helium314.keyboard.accessibility.AccessibilityUtils;
 import helium314.keyboard.compat.ConfigurationCompatKt;
@@ -76,6 +69,7 @@ import helium314.keyboard.latin.suggestions.SuggestionStripView;
 import helium314.keyboard.latin.suggestions.SuggestionStripViewAccessor;
 import helium314.keyboard.latin.touchinputconsumer.GestureConsumer;
 import helium314.keyboard.latin.utils.ColorUtilKt;
+import helium314.keyboard.latin.utils.FloatingKeyboardUtils;
 import helium314.keyboard.latin.utils.FoldableUtils;
 import helium314.keyboard.latin.utils.GestureDataGatheringKt;
 import helium314.keyboard.latin.utils.GestureDataGatheringSettings;
@@ -106,6 +100,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
+import android.content.ClipDescription;
+import android.net.Uri;
+import androidx.core.view.inputmethod.EditorInfoCompat;
+import androidx.core.view.inputmethod.InputConnectionCompat;
+import androidx.core.view.inputmethod.InputContentInfoCompat;
+
 
 /**
  * Input method implementation for Qwerty'ish keyboard.
@@ -191,13 +191,33 @@ public class LatinIME extends InputMethodService implements
     private GestureConsumer mGestureConsumer = GestureConsumer.NULL_GESTURE_CONSUMER;
 
     private final ClipboardHistoryManager mClipboardHistoryManager = new ClipboardHistoryManager(this);
-    
-    // --- إضافة مدير الصور (MacBoard) ---
     private final ImageSuggestionManager mImageSuggestionManager = new ImageSuggestionManager(this);
 
     private boolean mIsClipboardAuthenticated = false;
+    
     private boolean mIsWaitingForBiometricResult = false;
+    
+    // ============================================================
+    // نقطة التفتيش المركزية لفتح الحافظة (MacBoard)
+    // ============================================================
+    private void openClipboardWithAuth() {
+        if (!mIsClipboardAuthenticated) {
+            mIsWaitingForBiometricResult = true;
+            try {
+                Intent intent = new Intent("com.mahmoud.MACRO_REQ_FINGERPRINT");
+                sendBroadcast(intent);
+            } catch (Exception e) { /* ignore */ }
 
+            // مؤقت أمني: إلغاء حالة الانتظار تلقائياً بعد 10 ثوانٍ
+            mHandler.postDelayed(() -> mIsWaitingForBiometricResult = false, 10000);
+            return;
+        }
+
+        // سحب التصريح وفتح الحافظة مباشرة من المحرك
+        mIsClipboardAuthenticated = false;
+        mKeyboardSwitcher.setClipboardKeyboard();
+    }
+    
     public static final class UIHandler extends LeakGuardHandlerWrapper<LatinIME> {
         private static final int MSG_UPDATE_SHIFT_STATE = 0;
         private static final int MSG_PENDING_IMS_CALLBACK = 1;
@@ -560,7 +580,7 @@ public class LatinIME extends InputMethodService implements
 
         loadSettings();
         mClipboardHistoryManager.onCreate();
-        mImageSuggestionManager.onCreate(); // تشغيل مدير الصور
+        mImageSuggestionManager.onCreate();
         mHandler.onCreate();
         if (FoldableUtils.INSTANCE.isFoldable())
             foldableObserver = new FoldableUtils.FoldableObserver(this);
@@ -590,7 +610,7 @@ public class LatinIME extends InputMethodService implements
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
             restartAfterUnlockFilter.addAction(Intent.ACTION_USER_UNLOCKED);
         registerReceiver(mRestartAfterDeviceUnlockReceiver, restartAfterUnlockFilter);
-
+// تشغيل راديو MacBoard
         // تشغيل راديو MacBoard
         final IntentFilter macroFilter = new IntentFilter();
         macroFilter.addAction("com.mahmoud.MACRO_OPEN_CLIPBOARD");
@@ -709,7 +729,7 @@ public class LatinIME extends InputMethodService implements
     @Override
     public void onDestroy() {
         mClipboardHistoryManager.onDestroy();
-        mImageSuggestionManager.onDestroy(); // إيقاف مدير الصور
+        mImageSuggestionManager.onDestroy();
         mDictionaryFacilitator.closeDictionaries();
         mSettings.onDestroy();
         if (foldableObserver != null)
@@ -1020,6 +1040,8 @@ public class LatinIME extends InputMethodService implements
     public void onWindowShown() {
         super.onWindowShown();
         if (isInputViewShown()) {
+            if (mInputView != null && Settings.getValues().mIsFloatingKeyboard)
+                FloatingKeyboardUtils.setFloating(mInputView);
             setNavigationBarColor();
             workaroundForHuaweiStatusBarIssue();
         }
@@ -1166,7 +1188,7 @@ public class LatinIME extends InputMethodService implements
                 }
             }
         }
-        if (!mSettings.getCurrent().isApplicationSpecifiedCompletionsOn()) {
+        if (!mSettings.getCurrent().mInputAttributes.mApplicationSpecifiedCompletionOn) {
             return;
         }
         // If we have an update request in flight, we need to cancel it so it does not override
@@ -1214,6 +1236,8 @@ public class LatinIME extends InputMethodService implements
         }
         final int stripHeight = mKeyboardSwitcher.isShowingStripContainer() ? mKeyboardSwitcher.getStripContainer().getHeight() : 0;
         int visibleTopY = inputHeight - visibleKeyboardView.getHeight() - stripHeight;
+        if (Settings.getValues().mIsFloatingKeyboard)
+            visibleTopY = getResources().getDisplayMetrics().heightPixels;
 
         if (hasSuggestionStripView()) {
             mSuggestionStripView.setMoreSuggestionsHeight(visibleTopY);
@@ -1221,12 +1245,17 @@ public class LatinIME extends InputMethodService implements
 
         // Need to set expanded touchable region only if a keyboard view is being shown.
         if (visibleKeyboardView.isShown()) {
-            final int touchLeft = 0;
-            final int touchTop = mKeyboardSwitcher.isShowingPopupKeysPanel() ? 0 : visibleTopY;
-            final int touchRight = visibleKeyboardView.getWidth();
-            final int touchBottom = inputHeight
-                    // Extend touchable region below the keyboard.
-                    + EXTENDED_TOUCHABLE_REGION_HEIGHT;
+            int touchLeft = 0;
+            int touchTop = mKeyboardSwitcher.isShowingPopupKeysPanel() ? 0 : visibleTopY;
+            int touchRight = visibleKeyboardView.getWidth();
+            int touchBottom = inputHeight + EXTENDED_TOUCHABLE_REGION_HEIGHT; // Extend touchable region below the keyboard.
+            if (mSettings.getCurrent().mIsFloatingKeyboard) {
+                var xy = FloatingKeyboardUtils.readPosition(this);
+                touchLeft = xy.component1();
+                touchTop = xy.component2();
+                touchRight = touchLeft + mSettings.getCurrent().mFloatingWidth;
+                touchBottom = touchTop + mSettings.getCurrent().mFloatingHeight + stripHeight + (int)FloatingKeyboardUtils.getFloatingHandleHeight(getResources());
+            }
             outInsets.touchableInsets = InputMethodService.Insets.TOUCHABLE_INSETS_REGION;
             outInsets.touchableRegion.set(touchLeft, touchTop, touchRight, touchBottom);
         }
@@ -1272,8 +1301,8 @@ public class LatinIME extends InputMethodService implements
 
     @Override
     public boolean onEvaluateFullscreenMode() {
-        if (isImeSuppressedByHardwareKeyboard()) {
-            // If there is a hardware keyboard, disable full screen mode.
+        if (isImeSuppressedByHardwareKeyboard() || mSettings.getCurrent().mIsFloatingKeyboard) {
+            // If there is a hardware keyboard or we're floating, disable full screen mode.
             return false;
         }
         // Reread resource value here, because this method is called by the framework as needed.
@@ -1314,7 +1343,7 @@ public class LatinIME extends InputMethodService implements
     }
 
     @Override
-    @RequiresApi(api = Build.VERSION.CODES.R)
+    @RequiresApi(api = Build.VERSION_CODES.R)
     public boolean onInlineSuggestionsResponse(InlineSuggestionsResponse response) {
         Log.d(TAG,"onInlineSuggestionsResponse called");
         if (Settings.getValues().mSuggestionStripHiddenPerUserSettings) {
@@ -1410,36 +1439,23 @@ public class LatinIME extends InputMethodService implements
     }
 
     // Implementation of {@link SuggestionStripView.Listener}.
+    // Implementation of {@link SuggestionStripView.Listener}.
+    // Implementation of {@link SuggestionStripView.Listener}.
+    // Implementation of {@link SuggestionStripView.Listener}.
+    // Implementation of {@link SuggestionStripView.Listener}.
     @Override
     public void onCodeInput(final int codePoint, final int x, final int y, final boolean isKeyRepeat) {
         // حماية الحافظة من شريط الأدوات
         if (codePoint == KeyCode.CLIPBOARD) {
-            if (!mIsClipboardAuthenticated) {
-                mIsWaitingForBiometricResult = true; 
-                try {
-                    Intent intent = new Intent("com.mahmoud.MACRO_REQ_FINGERPRINT");
-                    sendBroadcast(intent);
-                } catch (Exception e) {}
-
-                // مؤقت أمني: إلغاء حالة الانتظار تلقائياً بعد 10 ثوانٍ إذا لم يصل رد
-                mHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        mIsWaitingForBiometricResult = false;
-                    }
-                }, 10000);
-
-                return; 
-            } else {
-                mIsClipboardAuthenticated = false;
-            }
+            openClipboardWithAuth();
+            return; 
         }
         mKeyboardActionListener.onCodeInput(codePoint, x, y, isKeyRepeat);
     }
 
     // This method is public for testability of LatinIME, but also in the future it should
     // completely replace #onCodeInput.
-    public void onEvent(@NonNull final Event event) {
+        public void onEvent(@NonNull final Event event) {
         // 1. المسح الشامل (MacBoard)
         if (event.getKeyCode() == -10052) {
             android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
@@ -1501,24 +1517,8 @@ public class LatinIME extends InputMethodService implements
         } else {
             // 3. حماية الحافظة من اللوحة الأساسية (MacBoard)
             if (event.getKeyCode() == KeyCode.CLIPBOARD) {
-                if (!mIsClipboardAuthenticated) {
-                    mIsWaitingForBiometricResult = true; 
-                    try {
-                        Intent intent = new Intent("com.mahmoud.MACRO_REQ_FINGERPRINT");
-                        sendBroadcast(intent);
-                    } catch (Exception e) {}
-
-                    mHandler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            mIsWaitingForBiometricResult = false;
-                        }
-                    }, 10000);
-
-                    return; // نوقف الكود هنا عشان الحافظة متفتحش
-                } else {
-                    mIsClipboardAuthenticated = false;
-                }
+                openClipboardWithAuth();
+                return; // نوقف الكود هنا عشان الحافظة متفتحش
             }
 
             // 4. معالجة باقي الأزرار العادية
@@ -1530,7 +1530,7 @@ public class LatinIME extends InputMethodService implements
         }
         mKeyboardSwitcher.onEvent(event, getCurrentAutoCapsState(), getCurrentRecapitalizeState());
     }
-
+    
     public void onTextInput(final String rawText) {
         // TODO: have the keyboard pass the correct key code when we need it.
         final Event event = Event.createSoftwareTextEvent(rawText, KeyCode.MULTIPLE_CODE_POINTS, null);
@@ -1599,14 +1599,14 @@ public class LatinIME extends InputMethodService implements
         }
 
         final boolean isEmptyApplicationSpecifiedCompletions =
-                currentSettingsValues.isApplicationSpecifiedCompletionsOn()
+                currentSettingsValues.mInputAttributes.mApplicationSpecifiedCompletionOn
                         && suggestedWords.isEmpty();
         final boolean noSuggestionsFromDictionaries = suggestedWords.isEmpty()
                 || suggestedWords.isPunctuationSuggestions()
                 || isEmptyApplicationSpecifiedCompletions;
 
-        if (currentSettingsValues.isSuggestionsEnabledPerUserSettings()
-                || currentSettingsValues.isApplicationSpecifiedCompletionsOn()
+        if (currentSettingsValues.mSuggestionsEnabled
+                || currentSettingsValues.mInputAttributes.mApplicationSpecifiedCompletionOn
                 // We should clear the contextual strip if there is no suggestion from dictionaries.
                 || noSuggestionsFromDictionaries) {
             mSuggestionStripView.setSuggestions(suggestedWords,
@@ -1653,8 +1653,11 @@ public class LatinIME extends InputMethodService implements
         updateStateAfterInputTransaction(completeInputTransaction);
     }
 
+    /**
+     *  Checks if a recent clipboard suggestion is available. If available, it is set in suggestion strip.
+     *  returns whether a clipboard suggestion has been set.
+     */
     public boolean tryShowMediaSuggestion() {
-        // 1. Try image (clipboard image or recent screenshot)
         final View imageView = mImageSuggestionManager.getImageSuggestionView(
                 getCurrentInputEditorInfo(), mSuggestionStripView);
         if (imageView != null && hasSuggestionStripView()) {
@@ -1662,7 +1665,6 @@ public class LatinIME extends InputMethodService implements
             return true;
         }
 
-        // 2. Fallback to text clipboard suggestion
         final View clipboardView = mClipboardHistoryManager.getClipboardSuggestionView(
                 getCurrentInputEditorInfo(), mSuggestionStripView);
         if (clipboardView != null && hasSuggestionStripView()) {
@@ -1672,10 +1674,16 @@ public class LatinIME extends InputMethodService implements
         return false;
     }
 
+    // This will first try showing a clipboard suggestion. On success, the toolbar will be hidden
+    // if the "Auto hide toolbar" is enabled. Otherwise, an empty suggestion strip (if prediction
+    // is enabled) or punctuation suggestions (if it's disabled) will be set.
+    // Then, the toolbar will be shown automatically if the relevant setting is enabled
+    // and there is a selection of text or it's the start of a line.
     @Override
     public void setNeutralSuggestionStrip() {
         final SettingsValues currentSettings = mSettings.getCurrent();
-        if (tryShowMediaSuggestion()) {          // <-- CHANGED
+        if (tryShowMediaSuggestion()) {
+            // clipboard suggestion has been set
             if (hasSuggestionStripView() && currentSettings.mAutoHideToolbar)
                 mSuggestionStripView.setToolbarVisibility(false);
             return;
@@ -1804,6 +1812,12 @@ public class LatinIME extends InputMethodService implements
 
     // receive ringer mode change.
     // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid عبر الراديو) ---
+    // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid عبر الراديو) ---
+    // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid عبر الراديو) ---
+    // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid عبر الراديو) ---
+    // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid عبر الراديو) ---
+    // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid مع حماية بكلمة سر) ---
+    // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid عبر الراديو) ---
     private final BroadcastReceiver mMacroDroidReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, final Intent intent) {
@@ -1812,13 +1826,12 @@ public class LatinIME extends InputMethodService implements
 
             if ("com.mahmoud.MACRO_OPEN_CLIPBOARD".equals(action)) {
                 String token = intent.getStringExtra("auth_token");
-                if ("MacBoard_Secure_2026".equals(token)) {
+                if ("M3aB2gK6+U8Wm7F6^s8,JlY:o=3h~c".equals(token)) {
                     mHandler.post(() -> {
                         if (mIsWaitingForBiometricResult && isInputViewShown()) {
                             mIsWaitingForBiometricResult = false;
                             mIsClipboardAuthenticated = true;
-                            // فتح الحافظة مباشرة
-                            mKeyboardActionListener.onCodeInput(KeyCode.CLIPBOARD, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false);
+                            openClipboardWithAuth(); // توجيه لنقطة التفتيش
                         }
                     });
                 } else {
@@ -1830,6 +1843,7 @@ public class LatinIME extends InputMethodService implements
         }
     };
     // --- نهاية التعديل ---
+    
     private final BroadcastReceiver mRingerModeChangeReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, final Intent intent) {
@@ -1847,6 +1861,46 @@ public class LatinIME extends InputMethodService implements
             }
         }
     };
+
+    public void commitImage(@NonNull final Uri imageUri) {
+        final android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
+        if (ic == null) {
+            Log.w(TAG, "commitImage: InputConnection is null");
+            return;
+        }
+
+        final EditorInfo editorInfo = getCurrentInputEditorInfo();
+        final String[] supportedMimeTypes = EditorInfoCompat.getContentMimeTypes(editorInfo);
+        boolean supportsImages = false;
+        for (final String mime : supportedMimeTypes) {
+            if (mime != null && mime.startsWith("image/")) {
+                supportsImages = true;
+                break;
+            }
+        }
+        if (!supportsImages) {
+            Log.i(TAG, "commitImage: Target app does not support image insertion");
+            return;
+        }
+
+        final ClipDescription description = new ClipDescription("HeliBoard image",
+                new String[]{"image/png", "image/jpeg", "image/gif", "image/webp"});
+        final InputContentInfoCompat contentInfo = new InputContentInfoCompat(imageUri, description, null);
+
+        int flags = 0;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+            flags = InputConnectionCompat.INPUT_CONTENT_GRANT_READ_URI_PERMISSION;
+        }
+
+        final boolean committed = InputConnectionCompat.commitContent(
+                ic, editorInfo, contentInfo, flags, null);
+        if (!committed) {
+            Log.w(TAG, "commitImage: commitContent failed for " + imageUri);
+        } else {
+            AudioAndHapticFeedbackManager.getInstance().performHapticAndAudioFeedback(
+                    KeyCode.NOT_SPECIFIED, mInputView, HapticEvent.KEY_PRESS);
+        }
+    }
 
     public ClipboardHistoryManager getClipboardHistoryManager() {
         return mClipboardHistoryManager;
@@ -2005,45 +2059,5 @@ public class LatinIME extends InputMethodService implements
         }
         GestureDataGatheringSettings.INSTANCE.showEndNotificationIfNecessary(this); // will do nothing for a long time
         mInputLogic.setFacilitator(mDictionaryFacilitator);
-    }
-
-    public void commitImage(@NonNull final Uri imageUri) {
-        final InputConnection ic = getCurrentInputConnection();
-        if (ic == null) {
-            Log.w(TAG, "commitImage: InputConnection is null");
-            return;
-        }
-
-        final EditorInfo editorInfo = getCurrentInputEditorInfo();
-        final String[] supportedMimeTypes = EditorInfoCompat.getContentMimeTypes(editorInfo);
-        boolean supportsImages = false;
-        for (final String mime : supportedMimeTypes) {
-            if (mime != null && mime.startsWith("image/")) {
-                supportsImages = true;
-                break;
-            }
-        }
-        if (!supportsImages) {
-            Log.i(TAG, "commitImage: Target app does not support image insertion");
-            return;
-        }
-
-        final ClipDescription description = new ClipDescription("HeliBoard image",
-                new String[]{"image/png", "image/jpeg", "image/gif", "image/webp"});
-        final InputContentInfoCompat contentInfo = new InputContentInfoCompat(imageUri, description, null);
-
-        int flags = 0;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
-            flags = InputConnectionCompat.INPUT_CONTENT_GRANT_READ_URI_PERMISSION;
-        }
-
-        final boolean committed = InputConnectionCompat.commitContent(
-                ic, editorInfo, contentInfo, flags, null);
-        if (!committed) {
-            Log.w(TAG, "commitImage: commitContent failed for " + imageUri);
-        } else {
-            AudioAndHapticFeedbackManager.getInstance().performHapticAndAudioFeedback(
-                    KeyCode.NOT_SPECIFIED, mInputView, HapticEvent.KEY_PRESS);
-        }
     }
 }
