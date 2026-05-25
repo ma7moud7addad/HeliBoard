@@ -9,17 +9,19 @@
     <LinearLayout
         android:id="@+id/image_suggestion_container"
         android:layout_width="wrap_content"
-        android:layout_height="32dp"
+        android:layout_height="28dp"
         android:orientation="horizontal"
-        android:gravity="center_vertical"
+        android:gravity="center"
         android:background="@drawable/image_suggestion_pill_background"
         android:paddingStart="4dp"
         android:paddingEnd="10dp"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp"
         android:elevation="2dp">
 
         <FrameLayout
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
             android:layout_marginStart="2dp"
             android:layout_marginEnd="6dp">
 
@@ -37,6 +39,8 @@
             android:layout_height="wrap_content"
             android:text="@string/image_suggestion_insert"
             android:textSize="13sp"
-            android:textColor="?android:attr/textColorPrimary" />
+            android:textColor="?android:attr/textColorPrimary"
+            android:includeFontPadding="false"
+            android:lineSpacingExtra="0dp" />
     </LinearLayout>
 </FrameLayout>
