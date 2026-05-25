@@ -204,4 +204,11 @@ class ImageSuggestionManager(private val latinIME: LatinIME) {
         latinIME.setNeutralSuggestionStrip()
         latinIME.mHandler.postResumeSuggestions(false)
     }
+
+    /** Called by LatinIME after successful image insertion */
+    fun clearSuggestion() {
+        dontShowCurrentSuggestion = true
+        latestImageUri = null
+        // The UI will be refreshed by LatinIME.setNeutralSuggestionStrip()
+    }
 }
