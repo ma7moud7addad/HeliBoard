@@ -1897,9 +1897,6 @@ public class LatinIME extends InputMethodService implements
                 InputConnectionCompat.INPUT_CONTENT_GRANT_READ_URI_PERMISSION, null);
         if (!committed) {
             Log.w(TAG, "commitImage: commitContent failed for " + imageUri);
-        } else {
-            AudioAndHapticFeedbackManager.getInstance().performHapticAndAudioFeedback(
-                    KeyCode.NOT_SPECIFIED, mInputView, HapticEvent.KEY_PRESS);
         }
     }
 
