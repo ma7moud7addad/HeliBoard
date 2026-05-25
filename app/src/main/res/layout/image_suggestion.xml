@@ -2,25 +2,26 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/image_suggestion_container"
     android:layout_width="wrap_content"
-    android:layout_height="28dp"
-    android:layout_gravity="center_vertical"
+    android:layout_height="match_parent"
     android:layout_marginStart="6dp"
-    android:layout_marginEnd="6dp"
-    android:background="@drawable/image_suggestion_pill_background"
-    android:elevation="2dp">
+    android:layout_marginEnd="6dp">
 
-    <!-- Everything in one centered row -->
+    <!-- The actual pill content, centered vertically -->
     <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
+        android:layout_height="28dp"
+        android:layout_gravity="center_vertical"
         android:orientation="horizontal"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical"
+        android:background="@drawable/image_suggestion_pill_background"
+        android:elevation="2dp"
+        android:paddingStart="4dp"
+        android:paddingEnd="10dp">
 
         <FrameLayout
             android:layout_width="22dp"
             android:layout_height="22dp"
-            android:layout_marginStart="4dp"
+            android:layout_marginStart="2dp"
             android:layout_marginEnd="6dp">
 
             <ImageView
@@ -35,7 +36,6 @@
             android:id="@+id/image_suggestion_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
             android:text="@string/image_suggestion_insert"
             android:textSize="13sp"
             android:textColor="?android:attr/textColorPrimary"
