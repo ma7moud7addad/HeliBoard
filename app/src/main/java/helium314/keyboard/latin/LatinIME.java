@@ -1862,11 +1862,9 @@ public class LatinIME extends InputMethodService implements
     };
 
     public void commitImage(@NonNull final Uri imageUri) {
-        final android.content.ClipboardManager clipboard = 
-            (android.content.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-
-        if (clipboard == null) {
-            Log.w(TAG, "commitImage: ClipboardManager is null");
+        final android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
+        if (ic == null) {
+            Log.w(TAG, "commitImage: InputConnection is null");
             return;
         }
 
@@ -1878,35 +1876,49 @@ public class LatinIME extends InputMethodService implements
                 if (type != null) mimeType = type;
             } catch (Exception ignored) {}
 
-            // Create clip data with the image URI
-            final android.content.ClipData clip = 
-                android.content.ClipData.newUri(getContentResolver(), "HeliBoard image", imageUri);
-            clipboard.setPrimaryClip(clip);
+            // Try commitContent first (for modern apps like Telegram)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+                final EditorInfo editorInfo = getCurrentInputEditorInfo();
+                final ClipDescription description = new ClipDescription("HeliBoard image",
+                        new String[]{mimeType});
+                final InputContentInfoCompat contentInfo = InputContentInfoCompat.wrap(
+                        new android.view.inputmethod.InputContentInfo(imageUri, description, null));
 
-            // Now paste it - this triggers the app's image handling
-            final android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
-            if (ic != null) {
-                // Try commitContent first (for modern apps like Telegram)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
-                    final EditorInfo editorInfo = getCurrentInputEditorInfo();
-                    final ClipDescription description = new ClipDescription("HeliBoard image",
-                            new String[]{mimeType});
-                    final InputContentInfoCompat contentInfo = InputContentInfoCompat.wrap(
-                            new android.view.inputmethod.InputContentInfo(imageUri, description, null));
+                final boolean committed = InputConnectionCompat.commitContent(
+                        ic, editorInfo, contentInfo,
+                        InputConnectionCompat.INPUT_CONTENT_GRANT_READ_URI_PERMISSION, null);
 
-                    final boolean committed = InputConnectionCompat.commitContent(
-                            ic, editorInfo, contentInfo,
-                            InputConnectionCompat.INPUT_CONTENT_GRANT_READ_URI_PERMISSION, null);
+                if (committed) {
+                    Log.i(TAG, "commitImage: Success via commitContent");
+                    return;
+                }
+            }
 
-                    if (committed) {
-                        Log.i(TAG, "commitImage: Success via commitContent");
-                        return;
+            // Fallback for WhatsApp: Use clipboard WITHOUT toast (suppress notification)
+            final android.content.ClipboardManager clipboard = 
+                (android.content.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+            if (clipboard != null) {
+                final android.content.ClipData clip = 
+                    android.content.ClipData.newUri(getContentResolver(), "HeliBoard image", imageUri);
+
+                // Suppress the "Copied to clipboard" toast on Android 13+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    // Use reflection to suppress the toast (hidden API)
+                    try {
+                        final java.lang.reflect.Method method = clipboard.getClass().getMethod("setPrimaryClip", 
+                            android.content.ClipData.class, boolean.class);
+                        method.invoke(clipboard, clip, false); // false = suppress toast
+                    } catch (Exception e) {
+                        // Fallback: just set it normally
+                        clipboard.setPrimaryClip(clip);
                     }
+                } else {
+                    clipboard.setPrimaryClip(clip);
                 }
 
-                // Fallback: paste from clipboard (triggers WhatsApp gallery picker)
+                // Trigger paste
                 ic.performContextMenuAction(android.R.id.paste);
-                Log.i(TAG, "commitImage: Triggered paste");
+                Log.i(TAG, "commitImage: Triggered paste via clipboard");
             }
         } catch (Exception e) {
             Log.w(TAG, "commitImage: Failed", e);
