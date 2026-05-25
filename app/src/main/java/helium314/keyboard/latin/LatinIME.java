@@ -1887,16 +1887,75 @@ public class LatinIME extends InputMethodService implements
             return;
         }
 
-        final ClipDescription description = new ClipDescription("HeliBoard image",
-                new String[]{"image/png", "image/jpeg", "image/gif", "image/webp"});
-        final InputContentInfoCompat contentInfo = InputContentInfoCompat.wrap(
-                new android.view.inputmethod.InputContentInfo(imageUri, description, null));
+        // Gboard-style: Copy image to cache and use FileProvider URI
+        // This makes WhatsApp treat it as a gallery pick, not a sticker
+        final Uri fileUri = copyImageToCache(imageUri);
+        if (fileUri == null) {
+            Log.w(TAG, "commitImage: Failed to copy image to cache");
+            return;
+        }
 
+        // Detect MIME type
+        String mimeType = "image/jpeg";
+        try {
+            final String type = getContentResolver().getType(imageUri);
+            if (type != null) mimeType = type;
+        } catch (Exception ignored) {}
+
+        // Create the content info
+        final ClipDescription description = new ClipDescription("HeliBoard image",
+                new String[]{mimeType});
+
+        final InputContentInfoCompat contentInfo = InputContentInfoCompat.wrap(
+                new android.view.inputmethod.InputContentInfo(fileUri, description, null));
+
+        // Commit WITHOUT GRANT_READ_URI_PERMISSION 
+        // (permission already granted via FileProvider in manifest)
         final boolean committed = InputConnectionCompat.commitContent(
-                ic, editorInfo, contentInfo,
-                InputConnectionCompat.INPUT_CONTENT_GRANT_READ_URI_PERMISSION, null);
+                ic, editorInfo, contentInfo, 0, null);
+
         if (!committed) {
-            Log.w(TAG, "commitImage: commitContent failed for " + imageUri);
+            Log.w(TAG, "commitImage: commitContent failed for " + fileUri);
+        } else {
+            Log.i(TAG, "commitImage: Image committed successfully via cache");
+        }
+    }
+
+    /**
+     * Copy image from source URI to app's cache directory.
+     * Returns a FileProvider URI that WhatsApp can access like a gallery image.
+     */
+    private Uri copyImageToCache(@NonNull final Uri sourceUri) {
+        try {
+            final java.io.File cacheDir = new java.io.File(getCacheDir(), "images");
+            if (!cacheDir.exists()) {
+                cacheDir.mkdirs();
+            }
+
+            // Generate unique filename
+            final String fileName = "shared_image_" + System.currentTimeMillis() + ".jpg";
+            final java.io.File destFile = new java.io.File(cacheDir, fileName);
+
+            // Copy the image
+            try (java.io.InputStream inputStream = getContentResolver().openInputStream(sourceUri);
+                 java.io.FileOutputStream outputStream = new java.io.FileOutputStream(destFile)) {
+
+                if (inputStream == null) return null;
+
+                final byte[] buffer = new byte[4096];
+                int bytesRead;
+                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                    outputStream.write(buffer, 0, bytesRead);
+                }
+            }
+
+            // Return FileProvider URI
+            return androidx.core.content.FileProvider.getUriForFile(
+                    this, getPackageName() + ".fileprovider", destFile);
+
+        } catch (Exception e) {
+            Log.w(TAG, "copyImageToCache failed: " + e.getMessage());
+            return null;
         }
     }
 
