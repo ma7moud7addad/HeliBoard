@@ -73,6 +73,6 @@
 
     <!-- Scrollbar color -->
     <color name="toolbar_scrollbar">#66808080</color>
-    <<color name="suggestion_background_color">#E8EAED</color>  <!-- رمادي فاتح زي Gboard -->
+    <color name="suggestion_background_color">#E8EAED</color>  <!-- رمادي فاتح زي Gboard -->
 
 </resources>
