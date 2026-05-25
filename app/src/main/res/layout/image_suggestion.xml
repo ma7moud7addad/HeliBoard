@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- This wrapper ensures the pill is centered vertically in the suggestion strip -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/image_suggestion_container"
     android:layout_width="wrap_content"
-    android:layout_height="match_parent"
-    android:layout_marginStart="6dp"
-    android:layout_marginEnd="6dp">
+    android:layout_height="match_parent">
 
-    <!-- The actual pill content, centered vertically -->
     <LinearLayout
+        android:id="@+id/image_suggestion_container"
         android:layout_width="wrap_content"
         android:layout_height="28dp"
         android:layout_gravity="center_vertical"
@@ -16,7 +14,9 @@
         android:background="@drawable/image_suggestion_pill_background"
         android:elevation="2dp"
         android:paddingStart="4dp"
-        android:paddingEnd="10dp">
+        android:paddingEnd="10dp"
+        android:layout_marginStart="6dp"
+        android:layout_marginEnd="6dp">
 
         <FrameLayout
             android:layout_width="22dp"
