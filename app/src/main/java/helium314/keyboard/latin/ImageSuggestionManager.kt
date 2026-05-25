@@ -180,10 +180,10 @@ class ImageSuggestionManager(private val latinIME: LatinIME) {
             view.visibility = View.GONE
         }
 
-        // Apply theme colors
+        // Apply theme colors (text only, background is set by pill drawable)
         val colors = latinIME.mSettings.current.mColors
         textView.setTextColor(colors.get(ColorType.KEY_TEXT))
-        colors.setBackground(container, ColorType.CLIPBOARD_SUGGESTION_BACKGROUND)
+        // Background color is handled by image_suggestion_pill_background.xml
 
         // Ensure proper LayoutParams for centering in suggestion strip
         val layoutParams = android.widget.FrameLayout.LayoutParams(
