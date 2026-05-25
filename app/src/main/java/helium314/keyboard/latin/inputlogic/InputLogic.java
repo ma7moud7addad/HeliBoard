@@ -1734,7 +1734,7 @@ public final class InputLogic {
         if (suggestedWords != null) {
             // Prefer clipboard suggestions (if available and setting is enabled) over beginning of sentence predictions.
             if (!(suggestedWords.mInputStyle == SuggestedWords.INPUT_STYLE_BEGINNING_OF_SENTENCE_PREDICTION
-                    && mLatinIME.tryShowClipboardSuggestion())) {
+                    && mLatinIME.tryShowMediaSuggestion())) {
                 mSuggestionStripViewAccessor.setSuggestions(suggestedWords);
             }
             if (!suggestedWords.isEmpty() && settingsValues.mSuggestionsEnabled && isInlineEmojiSearchAction()) {
