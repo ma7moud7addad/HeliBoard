@@ -173,8 +173,11 @@ class ImageSuggestionManager(private val latinIME: LatinIME) {
         textView.text = latinIME.getString(R.string.image_suggestion_insert)
         textView.setOnClickListener {
             dontShowCurrentSuggestion = true
+            latestImageUri = null  // Clear the image so it won't show again
             latinIME.commitImage(uri)
             view.visibility = View.GONE
+            // Force refresh suggestion strip to remove the capsule
+            latinIME.setNeutralSuggestionStrip()
         }
 
         // Apply theme colors (text only, background is set by pill drawable)
@@ -197,6 +200,7 @@ class ImageSuggestionManager(private val latinIME: LatinIME) {
 
     private fun removeImageSuggestion() {
         dontShowCurrentSuggestion = true
+        latestImageUri = null  // Clear the image
         latinIME.setNeutralSuggestionStrip()
         latinIME.mHandler.postResumeSuggestions(false)
     }
