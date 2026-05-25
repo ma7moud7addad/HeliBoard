@@ -3,25 +3,23 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="center_vertical"
-    android:layout_marginStart="8dp"
-    android:layout_marginEnd="8dp">
+    android:layout_marginStart="6dp"
+    android:layout_marginEnd="6dp">
 
-    <!-- Background pill shape -->
     <LinearLayout
         android:id="@+id/image_suggestion_container"
         android:layout_width="wrap_content"
-        android:layout_height="36dp"
+        android:layout_height="32dp"
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:background="@drawable/image_suggestion_pill_background"
         android:paddingStart="4dp"
-        android:paddingEnd="4dp"
+        android:paddingEnd="10dp"
         android:elevation="2dp">
 
-        <!-- Circular thumbnail -->
         <FrameLayout
-            android:layout_width="28dp"
-            android:layout_height="28dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:layout_marginStart="2dp"
             android:layout_marginEnd="6dp">
 
@@ -38,16 +36,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/image_suggestion_insert"
-            android:textSize="14sp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:layout_marginEnd="4dp" />
-
-        <ImageButton
-            android:id="@+id/image_suggestion_close"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:padding="2dp"
-            android:background="@android:color/transparent"
-            android:scaleType="centerInside" />
+            android:textSize="13sp"
+            android:textColor="?android:attr/textColorPrimary" />
     </LinearLayout>
 </FrameLayout>
