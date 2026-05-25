@@ -174,9 +174,6 @@ class ImageSuggestionManager(private val latinIME: LatinIME) {
         textView.setOnClickListener {
             dontShowCurrentSuggestion = true
             latinIME.commitImage(uri)
-            AudioAndHapticFeedbackManager.getInstance().performHapticAndAudioFeedback(
-                KeyCode.NOT_SPECIFIED, it, HapticEvent.KEY_PRESS
-            )
             view.visibility = View.GONE
         }
 
