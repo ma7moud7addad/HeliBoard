@@ -185,6 +185,14 @@ class ImageSuggestionManager(private val latinIME: LatinIME) {
         textView.setTextColor(colors.get(ColorType.KEY_TEXT))
         colors.setBackground(container, ColorType.CLIPBOARD_SUGGESTION_BACKGROUND)
 
+        // Ensure proper LayoutParams for centering in suggestion strip
+        view.layoutParams = ViewGroup.MarginLayoutParams(
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        ).apply {
+            setMargins(0, 0, 0, 0)
+        }
+
         return view
     }
 
