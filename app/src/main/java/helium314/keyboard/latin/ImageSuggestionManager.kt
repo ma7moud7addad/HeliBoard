@@ -19,7 +19,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewOutlineProvider
 import android.view.inputmethod.EditorInfo
-import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -27,7 +26,6 @@ import androidx.core.view.inputmethod.EditorInfoCompat
 import helium314.keyboard.event.HapticEvent
 import helium314.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode
 import helium314.keyboard.latin.common.ColorType
-import helium314.keyboard.latin.utils.ToolbarKey
 
 class ImageSuggestionManager(private val latinIME: LatinIME) {
 
@@ -146,13 +144,12 @@ class ImageSuggestionManager(private val latinIME: LatinIME) {
         if (!mimeTypes.any { it.startsWith("image/") }) return null
 
         val view = LayoutInflater.from(latinIME).inflate(R.layout.image_suggestion, parent, false)
-        val keyboard = latinIME.mKeyboardSwitcher.keyboard ?: return null
 
         val thumbnailView = view.findViewById<ImageView>(R.id.image_suggestion_thumbnail)
         val textView = view.findViewById<TextView>(R.id.image_suggestion_text)
-        val closeButton = view.findViewById<ImageButton>(R.id.image_suggestion_close)
+        val container = view.findViewById<View>(R.id.image_suggestion_container)
 
-        // Make thumbnail circular using outline provider
+        // Make thumbnail circular
         thumbnailView.clipToOutline = true
         thumbnailView.outlineProvider = object : ViewOutlineProvider() {
             override fun getOutline(view: View, outline: Outline) {
@@ -183,18 +180,10 @@ class ImageSuggestionManager(private val latinIME: LatinIME) {
             view.visibility = View.GONE
         }
 
-        closeButton.setImageDrawable(
-            keyboard.mIconsSet.getIconDrawable(ToolbarKey.CLOSE_HISTORY.name.lowercase())
-        )
-        closeButton.setOnClickListener {
-            dontShowCurrentSuggestion = true
-            removeImageSuggestion()
-        }
-
+        // Apply theme colors
         val colors = latinIME.mSettings.current.mColors
         textView.setTextColor(colors.get(ColorType.KEY_TEXT))
-        colors.setColor(closeButton, ColorType.REMOVE_SUGGESTION_ICON)
-        // Don't set background on the outer view, the pill drawable handles it
+        colors.setBackground(container, ColorType.CLIPBOARD_SUGGESTION_BACKGROUND)
 
         return view
     }
