@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
-    <solid android:color="@android:color/transparent" />
-    <corners android:radius="16dp" />
+    <!-- Solid color matching the suggestion strip background -->
+    <solid android:color="#4A4A4A" />
+    <!-- Pill shape: half of height (28dp / 2 = 14dp) for perfect circle ends -->
+    <corners android:radius="14dp" />
 </shape>
