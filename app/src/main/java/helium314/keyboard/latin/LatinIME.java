@@ -1931,7 +1931,11 @@ public class LatinIME extends InputMethodService implements
         if (mImageSuggestionManager != null) {
             mImageSuggestionManager.clearSuggestion();
         }
-        setNeutralSuggestionStrip();
+        // Remove the external suggestion view directly, don't call setNeutralSuggestionStrip
+        // which might recreate it
+        if (hasSuggestionStripView()) {
+            mSuggestionStripView.removeExternalSuggestions();
+        }
     }
 
         public ClipboardHistoryManager getClipboardHistoryManager() {
