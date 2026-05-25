@@ -186,12 +186,14 @@ class ImageSuggestionManager(private val latinIME: LatinIME) {
         colors.setBackground(container, ColorType.CLIPBOARD_SUGGESTION_BACKGROUND)
 
         // Ensure proper LayoutParams for centering in suggestion strip
-        view.layoutParams = ViewGroup.MarginLayoutParams(
+        val layoutParams = android.widget.FrameLayout.LayoutParams(
             ViewGroup.LayoutParams.WRAP_CONTENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT
+            ViewGroup.LayoutParams.MATCH_PARENT
         ).apply {
-            setMargins(0, 0, 0, 0)
+            gravity = android.view.Gravity.CENTER_VERTICAL
+            setMargins(6, 0, 6, 0)
         }
+        view.layoutParams = layoutParams
 
         return view
     }
