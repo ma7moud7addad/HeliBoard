@@ -74,6 +74,8 @@ class ImageSuggestionManager(private val latinIME: LatinIME) {
 
         val item = clipData.getItemAt(0) ?: return
         val uri = item.uri ?: return
+
+        // Always update to the new URI, even if one already exists
         latestImageUri = uri
         dontShowCurrentSuggestion = false
         latinIME.setNeutralSuggestionStrip()
@@ -111,6 +113,8 @@ class ImageSuggestionManager(private val latinIME: LatinIME) {
                     val idCol = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
                     val id = cursor.getLong(idCol)
                     val uri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
+
+                    // Always update to the latest screenshot, even if one is already showing
                     latestImageUri = uri
                     dontShowCurrentSuggestion = false
                     latinIME.setNeutralSuggestionStrip()
