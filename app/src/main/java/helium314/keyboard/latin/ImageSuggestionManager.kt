@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.database.ContentObserver
 import android.graphics.Bitmap
+import android.graphics.Outline
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
@@ -16,6 +17,7 @@ import android.util.Size
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewOutlineProvider
 import android.view.inputmethod.EditorInfo
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -150,6 +152,14 @@ class ImageSuggestionManager(private val latinIME: LatinIME) {
         val textView = view.findViewById<TextView>(R.id.image_suggestion_text)
         val closeButton = view.findViewById<ImageButton>(R.id.image_suggestion_close)
 
+        // Make thumbnail circular using outline provider
+        thumbnailView.clipToOutline = true
+        thumbnailView.outlineProvider = object : ViewOutlineProvider() {
+            override fun getOutline(view: View, outline: Outline) {
+                outline.setOval(0, 0, view.width, view.height)
+            }
+        }
+
         val thumbSize = 144
         val bitmap: Bitmap? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             try {
@@ -184,7 +194,7 @@ class ImageSuggestionManager(private val latinIME: LatinIME) {
         val colors = latinIME.mSettings.current.mColors
         textView.setTextColor(colors.get(ColorType.KEY_TEXT))
         colors.setColor(closeButton, ColorType.REMOVE_SUGGESTION_ICON)
-        colors.setBackground(view, ColorType.CLIPBOARD_SUGGESTION_BACKGROUND)
+        // Don't set background on the outer view, the pill drawable handles it
 
         return view
     }
