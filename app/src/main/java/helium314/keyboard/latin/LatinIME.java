@@ -1890,6 +1890,8 @@ public class LatinIME extends InputMethodService implements
 
                 if (committed) {
                     Log.i(TAG, "commitImage: Success via commitContent");
+                    // Clear the image suggestion after successful send
+                    clearImageSuggestion();
                     return;
                 }
             }
@@ -1903,26 +1905,33 @@ public class LatinIME extends InputMethodService implements
 
                 // Suppress the "Copied to clipboard" toast on Android 13+
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    // Use reflection to suppress the toast (hidden API)
                     try {
                         final java.lang.reflect.Method method = clipboard.getClass().getMethod("setPrimaryClip", 
                             android.content.ClipData.class, boolean.class);
-                        method.invoke(clipboard, clip, false); // false = suppress toast
+                        method.invoke(clipboard, clip, false);
                     } catch (Exception e) {
-                        // Fallback: just set it normally
                         clipboard.setPrimaryClip(clip);
                     }
                 } else {
                     clipboard.setPrimaryClip(clip);
                 }
 
-                // Trigger paste
                 ic.performContextMenuAction(android.R.id.paste);
                 Log.i(TAG, "commitImage: Triggered paste via clipboard");
+                // Clear the image suggestion after paste
+                clearImageSuggestion();
             }
         } catch (Exception e) {
             Log.w(TAG, "commitImage: Failed", e);
         }
+    }
+
+    /** Clear the current image suggestion from the strip */
+    private void clearImageSuggestion() {
+        if (mImageSuggestionManager != null) {
+            mImageSuggestionManager.clearSuggestion();
+        }
+        setNeutralSuggestionStrip();
     }
 
         public ClipboardHistoryManager getClipboardHistoryManager() {
