@@ -1249,7 +1249,7 @@ public class LatinIME extends InputMethodService implements
             int touchRight = visibleKeyboardView.getWidth();
             int touchBottom = inputHeight + EXTENDED_TOUCHABLE_REGION_HEIGHT; // Extend touchable region below the keyboard.
             if (mSettings.getCurrent().mIsFloatingKeyboard) {
-                var xy = FloatingKeyboardUtils.readPosition(this, Integer.MAX_VALUE, Integer.MAX_VALUE);
+                var xy = FloatingKeyboardUtils.readPosition(this);
                 touchLeft = xy.component1();
                 touchTop = xy.component2();
                 touchRight = touchLeft + mSettings.getCurrent().mFloatingWidth;
@@ -1890,6 +1890,8 @@ public class LatinIME extends InputMethodService implements
 
                 if (committed) {
                     Log.i(TAG, "commitImage: Success via commitContent");
+                    // CRITICAL: Clear clipboard so ClipboardHistoryManager won't show it again
+                    clearClipboardAfterImageSend();
                     return;
                 }
             }
@@ -1918,6 +1920,23 @@ public class LatinIME extends InputMethodService implements
             }
         } catch (Exception e) {
             Log.w(TAG, "commitImage: Failed", e);
+        }
+    }
+
+    /** Clear clipboard after image send to prevent ClipboardHistoryManager from showing it again */
+    private void clearClipboardAfterImageSend() {
+        try {
+            final android.content.ClipboardManager clipboard = 
+                (android.content.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+            if (clipboard != null) {
+                // Set empty text clip to clear the image
+                final android.content.ClipData emptyClip = 
+                    android.content.ClipData.newPlainText("", "");
+                clipboard.setPrimaryClip(emptyClip);
+                Log.i(TAG, "Clipboard cleared after image send");
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to clear clipboard: " + e.getMessage());
         }
     }
 
