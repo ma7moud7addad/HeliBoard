@@ -1862,6 +1862,16 @@ public class LatinIME extends InputMethodService implements
     };
 
     public void commitImage(@NonNull final Uri imageUri) {
+        // CRITICAL: Clear the suggestion FIRST before sending
+        // This prevents the capsule from reappearing
+        if (mImageSuggestionManager != null) {
+            mImageSuggestionManager.clearSuggestion();
+        }
+        // Force remove the external view immediately
+        if (hasSuggestionStripView()) {
+            mSuggestionStripView.setExternalSuggestionView(null, false);
+        }
+
         final android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
         if (ic == null) {
             Log.w(TAG, "commitImage: InputConnection is null");
@@ -1890,20 +1900,17 @@ public class LatinIME extends InputMethodService implements
 
                 if (committed) {
                     Log.i(TAG, "commitImage: Success via commitContent");
-                    // Clear the image suggestion after successful send
-                    clearImageSuggestion();
                     return;
                 }
             }
 
-            // Fallback for WhatsApp: Use clipboard WITHOUT toast (suppress notification)
+            // Fallback for WhatsApp: Use clipboard
             final android.content.ClipboardManager clipboard = 
                 (android.content.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
             if (clipboard != null) {
                 final android.content.ClipData clip = 
                     android.content.ClipData.newUri(getContentResolver(), "HeliBoard image", imageUri);
 
-                // Suppress the "Copied to clipboard" toast on Android 13+
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     try {
                         final java.lang.reflect.Method method = clipboard.getClass().getMethod("setPrimaryClip", 
@@ -1918,8 +1925,6 @@ public class LatinIME extends InputMethodService implements
 
                 ic.performContextMenuAction(android.R.id.paste);
                 Log.i(TAG, "commitImage: Triggered paste via clipboard");
-                // Clear the image suggestion after paste
-                clearImageSuggestion();
             }
         } catch (Exception e) {
             Log.w(TAG, "commitImage: Failed", e);
