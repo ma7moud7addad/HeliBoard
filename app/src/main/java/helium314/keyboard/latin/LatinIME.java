@@ -1862,16 +1862,6 @@ public class LatinIME extends InputMethodService implements
     };
 
     public void commitImage(@NonNull final Uri imageUri) {
-        // CRITICAL: Clear the suggestion FIRST before sending
-        // This prevents the capsule from reappearing
-        if (mImageSuggestionManager != null) {
-            mImageSuggestionManager.clearSuggestion();
-        }
-        // Force remove the external view immediately
-        if (hasSuggestionStripView()) {
-            mSuggestionStripView.setExternalSuggestionView(null, false);
-        }
-
         final android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
         if (ic == null) {
             Log.w(TAG, "commitImage: InputConnection is null");
@@ -1931,14 +1921,7 @@ public class LatinIME extends InputMethodService implements
         }
     }
 
-    /** Clear the current image suggestion from the strip */
-    private void clearImageSuggestion() {
-        if (mImageSuggestionManager != null) {
-            mImageSuggestionManager.clearSuggestion();
-        }
-        // Refresh the suggestion strip to remove the image capsule
-        setNeutralSuggestionStrip();
-    }
+
 
         public ClipboardHistoryManager getClipboardHistoryManager() {
         return mClipboardHistoryManager;
