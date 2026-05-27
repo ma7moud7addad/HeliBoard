@@ -176,12 +176,13 @@ class ImageSuggestionManager(private val latinIME: LatinIME) {
 
         textView.text = latinIME.getString(R.string.image_suggestion_insert)
         textView.setOnClickListener {
+            // CRITICAL: Clear everything BEFORE calling commitImage
             dontShowCurrentSuggestion = true
-            latestImageUri = null  // Clear the image so it won't show again
-            latinIME.commitImage(uri)
+            latestImageUri = null
             view.visibility = View.GONE
-            // Force refresh suggestion strip to remove the capsule
-            latinIME.setNeutralSuggestionStrip()
+
+            // Now send the image
+            latinIME.commitImage(uri)
         }
 
         // Apply theme colors (text only, background is set by pill drawable)
@@ -214,5 +215,12 @@ class ImageSuggestionManager(private val latinIME: LatinIME) {
         dontShowCurrentSuggestion = true
         latestImageUri = null
         // The UI will be refreshed by LatinIME.setNeutralSuggestionStrip()
+    }
+
+    /** Check if we should show image suggestion */
+    fun shouldShowSuggestion(): Boolean {
+        if (dontShowCurrentSuggestion) return false
+        if (latestImageUri == null) return false
+        return true
     }
 }
