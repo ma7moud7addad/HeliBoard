@@ -1249,7 +1249,9 @@ public class LatinIME extends InputMethodService implements
             int touchRight = visibleKeyboardView.getWidth();
             int touchBottom = inputHeight + EXTENDED_TOUCHABLE_REGION_HEIGHT; // Extend touchable region below the keyboard.
             if (mSettings.getCurrent().mIsFloatingKeyboard) {
-                var xy = FloatingKeyboardUtils.readPosition(this);
+                final int maxX = getResources().getDisplayMetrics().widthPixels - mSettings.getCurrent().mFloatingWidth;
+                final int maxY = getResources().getDisplayMetrics().heightPixels - mSettings.getCurrent().mFloatingHeight - stripHeight - (int)FloatingKeyboardUtils.getFloatingHandleHeight(getResources());
+                var xy = FloatingKeyboardUtils.readPosition(this, maxX, maxY);
                 touchLeft = xy.component1();
                 touchTop = xy.component2();
                 touchRight = touchLeft + mSettings.getCurrent().mFloatingWidth;
