@@ -23,6 +23,8 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.view.inputmethod.EditorInfoCompat
+import helium314.keyboard.event.HapticEvent
+import helium314.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode
 import helium314.keyboard.latin.common.ColorType
 
 class ImageSuggestionManager(private val latinIME: LatinIME) {
@@ -30,10 +32,10 @@ class ImageSuggestionManager(private val latinIME: LatinIME) {
     private lateinit var clipboardManager: ClipboardManager
     private var latestImageUri: Uri? = null
     private var dontShowCurrentSuggestion = false
-    private var suppressClipboardListener = false // ✅ MACBOARD FIX
+    private var suppressClipboardListener = false // MacBoard: prevent clipboard re-trigger after image send
 
     private val clipboardListener = ClipboardManager.OnPrimaryClipChangedListener {
-        if (suppressClipboardListener) return@OnPrimaryClipChangedListener // ✅ MACBOARD FIX
+        if (suppressClipboardListener) return@OnPrimaryClipChangedListener // MacBoard: ignore clipboard changes during image send
         onPrimaryClipChanged()
     }
 
@@ -176,27 +178,28 @@ class ImageSuggestionManager(private val latinIME: LatinIME) {
 
         textView.text = latinIME.getString(R.string.image_suggestion_insert)
         textView.setOnClickListener {
-            // ✅ MACBOARD FIX: Suppress clipboard listener temporarily
+            // MacBoard FIX for Telegram: Suppress clipboard listener to prevent image re-appearing
             suppressClipboardListener = true
-            
-            // Clear everything BEFORE calling commitImage
+
+            // CRITICAL: Clear everything BEFORE calling commitImage
             dontShowCurrentSuggestion = true
             latestImageUri = null
             view.visibility = View.GONE
 
             // Now send the image
             latinIME.commitImage(uri)
-            
-            // ✅ MACBOARD FIX: Re-enable after delay + force refresh strip
+
+            // MacBoard: Re-enable clipboard listener after delay + force refresh strip
             latinIME.mHandler.postDelayed({
                 suppressClipboardListener = false
                 latinIME.setNeutralSuggestionStrip()
-            }, 1000) // 1 second is enough for Telegram to finish
+            }, 1200) // 1.2s delay for Telegram to finish processing
         }
 
         // Apply theme colors (text only, background is set by pill drawable)
         val colors = latinIME.mSettings.current.mColors
         textView.setTextColor(colors.get(ColorType.KEY_TEXT))
+        // Background color is handled by image_suggestion_pill_background.xml
 
         // Ensure proper LayoutParams for centering in suggestion strip
         val layoutParams = android.widget.FrameLayout.LayoutParams(
@@ -213,7 +216,7 @@ class ImageSuggestionManager(private val latinIME: LatinIME) {
 
     private fun removeImageSuggestion() {
         dontShowCurrentSuggestion = true
-        latestImageUri = null
+        latestImageUri = null  // Clear the image
         latinIME.setNeutralSuggestionStrip()
         latinIME.mHandler.postResumeSuggestions(false)
     }
@@ -222,6 +225,7 @@ class ImageSuggestionManager(private val latinIME: LatinIME) {
     fun clearSuggestion() {
         dontShowCurrentSuggestion = true
         latestImageUri = null
+        // The UI will be refreshed by LatinIME.setNeutralSuggestionStrip()
     }
 
     /** Check if we should show image suggestion */
