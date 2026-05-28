@@ -1869,14 +1869,12 @@ public class LatinIME extends InputMethodService implements
         }
 
         try {
-            // Detect MIME type
             String mimeType = "image/*";
             try {
                 final String type = getContentResolver().getType(imageUri);
                 if (type != null) mimeType = type;
             } catch (Exception ignored) {}
 
-            // Try commitContent first (for modern apps like Telegram)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
                 final EditorInfo editorInfo = getCurrentInputEditorInfo();
                 final ClipDescription description = new ClipDescription("HeliBoard image",
@@ -1890,31 +1888,16 @@ public class LatinIME extends InputMethodService implements
 
                 if (committed) {
                     Log.i(TAG, "commitImage: Success via commitContent");
-                    // CRITICAL: Clear clipboard so ClipboardHistoryManager won't show it again
-                    clearClipboardAfterImageSend();
                     return;
                 }
             }
 
-            // Fallback for WhatsApp: Use clipboard
             final android.content.ClipboardManager clipboard = 
                 (android.content.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
             if (clipboard != null) {
                 final android.content.ClipData clip = 
                     android.content.ClipData.newUri(getContentResolver(), "HeliBoard image", imageUri);
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    try {
-                        final java.lang.reflect.Method method = clipboard.getClass().getMethod("setPrimaryClip", 
-                            android.content.ClipData.class, boolean.class);
-                        method.invoke(clipboard, clip, false);
-                    } catch (Exception e) {
-                        clipboard.setPrimaryClip(clip);
-                    }
-                } else {
-                    clipboard.setPrimaryClip(clip);
-                }
-
+                clipboard.setPrimaryClip(clip);
                 ic.performContextMenuAction(android.R.id.paste);
                 Log.i(TAG, "commitImage: Triggered paste via clipboard");
             }
@@ -1923,26 +1906,7 @@ public class LatinIME extends InputMethodService implements
         }
     }
 
-    /** Clear clipboard after image send to prevent ClipboardHistoryManager from showing it again */
-    private void clearClipboardAfterImageSend() {
-        try {
-            final android.content.ClipboardManager clipboard = 
-                (android.content.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-            if (clipboard != null) {
-                // Set empty text clip to clear the image
-                final android.content.ClipData emptyClip = 
-                    android.content.ClipData.newPlainText("", "");
-                clipboard.setPrimaryClip(emptyClip);
-                Log.i(TAG, "Clipboard cleared after image send");
-            }
-        } catch (Exception e) {
-            Log.w(TAG, "Failed to clear clipboard: " + e.getMessage());
-        }
-    }
-
-
-
-        public ClipboardHistoryManager getClipboardHistoryManager() {
+    public ClipboardHistoryManager getClipboardHistoryManager() {
         return mClipboardHistoryManager;
     }
 
