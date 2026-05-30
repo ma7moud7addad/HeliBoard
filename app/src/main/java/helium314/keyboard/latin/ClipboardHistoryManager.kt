@@ -132,22 +132,23 @@ class ClipboardHistoryManager(
         KeyboardTypeface.applyToTextView(textView)
         textView.text = (if (isClipSensitive(inputType)) "*".repeat(content.length) else content)
             .take(200) // truncate displayed text for performance reasons
-        val clipIcon = latinIME.mKeyboardSwitcher.keyboard.mIconsSet.getIconDrawable(ToolbarKey.PASTE.name.lowercase())
-        textView.setCompoundDrawablesRelativeWithIntrinsicBounds(clipIcon, null, null, null)
+        
+        // الأيقونة اللي كانت على الشمال اتمسحت من هنا تماماً عشان النص ياخد مساحته براحته
+
         textView.setOnClickListener {
             dontShowCurrentSuggestion = true
             latinIME.onTextInput(content.toString())
             AudioAndHapticFeedbackManager.getInstance().performHapticAndAudioFeedback(KeyCode.NOT_SPECIFIED, it, HapticEvent.KEY_PRESS)
             binding.root.isGone = true
         }
+        
         val closeButton = binding.clipboardSuggestionClose
-        closeButton.setImageDrawable(latinIME.mKeyboardSwitcher.keyboard.mIconsSet.getIconDrawable(ToolbarKey.CLOSE_HISTORY.name.lowercase()))
-        closeButton.setOnClickListener { removeClipboardSuggestion() }
+        // إخفاء زر الإغلاق اللي على اليمين تماماً عشان ميظهرش
+        closeButton.isGone = true 
 
         val colors = latinIME.mSettings.current.mColors
         textView.setTextColor(colors.get(ColorType.KEY_TEXT))
-        clipIcon?.let { colors.setColor(it, ColorType.KEY_ICON) }
-        colors.setColor(closeButton, ColorType.REMOVE_SUGGESTION_ICON)
+        // تلوين الأيقونات القديمة اتمسح لأننا شيلناها خلاص
         colors.setBackground(binding.root, ColorType.CLIPBOARD_SUGGESTION_BACKGROUND)
 
         clipboardSuggestionView = binding.root
