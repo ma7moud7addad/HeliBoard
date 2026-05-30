@@ -537,6 +537,16 @@ public final class KeyboardSwitcher implements KeyboardState.SwitchActions {
         else FloatingKeyboardUtils.disableFloating(mCurrentInputView);
     }
 
+    // ============================================================
+    // MacBoard: دالة تمرير حالة تمدد الحافظة للـ LatinIME
+    // ============================================================
+    public void setClipboardExpanded(boolean expanded, int height) {
+        mLatinIME.setClipboardExpanded(expanded, height);
+    }
+    // ============================================================
+    // نهاية التعديل
+    // ============================================================
+
     public void toggleSplitKeyboardMode() {
         final Settings settings = Settings.getInstance();
         settings.writeSplitKeyboardEnabled(
