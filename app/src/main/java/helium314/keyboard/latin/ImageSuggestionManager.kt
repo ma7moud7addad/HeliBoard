@@ -177,17 +177,37 @@ class ImageSuggestionManager(private val latinIME: LatinIME) {
         }
 
         textView.text = latinIME.getString(R.string.image_suggestion_insert)
+        
         textView.setOnClickListener {
             // MacBoard FIX for Telegram: Suppress clipboard listener to prevent image re-appearing
             suppressClipboardListener = true
 
             // CRITICAL: Clear everything BEFORE calling commitImage
             dontShowCurrentSuggestion = true
+            val currentUri = uri // حفظ المسار قبل مسحه من المتغيرات
             latestImageUri = null
             view.visibility = View.GONE
 
-            // Now send the image
-            latinIME.commitImage(uri)
+            // 1. إرسال الصورة الأول للتطبيق
+            latinIME.commitImage(currentUri)
+
+            // 2. نسف الصورة من استوديو الموبايل (MediaStore)
+            try {
+                latinIME.contentResolver.delete(currentUri, null, null)
+            } catch (e: Exception) {
+                // لو حصل أي خطأ نتجاهله عشان الكيبورد ماتعملش Crash
+            }
+
+            // 3. نسف الحافظة (System Clipboard)
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    clipboardManager.clearPrimaryClip()
+                } else {
+                    clipboardManager.setPrimaryClip(android.content.ClipData.newPlainText("", ""))
+                }
+            } catch (e: Exception) {
+                // تجاهل
+            }
 
             // MacBoard: Re-enable clipboard listener after delay + force refresh strip
             latinIME.mHandler.postDelayed({
