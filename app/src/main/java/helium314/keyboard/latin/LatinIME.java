@@ -192,15 +192,15 @@ public class LatinIME extends InputMethodService implements
     private final ImageSuggestionManager mImageSuggestionManager = new ImageSuggestionManager(this);
 
     private boolean mIsClipboardAuthenticated = false;
-    
+
     private boolean mIsWaitingForBiometricResult = false;
-    
+
     // ============================================================
     // MacBoard: متغيرات التمدد الديناميكي للحافظة
     // ============================================================
     private boolean mIsClipboardExpanded = false;
     private int mClipboardExpandedHeight = 0;
-    
+
     /**
      * تُستدعى من ClipboardHistoryView عند Swipe Up/Down لتحديث حدود النافذة
      */
@@ -220,7 +220,7 @@ public class LatinIME extends InputMethodService implements
     // ============================================================
     // نهاية تعديلات التمدد
     // ============================================================
-    
+
     // ============================================================
     // نقطة التفتيش المركزية لفتح الحافظة (MacBoard)
     // ============================================================
@@ -241,8 +241,8 @@ public class LatinIME extends InputMethodService implements
         mIsClipboardAuthenticated = false;
         mKeyboardSwitcher.setClipboardKeyboard();
     }
-    
-    public static final class UIHandler extends LeakGuardHandlerWrapper<<LatinIME> {
+
+    public static final class UIHandler extends LeakGuardHandlerWrapper<LatinIME> {
         private static final int MSG_UPDATE_SHIFT_STATE = 0;
         private static final int MSG_PENDING_IMS_CALLBACK = 1;
         private static final int MSG_UPDATE_SUGGESTION_STRIP = 2;
@@ -634,7 +634,6 @@ public class LatinIME extends InputMethodService implements
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
             restartAfterUnlockFilter.addAction(Intent.ACTION_USER_UNLOCKED);
         registerReceiver(mRestartAfterDeviceUnlockReceiver, restartAfterUnlockFilter);
-// تشغيل راديو MacBoard
         // تشغيل راديو MacBoard
         final IntentFilter macroFilter = new IntentFilter();
         macroFilter.addAction("com.mahmoud.MACRO_OPEN_CLIPBOARD");
@@ -698,7 +697,7 @@ public class LatinIME extends InputMethodService implements
         } else {
             subtypeLocale = subtypeSwitcherLocale;
         }
-        final ArrayList<<Locale> locales = new ArrayList<>();
+        final ArrayList<Locale> locales = new ArrayList<>();
         locales.add(subtypeLocale);
         locales.addAll(mSettings.getCurrent().mSecondaryLocales);
         if (mDictionaryFacilitator.usesSameSettings(
@@ -902,7 +901,7 @@ public class LatinIME extends InputMethodService implements
         final RichInputMethodSubtype subtypeForApp = editorInfo == null
             ? null :
             mSettings.getSubtypeForApp(editorInfo.packageName);
-        final List<<Locale> hintLocales = EditorInfoCompatUtils.getHintLocales(editorInfo);
+        final List<Locale> hintLocales = EditorInfoCompatUtils.getHintLocales(editorInfo);
         final InputMethodSubtype subtypeForLocales = mSubtypeState.getSubtypeForLocales(mRichImm, hintLocales, subtypeForApp);
         if (subtypeForLocales != null) {
             // found a better subtype using hint locales and saved-per-app subtype, that we should switch to.
@@ -1259,7 +1258,7 @@ public class LatinIME extends InputMethodService implements
             return;
         }
         final int stripHeight = mKeyboardSwitcher.isShowingStripContainer() ? mKeyboardSwitcher.getStripContainer().getHeight() : 0;
-        
+
         // ============================================================
         // MacBoard: حساب visibleTopY مع دعم التمدد الديناميكي للحافظة
         // ============================================================
@@ -1273,7 +1272,7 @@ public class LatinIME extends InputMethodService implements
         // ============================================================
         // نهاية التعديل
         // ============================================================
-        
+
         if (Settings.getValues().mIsFloatingKeyboard)
             visibleTopY = getResources().getDisplayMetrics().heightPixels;
 
@@ -1390,7 +1389,7 @@ public class LatinIME extends InputMethodService implements
             return false;
         }
 
-        final List<<InlineSuggestion> inlineSuggestions = response.getInlineSuggestions();
+        final List<InlineSuggestion> inlineSuggestions = response.getInlineSuggestions();
         if (inlineSuggestions.isEmpty()) {
             return false;
         }
@@ -1479,10 +1478,6 @@ public class LatinIME extends InputMethodService implements
     }
 
     // Implementation of {@link SuggestionStripView.Listener}.
-    // Implementation of {@link SuggestionStripView.Listener}.
-    // Implementation of {@link SuggestionStripView.Listener}.
-    // Implementation of {@link SuggestionStripView.Listener}.
-    // Implementation of {@link SuggestionStripView.Listener}.
     @Override
     public void onCodeInput(final int codePoint, final int x, final int y, final boolean isKeyRepeat) {
         // حماية الحافظة من شريط الأدوات
@@ -1495,7 +1490,7 @@ public class LatinIME extends InputMethodService implements
 
     // This method is public for testability of LatinIME, but also in the future it should
     // completely replace #onCodeInput.
-        public void onEvent(@NonNull final Event event) {
+    public void onEvent(@NonNull final Event event) {
         // 1. المسح الشامل (MacBoard)
         if (event.getKeyCode() == -10052) {
             android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
@@ -1516,7 +1511,7 @@ public class LatinIME extends InputMethodService implements
                         final android.speech.SpeechRecognizer speechRecognizer = android.speech.SpeechRecognizer.createSpeechRecognizer(LatinIME.this);
                         android.content.Intent speechIntent = new android.content.Intent(android.speech.RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
                         speechIntent.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL, android.speech.RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-                        
+
                         try {
                             android.view.inputmethod.InputMethodSubtype subtype = mRichImm.getCurrentSubtype().getRawSubtype();
                             if (subtype != null && subtype.getLocale() != null && !subtype.getLocale().isEmpty()) {
@@ -1570,7 +1565,7 @@ public class LatinIME extends InputMethodService implements
         }
         mKeyboardSwitcher.onEvent(event, getCurrentAutoCapsState(), getCurrentRecapitalizeState());
     }
-    
+
     public void onTextInput(final String rawText) {
         // TODO: have the keyboard pass the correct key code when we need it.
         final Event event = Event.createSoftwareTextEvent(rawText, KeyCode.MULTIPLE_CODE_POINTS, null);
@@ -1851,13 +1846,6 @@ public class LatinIME extends InputMethodService implements
     // boolean onKeyMultiple(final int keyCode, final int count, final KeyEvent event);
 
     // receive ringer mode change.
-    // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid عبر الراديو) ---
-    // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid عبر الراديو) ---
-    // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid عبر الراديو) ---
-    // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid عبر الراديو) ---
-    // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid عبر الراديو) ---
-    // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid مع حماية بكلمة سر) ---
-    // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid عبر الراديو) ---
     private final BroadcastReceiver mMacroDroidReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, final Intent intent) {
@@ -1882,8 +1870,7 @@ public class LatinIME extends InputMethodService implements
             }
         }
     };
-    // --- نهاية التعديل ---
-    
+
     private final BroadcastReceiver mRingerModeChangeReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, final Intent intent) {
