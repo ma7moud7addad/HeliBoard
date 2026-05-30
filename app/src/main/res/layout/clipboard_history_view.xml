@@ -7,7 +7,7 @@
     android:layout_gravity="bottom"
     android:orientation="vertical"
     android:visibility="gone"
-    android:background="@android:color/transparent"
+    android:background="?attr/keyboardBackground"
     style="?attr/clipboardHistoryViewStyle">
 
     <FrameLayout
