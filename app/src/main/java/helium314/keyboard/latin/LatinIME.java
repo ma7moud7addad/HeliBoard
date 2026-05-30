@@ -1470,6 +1470,12 @@ public class LatinIME extends InputMethodService implements
         // 2. الإدخال الصوتي المدمج (MacBoard)
         if (KeyCode.VOICE_INPUT == event.getKeyCode()) {
             android.widget.Toast.makeText(this, "🎤 جاري الاستماع...", android.widget.Toast.LENGTH_SHORT).show();
+            // Show initializing status in suggestion strip on main thread
+            mHandler.post(() -> {
+                if (hasSuggestionStripView()) {
+                    showVoiceStatusInSuggestionStrip(R.string.voice_initializing);
+                }
+            });
             new android.os.Handler(android.os.Looper.getMainLooper()).post(new Runnable() {
                 @Override
                 public void run() {
@@ -1477,7 +1483,7 @@ public class LatinIME extends InputMethodService implements
                         final android.speech.SpeechRecognizer speechRecognizer = android.speech.SpeechRecognizer.createSpeechRecognizer(LatinIME.this);
                         android.content.Intent speechIntent = new android.content.Intent(android.speech.RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
                         speechIntent.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL, android.speech.RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-                        
+
                         try {
                             android.view.inputmethod.InputMethodSubtype subtype = mRichImm.getCurrentSubtype().getRawSubtype();
                             if (subtype != null && subtype.getLocale() != null && !subtype.getLocale().isEmpty()) {
@@ -1486,13 +1492,31 @@ public class LatinIME extends InputMethodService implements
                         } catch (Exception e) { }
 
                         speechRecognizer.setRecognitionListener(new android.speech.RecognitionListener() {
-                            @Override public void onReadyForSpeech(android.os.Bundle params) {}
-                            @Override public void onBeginningOfSpeech() {}
+                            @Override public void onReadyForSpeech(android.os.Bundle params) {
+                                // Update UI on main thread via UIHandler
+                                mHandler.post(() -> {
+                                    if (hasSuggestionStripView()) {
+                                        showVoiceStatusInSuggestionStrip(R.string.voice_speak_now);
+                                    }
+                                });
+                            }
+                            @Override public void onBeginningOfSpeech() {
+                                // Update UI on main thread via UIHandler
+                                mHandler.post(() -> {
+                                    if (hasSuggestionStripView()) {
+                                        showVoiceStatusInSuggestionStrip(R.string.voice_listening);
+                                    }
+                                });
+                            }
                             @Override public void onRmsChanged(float rmsdB) {}
                             @Override public void onBufferReceived(byte[] buffer) {}
                             @Override public void onEndOfSpeech() {}
                             @Override public void onError(int error) {
-                                android.widget.Toast.makeText(LatinIME.this, "❌ توقف الاستماع", android.widget.Toast.LENGTH_SHORT).show();
+                                mHandler.post(() -> {
+                                    android.widget.Toast.makeText(LatinIME.this, "❌ توقف الاستماع", android.widget.Toast.LENGTH_SHORT).show();
+                                    // Restore normal suggestion strip
+                                    setNeutralSuggestionStrip();
+                                });
                                 speechRecognizer.destroy();
                             }
                             @Override public void onResults(android.os.Bundle results) {
@@ -1504,18 +1528,37 @@ public class LatinIME extends InputMethodService implements
                                         ic.commitText(text + " ", 1);
                                     }
                                 }
+                                // Restore normal suggestion strip on main thread
+                                mHandler.post(() -> setNeutralSuggestionStrip());
                                 speechRecognizer.destroy();
                             }
-                            @Override public void onPartialResults(android.os.Bundle partialResults) {}
+                            @Override public void onPartialResults(android.os.Bundle partialResults) {
+                                // Optional: Show partial results as they come in
+                                java.util.ArrayList<String> partialMatches = partialResults.getStringArrayList(
+                                        android.speech.SpeechRecognizer.RESULTS_RECOGNITION);
+                                if (partialMatches != null && !partialMatches.isEmpty()) {
+                                    final String partialText = partialMatches.get(0);
+                                    mHandler.post(() -> {
+                                        if (hasSuggestionStripView()) {
+                                            // Keep showing listening status while partial results arrive
+                                            showVoiceStatusInSuggestionStrip(R.string.voice_listening);
+                                        }
+                                    });
+                                }
+                            }
                             @Override public void onEvent(int eventType, android.os.Bundle params) {}
                         });
                         speechRecognizer.startListening(speechIntent);
                     } catch (Exception e) {
-                        android.widget.Toast.makeText(LatinIME.this, "❌ تعذر تشغيل الإدخال الصوتي", android.widget.Toast.LENGTH_SHORT).show();
+                        mHandler.post(() -> {
+                            android.widget.Toast.makeText(LatinIME.this, "❌ تعذر تشغيل الإدخال الصوتي", android.widget.Toast.LENGTH_SHORT).show();
+                            // Restore normal suggestion strip on error
+                            setNeutralSuggestionStrip();
+                        });
                     }
                 }
             });
-        } else {
+        }        } else {
             // 3. حماية الحافظة من اللوحة الأساسية (MacBoard)
             if (event.getKeyCode() == KeyCode.CLIPBOARD) {
                 openClipboardWithAuth();
