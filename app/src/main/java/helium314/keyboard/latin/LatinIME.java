@@ -58,7 +58,6 @@ import helium314.keyboard.latin.SuggestedWords.SuggestedWordInfo;
 import helium314.keyboard.latin.common.ColorType;
 import helium314.keyboard.latin.common.Constants;
 import helium314.keyboard.latin.common.CoordinateUtils;
-import helium314.keyboard.latin.common.InputPointers;
 import helium314.keyboard.latin.common.ViewOutlineProviderUtilsKt;
 import helium314.keyboard.latin.define.DebugFlags;
 import helium314.keyboard.latin.inputlogic.InputLogic;
@@ -197,6 +196,32 @@ public class LatinIME extends InputMethodService implements
     private boolean mIsWaitingForBiometricResult = false;
     
     // ============================================================
+    // MacBoard: متغيرات التمدد الديناميكي للحافظة
+    // ============================================================
+    private boolean mIsClipboardExpanded = false;
+    private int mClipboardExpandedHeight = 0;
+    
+    /**
+     * تُستدعى من ClipboardHistoryView عند Swipe Up/Down لتحديث حدود النافذة
+     */
+    public void setClipboardExpanded(boolean expanded, int height) {
+        mIsClipboardExpanded = expanded;
+        mClipboardExpandedHeight = height;
+        if (mInputView != null) {
+            // 1. نطلب إعادة قياس الـ View Tree
+            mInputView.requestLayout();
+            // 2. نستنى الـ Layout Cycle يخلص وبعدين نحدّث الـ Window Insets
+            mInputView.post(() -> {
+                updateFullscreenMode();
+                KtxKt.updateSoftInputWindowLayoutParameters(LatinIME.this, mInputView);
+            });
+        }
+    }
+    // ============================================================
+    // نهاية تعديلات التمدد
+    // ============================================================
+    
+    // ============================================================
     // نقطة التفتيش المركزية لفتح الحافظة (MacBoard)
     // ============================================================
     private void openClipboardWithAuth() {
@@ -217,7 +242,7 @@ public class LatinIME extends InputMethodService implements
         mKeyboardSwitcher.setClipboardKeyboard();
     }
     
-    public static final class UIHandler extends LeakGuardHandlerWrapper<LatinIME> {
+    public static final class UIHandler extends LeakGuardHandlerWrapper<<LatinIME> {
         private static final int MSG_UPDATE_SHIFT_STATE = 0;
         private static final int MSG_PENDING_IMS_CALLBACK = 1;
         private static final int MSG_UPDATE_SUGGESTION_STRIP = 2;
@@ -673,7 +698,7 @@ public class LatinIME extends InputMethodService implements
         } else {
             subtypeLocale = subtypeSwitcherLocale;
         }
-        final ArrayList<Locale> locales = new ArrayList<>();
+        final ArrayList<<Locale> locales = new ArrayList<>();
         locales.add(subtypeLocale);
         locales.addAll(mSettings.getCurrent().mSecondaryLocales);
         if (mDictionaryFacilitator.usesSameSettings(
@@ -877,7 +902,7 @@ public class LatinIME extends InputMethodService implements
         final RichInputMethodSubtype subtypeForApp = editorInfo == null
             ? null :
             mSettings.getSubtypeForApp(editorInfo.packageName);
-        final List<Locale> hintLocales = EditorInfoCompatUtils.getHintLocales(editorInfo);
+        final List<<Locale> hintLocales = EditorInfoCompatUtils.getHintLocales(editorInfo);
         final InputMethodSubtype subtypeForLocales = mSubtypeState.getSubtypeForLocales(mRichImm, hintLocales, subtypeForApp);
         if (subtypeForLocales != null) {
             // found a better subtype using hint locales and saved-per-app subtype, that we should switch to.
@@ -1234,7 +1259,21 @@ public class LatinIME extends InputMethodService implements
             return;
         }
         final int stripHeight = mKeyboardSwitcher.isShowingStripContainer() ? mKeyboardSwitcher.getStripContainer().getHeight() : 0;
-        int visibleTopY = inputHeight - visibleKeyboardView.getHeight() - stripHeight;
+        
+        // ============================================================
+        // MacBoard: حساب visibleTopY مع دعم التمدد الديناميكي للحافظة
+        // ============================================================
+        int visibleTopY;
+        if (mIsClipboardExpanded && mKeyboardSwitcher.isShowingClipboardHistory() && mClipboardExpandedHeight > 0) {
+            // لما الحافظة مفتوحة وموسعة، نحسب المساحة المحجوزة بناءً على الارتفاع الموسع
+            visibleTopY = Math.max(0, inputHeight - mClipboardExpandedHeight - stripHeight);
+        } else {
+            visibleTopY = inputHeight - visibleKeyboardView.getHeight() - stripHeight;
+        }
+        // ============================================================
+        // نهاية التعديل
+        // ============================================================
+        
         if (Settings.getValues().mIsFloatingKeyboard)
             visibleTopY = getResources().getDisplayMetrics().heightPixels;
 
@@ -1351,7 +1390,7 @@ public class LatinIME extends InputMethodService implements
             return false;
         }
 
-        final List<InlineSuggestion> inlineSuggestions = response.getInlineSuggestions();
+        final List<<InlineSuggestion> inlineSuggestions = response.getInlineSuggestions();
         if (inlineSuggestions.isEmpty()) {
             return false;
         }
