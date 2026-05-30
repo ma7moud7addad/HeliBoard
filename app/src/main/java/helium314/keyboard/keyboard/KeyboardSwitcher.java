@@ -797,4 +797,4 @@ public final class KeyboardSwitcher implements KeyboardState.SwitchActions {
             // in tests isInputViewShown returns true, but showWindow throws "IllegalStateException: Window token is not set yet."
         }
     }
-}
+                             }
