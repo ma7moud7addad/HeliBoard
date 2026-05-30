@@ -125,23 +125,6 @@ class ClipboardHistoryManager(
         KeyboardTypeface.applyToTextView(textView)
         textView.text = (if (isClipSensitive(inputType)) "*".repeat(content.length) else content)
             .take(200)
-            
-        // --- تعديلات السنترة للمسافات (MacBoard) ---
-        // 1. إجبار النص إنه يتسنتر في النص بالضبط
-        textView.gravity = android.view.Gravity.CENTER
-        textView.textAlignment = android.view.View.TEXT_ALIGNMENT_CENTER
-        
-        // 2. تصفير أي هوامش (Margins) قديمة كانت محجوزة للأيقونات
-        val lp = textView.layoutParams
-        if (lp is ViewGroup.MarginLayoutParams) {
-            lp.setMargins(0, lp.topMargin, 0, lp.bottomMargin)
-            textView.layoutParams = lp
-        }
-        
-        // 3. عمل مسافة تنفس متساوية (Padding) يمين وشمال عشان الكلمة تبقى متوازنة
-        val horizontalPadding = (16 * latinIME.resources.displayMetrics.density).toInt()
-        textView.setPadding(horizontalPadding, textView.paddingTop, horizontalPadding, textView.paddingBottom)
-        // -------------------------------------------
 
         textView.setOnClickListener {
             dontShowCurrentSuggestion = true
@@ -149,9 +132,6 @@ class ClipboardHistoryManager(
             AudioAndHapticFeedbackManager.getInstance().performHapticAndAudioFeedback(KeyCode.NOT_SPECIFIED, it, HapticEvent.KEY_PRESS)
             binding.root.isGone = true
         }
-        
-        val closeButton = binding.clipboardSuggestionClose
-        closeButton.isGone = true 
 
         val colors = latinIME.mSettings.current.mColors
         textView.setTextColor(colors.get(ColorType.KEY_TEXT))
