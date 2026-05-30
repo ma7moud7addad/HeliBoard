@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.util.AttributeSet
 import android.util.TypedValue
+import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.ImageButton
@@ -39,6 +40,7 @@ import helium314.keyboard.latin.utils.getCodeForToolbarKeyLongClick
 import helium314.keyboard.latin.utils.getEnabledClipboardToolbarKeys
 import helium314.keyboard.latin.utils.prefs
 import helium314.keyboard.latin.utils.setToolbarButtonsActivatedStateOnPrefChange
+import kotlin.math.abs
 
 @SuppressLint("CustomViewStyleable")
 class ClipboardHistoryView @JvmOverloads constructor(
@@ -61,6 +63,13 @@ class ClipboardHistoryView @JvmOverloads constructor(
     lateinit var keyboardActionListener: KeyboardActionListener
     private lateinit var clipboardHistoryManager: ClipboardHistoryManager
 
+    // --- MacBoard: متغيرات التمدد (Expand/Collapse) ---
+    private var isExpanded = false
+    private var initialY = 0f
+    private var initialX = 0f
+    private var isSwipingToExpand = false
+    // --------------------------------------------------
+
     init {
         val clipboardViewAttr = context.obtainStyledAttributes(attrs,
                 R.styleable.ClipboardHistoryView, defStyle, R.style.ClipboardHistoryView)
@@ -77,12 +86,68 @@ class ClipboardHistoryView @JvmOverloads constructor(
         fitsSystemWindows = true
     }
 
+    // --- MacBoard: منطق السحب لأعلى للتمدد والسحب لأسفل للطي ---
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        when (ev.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                initialY = ev.rawY
+                initialX = ev.rawX
+                isSwipingToExpand = false
+            }
+            MotionEvent.ACTION_MOVE -> {
+                val dy = ev.rawY - initialY
+                val dx = ev.rawX - initialX
+                
+                // لو السحب عمودي (لفوق أو لتحت) ومسافته قوية (أكتر من 50 بيكسل)
+                if (abs(dy) > abs(dx) && abs(dy) > 50) {
+                    if (!isExpanded && dy < -50) {
+                        // سحب لأعلى لتمديد الحافظة
+                        isExpanded = true
+                        isSwipingToExpand = true
+                        initialY = ev.rawY // إعادة تعيين عشان ميحصلش تذبذب
+                        requestLayout()
+                    } else if (isExpanded && dy > 50) {
+                        // سحب لأسفل للطي (لازم نكون في أول القائمة عشان نطويها)
+                        if (!clipboardRecyclerView.canScrollVertically(-1)) {
+                            isExpanded = false
+                            isSwipingToExpand = true
+                            initialY = ev.rawY
+                            requestLayout()
+                        }
+                    }
+                }
+            }
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                if (isSwipingToExpand) {
+                    // إلغاء الحدث عشان السحب ميعملش "كليك" بالغلط على أي نص
+                    val cancelEv = MotionEvent.obtain(ev)
+                    cancelEv.action = MotionEvent.ACTION_CANCEL
+                    super.dispatchTouchEvent(cancelEv)
+                    cancelEv.recycle()
+                    return true
+                }
+            }
+        }
+        return super.dispatchTouchEvent(ev)
+    }
+    // ----------------------------------------------------------
+
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         val res = context.resources
-        // The main keyboard expands to the entire this {@link KeyboardView}.
         val width = ResourceUtils.getKeyboardWidth(context, Settings.getValues()) + paddingLeft + paddingRight
-        val height = ResourceUtils.getSecondaryKeyboardHeight(res, Settings.getValues()) + paddingTop + paddingBottom
+        val baseHeight = ResourceUtils.getSecondaryKeyboardHeight(res, Settings.getValues()) + paddingTop + paddingBottom
+        
+        // --- MacBoard: تغيير الارتفاع بناءً على حالة التمدد ---
+        val height = if (isExpanded) {
+            val displayHeight = res.displayMetrics.heightPixels
+            val maxAllowedHeight = (displayHeight * 0.80).toInt() // تتمدد حتى 80% من طول الشاشة
+            if (maxAllowedHeight > baseHeight) maxAllowedHeight else baseHeight
+        } else {
+            baseHeight
+        }
+        // -----------------------------------------------------
+
         setMeasuredDimension(width, height)
     }
 
@@ -123,7 +188,6 @@ class ClipboardHistoryView @JvmOverloads constructor(
     }
 
     private fun setupToolbarKeys() {
-        // set layout params
         val toolbarKeyLayoutParams = LayoutParams(resources.getDimensionPixelSize(R.dimen.config_suggestions_strip_edge_key_width), LayoutParams.MATCH_PARENT)
         toolbarKeys.forEach { it.layoutParams = toolbarKeyLayoutParams }
     }
@@ -139,7 +203,6 @@ class ClipboardHistoryView @JvmOverloads constructor(
 
     fun setHardwareAcceleratedDrawingEnabled(enabled: Boolean) {
         if (!enabled) return
-        // TODO: Should use LAYER_TYPE_SOFTWARE when hardware acceleration is off?
         setLayerType(LAYER_TYPE_HARDWARE, null)
     }
 
@@ -149,6 +212,8 @@ class ClipboardHistoryView @JvmOverloads constructor(
             editorInfo: EditorInfo,
             keyboardActionListener: KeyboardActionListener
     ) {
+        isExpanded = false // إرجاع الحافظة للحجم الطبيعي عند فتحها في كل مرة
+        
         clipboardHistoryManager = historyManager
         initialize()
         setupToolbarKeys()
@@ -173,10 +238,8 @@ class ClipboardHistoryView @JvmOverloads constructor(
             adapter = clipboardAdapter
             val keyboardWidth = ResourceUtils.getKeyboardWidth(context, settings.current)
             layoutParams.width = keyboardWidth
-            // new ClipboardLayoutParams means ClipboardAdapter has wrong gaps, but that's ok (only relevant when resizing floating keyboard)
             ClipboardLayoutParams(context).setListProperties(this)
 
-            // set side padding
             val keyboardAttr = context.obtainStyledAttributes(
                 null, R.styleable.Keyboard, R.attr.keyboardStyle, R.style.Keyboard)
             val leftPadding = (keyboardAttr.getFraction(R.styleable.Keyboard_keyboardLeftPadding,
@@ -189,7 +252,6 @@ class ClipboardHistoryView @JvmOverloads constructor(
             setPadding(leftPadding, paddingTop, rightPadding, paddingBottom)
         }
 
-        // absurd workaround so Android sets the correct color from stateList (depending on "activated")
         toolbarKeys.forEach { it.isEnabled = false; it.isEnabled = true }
     }
 
@@ -260,10 +322,7 @@ class ClipboardHistoryView @JvmOverloads constructor(
 
     override fun onSharedPreferenceChanged(prefs: SharedPreferences?, key: String?) {
         setToolbarButtonsActivatedStateOnPrefChange(KeyboardSwitcher.getInstance().clipboardStrip, key)
-
-        // The setting can only be changed from a settings screen, but adding it to this listener seems necessary: https://github.com/HeliBorg/HeliBoard/pull/1903#issuecomment-3478424606
         if (::clipboardHistoryManager.isInitialized && key == Settings.PREF_CLIPBOARD_HISTORY_PINNED_FIRST) {
-            // Ensure settings are reloaded first
             Settings.getInstance().onSharedPreferenceChanged(prefs, key)
             clipboardHistoryManager.sortHistoryEntries()
             clipboardAdapter.notifyDataSetChanged()
