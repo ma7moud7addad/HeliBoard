@@ -7,7 +7,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.util.AttributeSet
 import android.util.TypedValue
-import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.ImageButton
@@ -40,7 +39,6 @@ import helium314.keyboard.latin.utils.getCodeForToolbarKeyLongClick
 import helium314.keyboard.latin.utils.getEnabledClipboardToolbarKeys
 import helium314.keyboard.latin.utils.prefs
 import helium314.keyboard.latin.utils.setToolbarButtonsActivatedStateOnPrefChange
-import kotlin.math.abs
 
 @SuppressLint("CustomViewStyleable")
 class ClipboardHistoryView @JvmOverloads constructor(
@@ -63,13 +61,6 @@ class ClipboardHistoryView @JvmOverloads constructor(
     lateinit var keyboardActionListener: KeyboardActionListener
     private lateinit var clipboardHistoryManager: ClipboardHistoryManager
 
-    // --- MacBoard: متغيرات التمدد (Expand/Collapse) ---
-    private var isExpanded = false
-    private var initialY = 0f
-    private var initialX = 0f
-    private var isSwipingToExpand = false
-    // --------------------------------------------------
-
     init {
         val clipboardViewAttr = context.obtainStyledAttributes(attrs,
                 R.styleable.ClipboardHistoryView, defStyle, R.style.ClipboardHistoryView)
@@ -86,68 +77,18 @@ class ClipboardHistoryView @JvmOverloads constructor(
         fitsSystemWindows = true
     }
 
-    // --- MacBoard: منطق السحب لأعلى للتمدد والسحب لأسفل للطي ---
-    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
-        when (ev.actionMasked) {
-            MotionEvent.ACTION_DOWN -> {
-                initialY = ev.rawY
-                initialX = ev.rawX
-                isSwipingToExpand = false
-            }
-            MotionEvent.ACTION_MOVE -> {
-                val dy = ev.rawY - initialY
-                val dx = ev.rawX - initialX
-                
-                // لو السحب عمودي (لفوق أو لتحت) ومسافته قوية (أكتر من 50 بيكسل)
-                if (abs(dy) > abs(dx) && abs(dy) > 50) {
-                    if (!isExpanded && dy < -50) {
-                        // سحب لأعلى لتمديد الحافظة
-                        isExpanded = true
-                        isSwipingToExpand = true
-                        initialY = ev.rawY // إعادة تعيين عشان ميحصلش تذبذب
-                        requestLayout()
-                    } else if (isExpanded && dy > 50) {
-                        // سحب لأسفل للطي (لازم نكون في أول القائمة عشان نطويها)
-                        if (!clipboardRecyclerView.canScrollVertically(-1)) {
-                            isExpanded = false
-                            isSwipingToExpand = true
-                            initialY = ev.rawY
-                            requestLayout()
-                        }
-                    }
-                }
-            }
-            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                if (isSwipingToExpand) {
-                    // إلغاء الحدث عشان السحب ميعملش "كليك" بالغلط على أي نص
-                    val cancelEv = MotionEvent.obtain(ev)
-                    cancelEv.action = MotionEvent.ACTION_CANCEL
-                    super.dispatchTouchEvent(cancelEv)
-                    cancelEv.recycle()
-                    return true
-                }
-            }
-        }
-        return super.dispatchTouchEvent(ev)
-    }
-    // ----------------------------------------------------------
-
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         val res = context.resources
         val width = ResourceUtils.getKeyboardWidth(context, Settings.getValues()) + paddingLeft + paddingRight
-        val baseHeight = ResourceUtils.getSecondaryKeyboardHeight(res, Settings.getValues()) + paddingTop + paddingBottom
         
-        // --- MacBoard: تغيير الارتفاع بناءً على حالة التمدد ---
-        val height = if (isExpanded) {
-            val displayHeight = res.displayMetrics.heightPixels
-            val maxAllowedHeight = (displayHeight * 0.80).toInt() // تتمدد حتى 80% من طول الشاشة
-            if (maxAllowedHeight > baseHeight) maxAllowedHeight else baseHeight
-        } else {
-            baseHeight
-        }
-        // -----------------------------------------------------
-
+        // --- MacBoard Safe Spacious Mode ---
+        // جعل الحافظة أطول بنسبة 60% دائماً لسهولة التصفح بدلاً من السحب غير المستقر
+        val baseHeight = ResourceUtils.getSecondaryKeyboardHeight(res, Settings.getValues())
+        val tallHeight = (baseHeight * 1.6).toInt() 
+        val height = tallHeight + paddingTop + paddingBottom
+        // -----------------------------------
+        
         setMeasuredDimension(width, height)
     }
 
@@ -212,8 +153,6 @@ class ClipboardHistoryView @JvmOverloads constructor(
             editorInfo: EditorInfo,
             keyboardActionListener: KeyboardActionListener
     ) {
-        isExpanded = false // إرجاع الحافظة للحجم الطبيعي عند فتحها في كل مرة
-        
         clipboardHistoryManager = historyManager
         initialize()
         setupToolbarKeys()
