@@ -130,7 +130,7 @@ class ClipboardHistoryView @JvmOverloads constructor(
             pinnedIconResId = pinIconId
         }
         placeholderView = findViewById(R.id.clipboard_empty_view)
-        clipboardRecyclerView = findViewById<<ClipboardHistoryRecyclerView>(R.id.clipboard_list).apply {
+        clipboardRecyclerView = findViewById<ClipboardHistoryRecyclerView>(R.id.clipboard_list).apply {
             val colCount = resources.getInteger(R.integer.config_clipboard_keyboard_col_count)
             layoutManager = StaggeredGridLayoutManager(colCount, StaggeredGridLayoutManager.VERTICAL)
             @Suppress("deprecation") // "no cache" should be fine according to warning in https://developer.android.com/reference/android/view/ViewGroup#setPersistentDrawingCache(int)
@@ -164,7 +164,7 @@ class ClipboardHistoryView @JvmOverloads constructor(
     }
 
     private fun setupBottomRowKeyboard(editorInfo: EditorInfo, listener: KeyboardActionListener) {
-        val keyboardView = findViewById<<MainKeyboardView>(R.id.bottom_row_keyboard)
+        val keyboardView = findViewById<MainKeyboardView>(R.id.bottom_row_keyboard)
         keyboardView.setKeyboardActionListener(listener)
         PointerTracker.switchTo(keyboardView)
         val kls = KeyboardLayoutSet.Builder.buildEmojiClipBottomRow(context, editorInfo)
