@@ -43,7 +43,6 @@ class ClipboardHistoryManager(
     }
 
     override fun onPrimaryClipChanged() {
-        // Make sure we read clipboard content only if history settings is set
         if (latinIME.mSettings.current.mClipboardHistoryEnabled) {
             fetchPrimaryClip()
             dontShowCurrentSuggestion = false
@@ -82,8 +81,6 @@ class ClipboardHistoryManager(
         clipboardDao?.sort()
     }
 
-    // We do not want to update history while user is visualizing it, so we check retention only
-    // when history is about to be shown
     fun prepareClipboardHistory() = clipboardDao?.clearOldClips(true)
 
     fun getHistorySize() = clipboardDao?.count() ?: 0
@@ -108,11 +105,8 @@ class ClipboardHistoryManager(
     }
 
     fun getClipboardSuggestionView(editorInfo: EditorInfo?, parent: ViewGroup?): View? {
-        // maybe no need to create a new view
-        // but a cache has to consider a few possible changes, so better don't implement without need
         clipboardSuggestionView = null
 
-        // get the content, or return null
         if (!latinIME.mSettings.current.mSuggestClipboardContent) return null
         if (dontShowCurrentSuggestion) return null
         if (parent == null) return null
@@ -126,28 +120,21 @@ class ClipboardHistoryManager(
         val inputType = editorInfo?.inputType ?: InputType.TYPE_NULL
         if (InputTypeUtils.isNumberInputType(inputType) && !content.isValidNumber()) return null
 
-        // create the view
         val binding = ClipboardSuggestionBinding.inflate(LayoutInflater.from(latinIME), parent, false)
         val textView = binding.clipboardSuggestionText
         KeyboardTypeface.applyToTextView(textView)
         textView.text = (if (isClipSensitive(inputType)) "*".repeat(content.length) else content)
-            .take(200) // truncate displayed text for performance reasons
-        val clipIcon = latinIME.mKeyboardSwitcher.keyboard.mIconsSet.getIconDrawable(ToolbarKey.PASTE.name.lowercase())
-        textView.setCompoundDrawablesRelativeWithIntrinsicBounds(clipIcon, null, null, null)
+            .take(200)
+
         textView.setOnClickListener {
             dontShowCurrentSuggestion = true
             latinIME.onTextInput(content.toString())
             AudioAndHapticFeedbackManager.getInstance().performHapticAndAudioFeedback(KeyCode.NOT_SPECIFIED, it, HapticEvent.KEY_PRESS)
             binding.root.isGone = true
         }
-        val closeButton = binding.clipboardSuggestionClose
-        closeButton.setImageDrawable(latinIME.mKeyboardSwitcher.keyboard.mIconsSet.getIconDrawable(ToolbarKey.CLOSE_HISTORY.name.lowercase()))
-        closeButton.setOnClickListener { removeClipboardSuggestion() }
 
         val colors = latinIME.mSettings.current.mColors
         textView.setTextColor(colors.get(ColorType.KEY_TEXT))
-        clipIcon?.let { colors.setColor(it, ColorType.KEY_ICON) }
-        colors.setColor(closeButton, ColorType.REMOVE_SUGGESTION_ICON)
         colors.setBackground(binding.root, ColorType.CLIPBOARD_SUGGESTION_BACKGROUND)
 
         clipboardSuggestionView = binding.root
@@ -158,7 +145,6 @@ class ClipboardHistoryManager(
         dontShowCurrentSuggestion = true
         val csv = clipboardSuggestionView ?: return
         if (csv.parent != null && !csv.isGone) {
-            // clipboard view is shown ->
             latinIME.setNeutralSuggestionStrip()
             latinIME.mHandler.postResumeSuggestions(false)
         }
@@ -167,6 +153,6 @@ class ClipboardHistoryManager(
 
     companion object {
         private var dontShowCurrentSuggestion: Boolean = false
-        const val RECENT_TIME_MILLIS = 3 * 60 * 1000L // 3 minutes (for clipboard suggestions)
+        const val RECENT_TIME_MILLIS = 3 * 60 * 1000L // 3 minutes
     }
 }
