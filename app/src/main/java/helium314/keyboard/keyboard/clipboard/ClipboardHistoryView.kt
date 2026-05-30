@@ -7,7 +7,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.util.AttributeSet
 import android.util.TypedValue
-import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.ImageButton
@@ -62,34 +61,12 @@ class ClipboardHistoryView @JvmOverloads constructor(
     lateinit var keyboardActionListener: KeyboardActionListener
     private lateinit var clipboardHistoryManager: ClipboardHistoryManager
 
-    private var isExpanded = false
-    private var startY = 0f
-    private val SWIPE_THRESHOLD = 150f
-    private val EXPANDED_RATIO = 0.75f
-
-    fun isClipboardExpanded(): Boolean = isExpanded
-
-    fun expandClipboard() {
-        if (isExpanded) return
-        isExpanded = true
-        val expandedHeight = (context.resources.displayMetrics.heightPixels * EXPANDED_RATIO).toInt()
-        requestLayout()
-        KeyboardSwitcher.getInstance().setClipboardExpanded(true, expandedHeight)
-    }
-
-    fun collapseClipboard() {
-        if (!isExpanded) return
-        isExpanded = false
-        requestLayout()
-        KeyboardSwitcher.getInstance().setClipboardExpanded(false, 0)
-    }
-
     init {
         val clipboardViewAttr = context.obtainStyledAttributes(attrs,
                 R.styleable.ClipboardHistoryView, defStyle, R.style.ClipboardHistoryView)
         pinIconId = clipboardViewAttr.getResourceId(R.styleable.ClipboardHistoryView_iconPinnedClip, 0)
         clipboardViewAttr.recycle()
-        @SuppressLint("UseKtx")
+        @SuppressLint("UseKtx") // suggestion does not work
         val keyboardViewAttr = context.obtainStyledAttributes(attrs, R.styleable.KeyboardView, defStyle, R.style.KeyboardView)
         keyBackgroundId = keyboardViewAttr.getResourceId(R.styleable.KeyboardView_keyBackground, 0)
         keyboardViewAttr.recycle()
@@ -101,21 +78,16 @@ class ClipboardHistoryView @JvmOverloads constructor(
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         val res = context.resources
+        // The main keyboard expands to the entire this {@link KeyboardView}.
         val width = ResourceUtils.getKeyboardWidth(context, Settings.getValues()) + paddingLeft + paddingRight
-        val baseHeight = ResourceUtils.getSecondaryKeyboardHeight(res, Settings.getValues()) + paddingTop + paddingBottom
-        val height = if (isExpanded) {
-            (res.displayMetrics.heightPixels * EXPANDED_RATIO).toInt()
-        } else {
-            baseHeight
-        }
-        val resolvedHeight = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY)
-        super.onMeasure(widthMeasureSpec, resolvedHeight)
+        val height = ResourceUtils.getSecondaryKeyboardHeight(res, Settings.getValues()) + paddingTop + paddingBottom
         setMeasuredDimension(width, height)
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private fun initialize() {
+    private fun initialize() { // needs to be delayed for access to ClipboardStrip, which is not a child of this view
         if (this::clipboardAdapter.isInitialized) return
         val colors = Settings.getValues().mColors
         clipboardAdapter = ClipboardAdapter(clipboardLayoutParams, this).apply {
@@ -126,7 +98,7 @@ class ClipboardHistoryView @JvmOverloads constructor(
         clipboardRecyclerView = findViewById<ClipboardHistoryRecyclerView>(R.id.clipboard_list).apply {
             val colCount = resources.getInteger(R.integer.config_clipboard_keyboard_col_count)
             layoutManager = StaggeredGridLayoutManager(colCount, StaggeredGridLayoutManager.VERTICAL)
-            @Suppress("deprecation")
+            @Suppress("deprecation") // "no cache" should be fine according to warning in https://developer.android.com/reference/android/view/ViewGroup#setPersistentDrawingCache(int)
             persistentDrawingCache = PERSISTENT_NO_CACHE
             clipboardLayoutParams.setListProperties(this)
             placeholderView = this@ClipboardHistoryView.placeholderView
@@ -151,6 +123,7 @@ class ClipboardHistoryView @JvmOverloads constructor(
     }
 
     private fun setupToolbarKeys() {
+        // set layout params
         val toolbarKeyLayoutParams = LayoutParams(resources.getDimensionPixelSize(R.dimen.config_suggestions_strip_edge_key_width), LayoutParams.MATCH_PARENT)
         toolbarKeys.forEach { it.layoutParams = toolbarKeyLayoutParams }
     }
@@ -166,6 +139,7 @@ class ClipboardHistoryView @JvmOverloads constructor(
 
     fun setHardwareAcceleratedDrawingEnabled(enabled: Boolean) {
         if (!enabled) return
+        // TODO: Should use LAYER_TYPE_SOFTWARE when hardware acceleration is off?
         setLayerType(LAYER_TYPE_HARDWARE, null)
     }
 
@@ -199,8 +173,10 @@ class ClipboardHistoryView @JvmOverloads constructor(
             adapter = clipboardAdapter
             val keyboardWidth = ResourceUtils.getKeyboardWidth(context, settings.current)
             layoutParams.width = keyboardWidth
+            // new ClipboardLayoutParams means ClipboardAdapter has wrong gaps, but that's ok (only relevant when resizing floating keyboard)
             ClipboardLayoutParams(context).setListProperties(this)
 
+            // set side padding
             val keyboardAttr = context.obtainStyledAttributes(
                 null, R.styleable.Keyboard, R.attr.keyboardStyle, R.style.Keyboard)
             val leftPadding = (keyboardAttr.getFraction(R.styleable.Keyboard_keyboardLeftPadding,
@@ -213,6 +189,7 @@ class ClipboardHistoryView @JvmOverloads constructor(
             setPadding(leftPadding, paddingTop, rightPadding, paddingBottom)
         }
 
+        // absurd workaround so Android sets the correct color from stateList (depending on "activated")
         toolbarKeys.forEach { it.isEnabled = false; it.isEnabled = true }
     }
 
@@ -221,24 +198,6 @@ class ClipboardHistoryView @JvmOverloads constructor(
         clipboardRecyclerView.adapter = null
         clipboardHistoryManager.setHistoryChangeListener(null)
         clipboardAdapter.clipboardHistoryManager = null
-    }
-
-    override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
-        if (ev == null) return super.dispatchTouchEvent(null)
-        when (ev.action) {
-            MotionEvent.ACTION_DOWN -> startY = ev.rawY
-            MotionEvent.ACTION_MOVE -> {
-                val deltaY = startY - ev.rawY
-                if (!isExpanded && deltaY > SWIPE_THRESHOLD) {
-                    expandClipboard()
-                    return true
-                } else if (isExpanded && deltaY < -SWIPE_THRESHOLD) {
-                    collapseClipboard()
-                    return true
-                }
-            }
-        }
-        return super.dispatchTouchEvent(ev)
     }
 
     override fun onClick(view: View) {
@@ -272,6 +231,7 @@ class ClipboardHistoryView @JvmOverloads constructor(
     }
 
     override fun onKeyDown(clipId: Long) {
+        // تعديل MacBoard: إلغاء صوت النقر عند اختيار نص من الحافظة
         keyboardActionListener.onPressKey(KeyCode.NOT_SPECIFIED, 0, true, HapticEvent.NO_HAPTICS)
     }
 
@@ -301,7 +261,9 @@ class ClipboardHistoryView @JvmOverloads constructor(
     override fun onSharedPreferenceChanged(prefs: SharedPreferences?, key: String?) {
         setToolbarButtonsActivatedStateOnPrefChange(KeyboardSwitcher.getInstance().clipboardStrip, key)
 
+        // The setting can only be changed from a settings screen, but adding it to this listener seems necessary: https://github.com/HeliBorg/HeliBoard/pull/1903#issuecomment-3478424606
         if (::clipboardHistoryManager.isInitialized && key == Settings.PREF_CLIPBOARD_HISTORY_PINNED_FIRST) {
+            // Ensure settings are reloaded first
             Settings.getInstance().onSharedPreferenceChanged(prefs, key)
             clipboardHistoryManager.sortHistoryEntries()
             clipboardAdapter.notifyDataSetChanged()
