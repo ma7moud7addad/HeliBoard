@@ -179,41 +179,34 @@ class ImageSuggestionManager(private val latinIME: LatinIME) {
         textView.text = latinIME.getString(R.string.image_suggestion_insert)
         
         textView.setOnClickListener {
-            // MacBoard FIX for Telegram: Suppress clipboard listener to prevent image re-appearing
             suppressClipboardListener = true
-
-            // CRITICAL: Clear everything BEFORE calling commitImage
             dontShowCurrentSuggestion = true
-            val currentUri = uri // حفظ المسار قبل مسحه من المتغيرات
+            val currentUri = uri 
             latestImageUri = null
             view.visibility = View.GONE
 
-            // 1. إرسال الصورة الأول للتطبيق
+            // 1. إرسال الصورة الأول للتطبيق (ونديها فرصتها تحمل)
             latinIME.commitImage(currentUri)
 
-            // 2. نسف الصورة من استوديو الموبايل (MediaStore)
-            try {
-                latinIME.contentResolver.delete(currentUri, null, null)
-            } catch (e: Exception) {
-                // لو حصل أي خطأ نتجاهله عشان الكيبورد ماتعملش Crash
-            }
-
-            // 3. نسف الحافظة (System Clipboard)
+            // 2. نسف الحافظة (دي عادي تتنسف فوراً لأنها مجرد Text/Clipboard)
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                     clipboardManager.clearPrimaryClip()
                 } else {
                     clipboardManager.setPrimaryClip(android.content.ClipData.newPlainText("", ""))
                 }
-            } catch (e: Exception) {
-                // تجاهل
-            }
+            } catch (e: Exception) {}
 
-            // MacBoard: Re-enable clipboard listener after delay + force refresh strip
+            // 3. تأخير نسف ملف الصورة 1.5 ثانية لحد ما تليجرام يشفطها
             latinIME.mHandler.postDelayed({
+                try {
+                    // النسف بيحصل هنا بعد ما تليجرام يكون استلمها خلاص!
+                    latinIME.contentResolver.delete(currentUri, null, null)
+                } catch (e: Exception) {}
+
                 suppressClipboardListener = false
                 latinIME.setNeutralSuggestionStrip()
-            }, 1200) // 1.2s delay for Telegram to finish processing
+            }, 1500) // خليناها ثانية ونص للأمان
         }
 
         // Apply theme colors (text only, background is set by pill drawable)
