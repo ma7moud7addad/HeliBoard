@@ -32,10 +32,13 @@ class ImageSuggestionManager(private val latinIME: LatinIME) {
     private lateinit var clipboardManager: ClipboardManager
     private var latestImageUri: Uri? = null
     private var dontShowCurrentSuggestion = false
-    private var suppressClipboardListener = false // MacBoard: prevent clipboard re-trigger after image send
+    private var suppressClipboardListener = false
+    
+    // الذاكرة السحرية: حفظ مسار آخر صورة تم إرسالها لتجاهلها لاحقاً
+    private var lastInsertedUriString: String? = null 
 
     private val clipboardListener = ClipboardManager.OnPrimaryClipChangedListener {
-        if (suppressClipboardListener) return@OnPrimaryClipChangedListener // MacBoard: ignore clipboard changes during image send
+        if (suppressClipboardListener) return@OnPrimaryClipChangedListener
         onPrimaryClipChanged()
     }
 
@@ -77,7 +80,9 @@ class ImageSuggestionManager(private val latinIME: LatinIME) {
         val item = clipData.getItemAt(0) ?: return
         val uri = item.uri ?: return
 
-        // Always update to the new URI, even if one already exists
+        // لو الصورة دي هي اللي لسه مبعوتة حالا.. تجاهلها تماماً ومتعرضش الكبسولة!
+        if (uri.toString() == lastInsertedUriString) return
+
         latestImageUri = uri
         dontShowCurrentSuggestion = false
         latinIME.setNeutralSuggestionStrip()
@@ -116,7 +121,9 @@ class ImageSuggestionManager(private val latinIME: LatinIME) {
                     val id = cursor.getLong(idCol)
                     val uri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
 
-                    // Always update to the latest screenshot, even if one is already showing
+                    // لو دي نفس السكرين شوت اللي لسه مبعوتة حالا.. تجاهلها تماماً!
+                    if (uri.toString() == lastInsertedUriString) return
+
                     latestImageUri = uri
                     dontShowCurrentSuggestion = false
                     latinIME.setNeutralSuggestionStrip()
@@ -155,7 +162,6 @@ class ImageSuggestionManager(private val latinIME: LatinIME) {
         val textView = view.findViewById<TextView>(R.id.image_suggestion_text)
         val container = view.findViewById<View>(R.id.image_suggestion_container)
 
-        // Make thumbnail circular
         thumbnailView.clipToOutline = true
         thumbnailView.outlineProvider = object : ViewOutlineProvider() {
             override fun getOutline(view: View, outline: Outline) {
@@ -181,40 +187,27 @@ class ImageSuggestionManager(private val latinIME: LatinIME) {
         textView.setOnClickListener {
             suppressClipboardListener = true
             dontShowCurrentSuggestion = true
+            
+            // حفظ مسار الصورة في الذاكرة عشان الكيبورد تنساها وتتجاهلها
+            lastInsertedUriString = uri.toString()
+            
             val currentUri = uri 
             latestImageUri = null
             view.visibility = View.GONE
 
-            // 1. إرسال الصورة الأول للتطبيق (ونديها فرصتها تحمل)
+            // إرسال الصورة
             latinIME.commitImage(currentUri)
 
-            // 2. نسف الحافظة (دي عادي تتنسف فوراً لأنها مجرد Text/Clipboard)
-            try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    clipboardManager.clearPrimaryClip()
-                } else {
-                    clipboardManager.setPrimaryClip(android.content.ClipData.newPlainText("", ""))
-                }
-            } catch (e: Exception) {}
-
-            // 3. تأخير نسف ملف الصورة 1.5 ثانية لحد ما تليجرام يشفطها
+            // إعادة تحديث الشريط بعد 1.2 ثانية وتجاهل أي محاولة من تليجرام لإظهار نفس الصورة
             latinIME.mHandler.postDelayed({
-                try {
-                    // النسف بيحصل هنا بعد ما تليجرام يكون استلمها خلاص!
-                    latinIME.contentResolver.delete(currentUri, null, null)
-                } catch (e: Exception) {}
-
                 suppressClipboardListener = false
                 latinIME.setNeutralSuggestionStrip()
-            }, 1500) // خليناها ثانية ونص للأمان
+            }, 1200)
         }
 
-        // Apply theme colors (text only, background is set by pill drawable)
         val colors = latinIME.mSettings.current.mColors
         textView.setTextColor(colors.get(ColorType.KEY_TEXT))
-        // Background color is handled by image_suggestion_pill_background.xml
 
-        // Ensure proper LayoutParams for centering in suggestion strip
         val layoutParams = android.widget.FrameLayout.LayoutParams(
             ViewGroup.LayoutParams.WRAP_CONTENT,
             ViewGroup.LayoutParams.MATCH_PARENT
@@ -229,19 +222,16 @@ class ImageSuggestionManager(private val latinIME: LatinIME) {
 
     private fun removeImageSuggestion() {
         dontShowCurrentSuggestion = true
-        latestImageUri = null  // Clear the image
+        latestImageUri = null
         latinIME.setNeutralSuggestionStrip()
         latinIME.mHandler.postResumeSuggestions(false)
     }
 
-    /** Called by LatinIME after successful image insertion */
     fun clearSuggestion() {
         dontShowCurrentSuggestion = true
         latestImageUri = null
-        // The UI will be refreshed by LatinIME.setNeutralSuggestionStrip()
     }
 
-    /** Check if we should show image suggestion */
     fun shouldShowSuggestion(): Boolean {
         if (dontShowCurrentSuggestion) return false
         if (latestImageUri == null) return false
