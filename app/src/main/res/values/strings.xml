@@ -1112,9 +1112,6 @@ New dictionary:
     <string name="gesture_data_links">Information on gesture data gathering on:</string>
     <string name="image_suggestion_insert">Insert image</string>
     <string name="image_suggestion_desc">Image thumbnail</string>
-    <string name="voice_initializing">Initializing…</string>
-    <string name="voice_speak_now">Speak now</string>
-    <string name="voice_listening">Listening…</string>
 
 
 
