@@ -154,16 +154,10 @@ object KeyLabel {
         return "."
     }
 
-    private fun getSpaceLabel(params: KeyboardParams): String {
-        val spaceText = when (params.mId.locale.language) {
-            "ar" -> "د محمود حداد"
-            "en", "en_GB", "en_US" -> "dr mahmoud haddad"
-            else -> "Space"
-        }
-        return if (params.mId.isAlphaOrSymbolKeyboard || params.mId.isEmojiClipBottomRow)
-            "$spaceText|!code/key_space"
-        else "$spaceText|!code/key_space"
-    }"
+    private fun getSpaceLabel(params: KeyboardParams): String =
+        if (params.mId.isAlphaOrSymbolKeyboard || params.mId.isEmojiClipBottomRow)
+            "!icon/space_key|!code/key_space"
+        else "!icon/space_key_for_number_layout|!code/key_space"
 
     // todo (later): should this be handled with metaState? but metaState shift would require LOTS of changes...
     private fun getActionKeyCode(params: KeyboardParams): String {
