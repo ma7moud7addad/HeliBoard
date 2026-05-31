@@ -1468,13 +1468,17 @@ public class LatinIME extends InputMethodService implements
         }
 
         // 2. الإدخال الصوتي المدمج (MacBoard) - تم التعديل لعرض الحالة في شريط الأدوات
-                if (KeyCode.VOICE_INPUT == event.getKeyCode()) {
+                        if (KeyCode.VOICE_INPUT == event.getKeyCode()) {
             android.widget.Toast.makeText(this, "🎤 جاري الاستماع...", android.widget.Toast.LENGTH_SHORT).show();
 
-            // عرض حالة التهيئة فوراً
+            // إحضار الـ ID الخاص بالنصوص بشكل ديناميكي لتفادي أي أخطاء برمجية في مسار الـ R
+            final int initResId = getResources().getIdentifier("voice_initializing", "string", getPackageName());
+            final int speakResId = getResources().getIdentifier("voice_speak_now", "string", getPackageName());
+            final int listenResId = getResources().getIdentifier("voice_listening", "string", getPackageName());
+
             mHandler.post(() -> {
-                if (hasSuggestionStripView()) {
-                    showVoiceStatusInSuggestionStrip(helium314.keyboard.R.string.voice_initializing);
+                if (hasSuggestionStripView() && initResId != 0) {
+                    showVoiceStatusInSuggestionStrip(initResId);
                 }
             });
 
@@ -1497,16 +1501,16 @@ public class LatinIME extends InputMethodService implements
                             @Override
                             public void onReadyForSpeech(android.os.Bundle params) {
                                 mHandler.post(() -> {
-                                    if (hasSuggestionStripView()) {
-                                        showVoiceStatusInSuggestionStrip(helium314.keyboard.R.string.voice_speak_now);
+                                    if (hasSuggestionStripView() && speakResId != 0) {
+                                        showVoiceStatusInSuggestionStrip(speakResId);
                                     }
                                 });
                             }
                             @Override
                             public void onBeginningOfSpeech() {
                                 mHandler.post(() -> {
-                                    if (hasSuggestionStripView()) {
-                                        showVoiceStatusInSuggestionStrip(helium314.keyboard.R.string.voice_listening);
+                                    if (hasSuggestionStripView() && listenResId != 0) {
+                                        showVoiceStatusInSuggestionStrip(listenResId);
                                     }
                                 });
                             }
@@ -1544,7 +1548,8 @@ public class LatinIME extends InputMethodService implements
                     }
                 }
             });
-            }
+        }
+
         } else {
             // 3. حماية الحافظة من اللوحة الأساسية (MacBoard)
             if (event.getKeyCode() == KeyCode.CLIPBOARD) {
