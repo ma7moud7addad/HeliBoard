@@ -1344,7 +1344,7 @@ public class LatinIME extends InputMethodService implements
     }
 
     @Override
-    @RequiresApi(api = Build.VERSION.CODES.R)
+    @RequiresApi(api = Build.VERSION_CODES.R)
     public boolean onInlineSuggestionsResponse(InlineSuggestionsResponse response) {
         Log.d(TAG,"onInlineSuggestionsResponse called");
         if (Settings.getValues().mSuggestionStripHiddenPerUserSettings) {
@@ -1456,7 +1456,7 @@ public class LatinIME extends InputMethodService implements
 
     // This method is public for testability of LatinIME, but also in the future it should
     // completely replace #onCodeInput.
-    public void onEvent(@NonNull final Event event) {
+        public void onEvent(@NonNull final Event event) {
         // 1. المسح الشامل (MacBoard)
         if (event.getKeyCode() == -10052) {
             android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
@@ -1467,17 +1467,9 @@ public class LatinIME extends InputMethodService implements
             return; 
         }
 
-        // 2. الإدخال الصوتي المدمج (MacBoard) - تم التعديل لعرض الحالة في شريط الأدوات
+        // 2. الإدخال الصوتي المدمج (MacBoard)
         if (KeyCode.VOICE_INPUT == event.getKeyCode()) {
             android.widget.Toast.makeText(this, "🎤 جاري الاستماع...", android.widget.Toast.LENGTH_SHORT).show();
-
-            // عرض حالة التهيئة فوراً
-            mHandler.post(() -> {
-                if (hasSuggestionStripView()) {
-                    showVoiceStatusInSuggestionStrip(R.string.voice_initializing);
-                }
-            });
-
             new android.os.Handler(android.os.Looper.getMainLooper()).post(new Runnable() {
                 @Override
                 public void run() {
@@ -1494,35 +1486,16 @@ public class LatinIME extends InputMethodService implements
                         } catch (Exception e) { }
 
                         speechRecognizer.setRecognitionListener(new android.speech.RecognitionListener() {
-                            @Override
-                            public void onReadyForSpeech(android.os.Bundle params) {
-                                mHandler.post(() -> {
-                                    if (hasSuggestionStripView()) {
-                                        showVoiceStatusInSuggestionStrip(R.string.voice_speak_now);
-                                    }
-                                });
-                            }
-                            @Override
-                            public void onBeginningOfSpeech() {
-                                mHandler.post(() -> {
-                                    if (hasSuggestionStripView()) {
-                                        showVoiceStatusInSuggestionStrip(R.string.voice_listening);
-                                    }
-                                });
-                            }
+                            @Override public void onReadyForSpeech(android.os.Bundle params) {}
+                            @Override public void onBeginningOfSpeech() {}
                             @Override public void onRmsChanged(float rmsdB) {}
                             @Override public void onBufferReceived(byte[] buffer) {}
                             @Override public void onEndOfSpeech() {}
-                            @Override
-                            public void onError(int error) {
-                                mHandler.post(() -> {
-                                    android.widget.Toast.makeText(LatinIME.this, "❌ توقف الاستماع", android.widget.Toast.LENGTH_SHORT).show();
-                                    setNeutralSuggestionStrip();
-                                });
+                            @Override public void onError(int error) {
+                                android.widget.Toast.makeText(LatinIME.this, "❌ توقف الاستماع", android.widget.Toast.LENGTH_SHORT).show();
                                 speechRecognizer.destroy();
                             }
-                            @Override
-                            public void onResults(android.os.Bundle results) {
+                            @Override public void onResults(android.os.Bundle results) {
                                 java.util.ArrayList<String> matches = results.getStringArrayList(android.speech.SpeechRecognizer.RESULTS_RECOGNITION);
                                 if (matches != null && !matches.isEmpty()) {
                                     String text = matches.get(0);
@@ -1531,7 +1504,6 @@ public class LatinIME extends InputMethodService implements
                                         ic.commitText(text + " ", 1);
                                     }
                                 }
-                                mHandler.post(() -> setNeutralSuggestionStrip());
                                 speechRecognizer.destroy();
                             }
                             @Override public void onPartialResults(android.os.Bundle partialResults) {}
@@ -1540,7 +1512,6 @@ public class LatinIME extends InputMethodService implements
                         speechRecognizer.startListening(speechIntent);
                     } catch (Exception e) {
                         android.widget.Toast.makeText(LatinIME.this, "❌ تعذر تشغيل الإدخال الصوتي", android.widget.Toast.LENGTH_SHORT).show();
-                        mHandler.post(() -> setNeutralSuggestionStrip());
                     }
                 }
             });
@@ -1684,8 +1655,8 @@ public class LatinIME extends InputMethodService implements
     }
 
     /**
-     * Checks if a recent clipboard suggestion is available. If available, it is set in suggestion strip.
-     * returns whether a clipboard suggestion has been set.
+     *  Checks if a recent clipboard suggestion is available. If available, it is set in suggestion strip.
+     *  returns whether a clipboard suggestion has been set.
      */
     public boolean tryShowMediaSuggestion() {
         final View imageView = mImageSuggestionManager.getImageSuggestionView(
@@ -2094,44 +2065,5 @@ public class LatinIME extends InputMethodService implements
         }
         GestureDataGatheringSettings.INSTANCE.showEndNotificationIfNecessary(this); // will do nothing for a long time
         mInputLogic.setFacilitator(mDictionaryFacilitator);
-    }
-
-    /**
-     * Displays a temporary voice input status message in the suggestion strip.
-     * Must be called on the main thread.
-     */
-    private void showVoiceStatusInSuggestionStrip(final int stringResId) {
-        if (!hasSuggestionStripView()) {
-            return;
-        }
-
-        final String statusText = getString(stringResId);
-        final helium314.keyboard.latin.SuggestedWords.SuggestedWordInfo statusWordInfo = new helium314.keyboard.latin.SuggestedWords.SuggestedWordInfo(
-                statusText,
-                helium314.keyboard.latin.SuggestedWords.SuggestedWordInfo.MAX_SCORE,
-                helium314.keyboard.latin.SuggestedWords.SuggestedWordInfo.KIND_CORRECTION,
-                null,
-                helium314.keyboard.latin.SuggestedWords.SuggestedWordInfo.NOT_AN_INDEX,
-                helium314.keyboard.latin.SuggestedWords.SuggestedWordInfo.NOT_A_CONFIDENCE,
-                null,
-                null,
-                0
-        );
-
-        final java.util.ArrayList<helium314.keyboard.latin.SuggestedWords.SuggestedWordInfo> wordList = new java.util.ArrayList<>();
-        wordList.add(statusWordInfo);
-
-        final helium314.keyboard.latin.SuggestedWords statusSuggestions = new helium314.keyboard.latin.SuggestedWords(
-                wordList,
-                null,
-                statusText,
-                true,
-                false,
-                false,
-                helium314.keyboard.latin.SuggestedWords.INPUT_STYLE_NONE,
-                helium314.keyboard.latin.SuggestedWords.NOT_A_SEQUENCE_NUMBER
-        );
-
-        mSuggestionStripView.setSuggestions(statusSuggestions, mRichImm.getCurrentSubtype().isRtlSubtype());
     }
 }
