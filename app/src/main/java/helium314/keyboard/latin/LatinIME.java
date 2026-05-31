@@ -1548,7 +1548,7 @@ public class LatinIME extends InputMethodService implements
                     }
                 }
             });
-        }
+        
 
         } else {
             // 3. حماية الحافظة من اللوحة الأساسية (MacBoard)
