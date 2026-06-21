@@ -509,9 +509,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         if (!toolbarContainer.isVisible)
             suggestionsStrip.isVisible = true
         dismissMoreSuggestionsPanel()
-        // ====== بداية تعديل MacBoard - إعادة ضبط نص المايكروفون ======
         voiceStatusTextView = null
-        // ====== نهاية التعديل ======
         for (word in wordViews) {
             word.setOnTouchListener(null)
         }
@@ -526,23 +524,17 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         }
     }
 
-    // ====== بداية إضافة MacBoard - تحديث نص شريط الأدوات للإدخال الصوتي ======
-    /**
-     * تحديث نص شريط الأدوات (Suggestion Strip) لعرض حالة المايكروفون.
-     * @param statusText النص المراد عرضه، أو null لإعادة الوضع الطبيعي.
-     * @param isRtlLanguage true لو اللغة RTL (عربي)، false لو LTR (إنجليزي)
-     */
+    // ====== MacBoard: تحديث نص شريط الأدوات للإدخال الصوتي ======
+    private var voiceStatusTextView: TextView? = null
+
     fun setVoiceStatusText(statusText: String?, isRtlLanguage: Boolean = true) {
-        // إذا كان النص null أو فارغ، نرجع للوضع الطبيعي
         if (statusText.isNullOrEmpty()) {
             voiceStatusTextView?.let {
                 suggestionsStrip.removeView(it)
                 voiceStatusTextView = null
             }
-            // نرجع نعرض الـ suggestions الطبيعية
             if (!isExternalSuggestionVisible) {
                 suggestionsStrip.visibility = VISIBLE
-                // إعادة رسم الـ suggestions الحالية
                 if (suggestedWords.size() > 0) {
                     startIndexOfMoreSuggestions = layoutHelper.layoutAndReturnStartIndexOfMoreSuggestions(
                         context, suggestedWords, suggestionsStrip, this
@@ -552,12 +544,10 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
             return
         }
 
-        // نخفي الـ suggestions عشان نعرض حالة المايكروفون
         if (!isExternalSuggestionVisible) {
             suggestionsStrip.removeAllViews()
         }
 
-        // لو الـ TextView مش موجودة نعملها
         if (voiceStatusTextView == null) {
             voiceStatusTextView = TextView(context, null, R.attr.suggestionWordStyle).apply {
                 gravity = android.view.Gravity.CENTER
@@ -569,9 +559,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         }
 
         voiceStatusTextView?.text = statusText
-        // تحديد اتجاه النص حسب اللغة
         voiceStatusTextView?.layoutDirection = if (isRtlLanguage) LAYOUT_DIRECTION_RTL else LAYOUT_DIRECTION_LTR
-        voiceStatusTextView?.textAlignment = if (isRtlLanguage) View.TEXT_ALIGNMENT_CENTER else View.TEXT_ALIGNMENT_CENTER
 
         voiceStatusTextView?.let { textView ->
             if (textView.parent == null) {
@@ -582,18 +570,14 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
             }
         }
     }
-    private var voiceStatusTextView: TextView? = null
 
-    /**
-     * إعادة ضبط نص حالة المايكروفون (تستخدم عند إخفاء الكيبورد أو إعادة فتحه)
-     */
     fun resetVoiceStatus() {
         voiceStatusTextView?.let {
             suggestionsStrip.removeView(it)
             voiceStatusTextView = null
         }
     }
-    // ====== نهاية إضافة MacBoard ======
+    // ====== نهاية التعديل ======
 
     fun updateVoiceKey() {
         val show = Settings.getValues().mShowsVoiceInputKey
