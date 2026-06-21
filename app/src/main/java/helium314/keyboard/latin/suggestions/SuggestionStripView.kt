@@ -509,6 +509,9 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         if (!toolbarContainer.isVisible)
             suggestionsStrip.isVisible = true
         dismissMoreSuggestionsPanel()
+        // ====== بداية تعديل MacBoard - إعادة ضبط نص المايكروفون ======
+        voiceStatusTextView = null
+        // ====== نهاية التعديل ======
         for (word in wordViews) {
             word.setOnTouchListener(null)
         }
@@ -527,8 +530,9 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
     /**
      * تحديث نص شريط الأدوات (Suggestion Strip) لعرض حالة المايكروفون.
      * @param statusText النص المراد عرضه، أو null لإعادة الوضع الطبيعي.
+     * @param isRtlLanguage true لو اللغة RTL (عربي)، false لو LTR (إنجليزي)
      */
-    fun setVoiceStatusText(statusText: String?) {
+    fun setVoiceStatusText(statusText: String?, isRtlLanguage: Boolean = true) {
         // إذا كان النص null أو فارغ، نرجع للوضع الطبيعي
         if (statusText.isNullOrEmpty()) {
             voiceStatusTextView?.let {
@@ -565,6 +569,10 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         }
 
         voiceStatusTextView?.text = statusText
+        // تحديد اتجاه النص حسب اللغة
+        voiceStatusTextView?.layoutDirection = if (isRtlLanguage) LAYOUT_DIRECTION_RTL else LAYOUT_DIRECTION_LTR
+        voiceStatusTextView?.textAlignment = if (isRtlLanguage) View.TEXT_ALIGNMENT_CENTER else View.TEXT_ALIGNMENT_CENTER
+
         voiceStatusTextView?.let { textView ->
             if (textView.parent == null) {
                 suggestionsStrip.addView(textView, LinearLayout.LayoutParams(
@@ -575,6 +583,16 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         }
     }
     private var voiceStatusTextView: TextView? = null
+
+    /**
+     * إعادة ضبط نص حالة المايكروفون (تستخدم عند إخفاء الكيبورد أو إعادة فتحه)
+     */
+    fun resetVoiceStatus() {
+        voiceStatusTextView?.let {
+            suggestionsStrip.removeView(it)
+            voiceStatusTextView = null
+        }
+    }
     // ====== نهاية إضافة MacBoard ======
 
     fun updateVoiceKey() {
