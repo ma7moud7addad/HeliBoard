@@ -1469,7 +1469,13 @@ public class LatinIME extends InputMethodService implements
 
         // 2. الإدخال الصوتي المدمج (MacBoard)
         if (KeyCode.VOICE_INPUT == event.getKeyCode()) {
-            android.widget.Toast.makeText(this, "🎤 جاري الاستماع...", android.widget.Toast.LENGTH_SHORT).show();
+            // ====== بداية تعديل MacBoard - تحديث شريط الأدوات للإدخال الصوتي ======
+            // تحديث شريط الأدوات لـ "جارِ التهيئة..."
+            if (hasSuggestionStripView()) {
+                mSuggestionStripView.setVoiceStatusText("جارِ التهيئة...");
+            }
+            // ====== نهاية التعديل ======
+
             new android.os.Handler(android.os.Looper.getMainLooper()).post(new Runnable() {
                 @Override
                 public void run() {
@@ -1477,7 +1483,7 @@ public class LatinIME extends InputMethodService implements
                         final android.speech.SpeechRecognizer speechRecognizer = android.speech.SpeechRecognizer.createSpeechRecognizer(LatinIME.this);
                         android.content.Intent speechIntent = new android.content.Intent(android.speech.RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
                         speechIntent.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL, android.speech.RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-                        
+
                         try {
                             android.view.inputmethod.InputMethodSubtype subtype = mRichImm.getCurrentSubtype().getRawSubtype();
                             if (subtype != null && subtype.getLocale() != null && !subtype.getLocale().isEmpty()) {
@@ -1486,16 +1492,81 @@ public class LatinIME extends InputMethodService implements
                         } catch (Exception e) { }
 
                         speechRecognizer.setRecognitionListener(new android.speech.RecognitionListener() {
-                            @Override public void onReadyForSpeech(android.os.Bundle params) {}
-                            @Override public void onBeginningOfSpeech() {}
+                            @Override public void onReadyForSpeech(android.os.Bundle params) {
+                                // ====== بداية تعديل MacBoard ======
+                                // تحديث شريط الأدوات لـ "تحدث الآن"
+                                new android.os.Handler(android.os.Looper.getMainLooper()).post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (hasSuggestionStripView()) {
+                                            mSuggestionStripView.setVoiceStatusText("تحدث الآن");
+                                        }
+                                    }
+                                });
+                                // ====== نهاية التعديل ======
+                            }
+
+                            @Override public void onBeginningOfSpeech() {
+                                // ====== بداية تعديل MacBoard ======
+                                // تحديث شريط الأدوات لـ "جارِ الاستماع..."
+                                new android.os.Handler(android.os.Looper.getMainLooper()).post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (hasSuggestionStripView()) {
+                                            mSuggestionStripView.setVoiceStatusText("جارِ الاستماع...");
+                                        }
+                                    }
+                                });
+                                // ====== نهاية التعديل ======
+                            }
+
                             @Override public void onRmsChanged(float rmsdB) {}
                             @Override public void onBufferReceived(byte[] buffer) {}
-                            @Override public void onEndOfSpeech() {}
+
+                            @Override public void onEndOfSpeech() {
+                                // ====== بداية تعديل MacBoard ======
+                                // إخفاء نص شريط الأدوات وإرجاع الحالة الطبيعية
+                                new android.os.Handler(android.os.Looper.getMainLooper()).post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (hasSuggestionStripView()) {
+                                            mSuggestionStripView.setVoiceStatusText(null);
+                                        }
+                                    }
+                                });
+                                // ====== نهاية التعديل ======
+                            }
+
                             @Override public void onError(int error) {
+                                // ====== بداية تعديل MacBoard ======
+                                // إخفاء نص شريط الأدوات وإرجاع الحالة الطبيعية
+                                new android.os.Handler(android.os.Looper.getMainLooper()).post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (hasSuggestionStripView()) {
+                                            mSuggestionStripView.setVoiceStatusText(null);
+                                        }
+                                    }
+                                });
+                                // ====== نهاية التعديل ======
+
                                 android.widget.Toast.makeText(LatinIME.this, "❌ توقف الاستماع", android.widget.Toast.LENGTH_SHORT).show();
                                 speechRecognizer.destroy();
                             }
+
                             @Override public void onResults(android.os.Bundle results) {
+                                // ====== بداية تعديل MacBoard ======
+                                // إخفاء نص شريط الأدوات وإرجاع الحالة الطبيعية
+                                new android.os.Handler(android.os.Looper.getMainLooper()).post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (hasSuggestionStripView()) {
+                                            mSuggestionStripView.setVoiceStatusText(null);
+                                        }
+                                    }
+                                });
+                                // ====== نهاية التعديل ======
+
                                 java.util.ArrayList<String> matches = results.getStringArrayList(android.speech.SpeechRecognizer.RESULTS_RECOGNITION);
                                 if (matches != null && !matches.isEmpty()) {
                                     String text = matches.get(0);
@@ -1511,6 +1582,18 @@ public class LatinIME extends InputMethodService implements
                         });
                         speechRecognizer.startListening(speechIntent);
                     } catch (Exception e) {
+                        // ====== بداية تعديل MacBoard ======
+                        // إخفاء نص شريط الأدوات في حالة الخطأ
+                        new android.os.Handler(android.os.Looper.getMainLooper()).post(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (hasSuggestionStripView()) {
+                                    mSuggestionStripView.setVoiceStatusText(null);
+                                }
+                            }
+                        });
+                        // ====== نهاية التعديل ======
+
                         android.widget.Toast.makeText(LatinIME.this, "❌ تعذر تشغيل الإدخال الصوتي", android.widget.Toast.LENGTH_SHORT).show();
                     }
                 }
