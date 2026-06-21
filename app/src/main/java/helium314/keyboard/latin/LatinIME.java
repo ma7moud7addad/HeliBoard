@@ -872,11 +872,6 @@ public class LatinIME extends InputMethodService implements
     }
 
     private void onStartInputInternal(final EditorInfo editorInfo, final boolean restarting) {
-        // ====== بداية تعديل MacBoard - إعادة ضبط حالة المايكروفون ======
-        if (hasSuggestionStripView()) {
-            mSuggestionStripView.resetVoiceStatus();
-        }
-        // ====== نهاية التعديل ======
         super.onStartInput(editorInfo, restarting);
 
         final RichInputMethodSubtype subtypeForApp = editorInfo == null
@@ -892,12 +887,6 @@ public class LatinIME extends InputMethodService implements
 
     void onStartInputViewInternal(final EditorInfo editorInfo, final boolean restarting) {
         super.onStartInputView(editorInfo, restarting);
-        // ====== بداية تعديل MacBoard - إعادة ضبط حالة المايكروفون ======
-        // نتأكد إن نص المايكروفون متشال لما الكيبورد يتفتح
-        if (hasSuggestionStripView()) {
-            mSuggestionStripView.resetVoiceStatus();
-        }
-        // ====== نهاية التعديل ======
 
         setGestureDataGatheringMode(editorInfo);
 
@@ -1480,32 +1469,17 @@ public class LatinIME extends InputMethodService implements
 
         // 2. الإدخال الصوتي المدمج (MacBoard)
         if (KeyCode.VOICE_INPUT == event.getKeyCode()) {
-            // ====== بداية تعديل MacBoard - تحديث شريط الأدوات للإدخال الصوتي ======
-            // تحديد اللغة الحالية (عربي ولا إنجليزي)
-            final boolean isCurrentRtl = mRichImm.getCurrentSubtype().isRtlSubtype();
-            String localeStr = null;
-            try {
-                localeStr = mRichImm.getCurrentSubtype().getRawSubtype().getLocale();
-            } catch (Exception e) {
-                // fallback: localeStr stays null
-            }
-            final boolean isArabic = isCurrentRtl || (localeStr != null && localeStr.toLowerCase().startsWith("ar"));
+            android.widget.Toast.makeText(this, "🎤 جاري الاستماع...", android.widget.Toast.LENGTH_SHORT).show();
 
-            // اختيار النصوص حسب اللغة
-            final String textInitializing = isArabic ? "جارِ التهيئة..." : "Initializing...";
-            final String textSpeakNow = isArabic ? "تحدث الآن" : "Speak now";
-            final String textListening = isArabic ? "جارِ الاستماع..." : "Listening...";
-            final String textStopped = isArabic ? "❌ توقف الاستماع" : "❌ Stopped listening";
-            final String textFailed = isArabic ? "❌ تعذر تشغيل الإدخال الصوتي" : "❌ Voice input failed";
-
-            // تحديث شريط الأدوات لـ "جارِ التهيئة..."
+            // ====== MacBoard: تحديث شريط الأدوات - بداية الإدخال ======
+            final boolean isRtl = mRichImm.getCurrentSubtype().isRtlSubtype();
+            final String initializingText = isRtl ? "جارِ التهيئة..." : "Initializing...";
+            final String speakNowText = isRtl ? "تحدث الآن" : "Speak now";
+            final String listeningText = isRtl ? "جارِ الاستماع..." : "Listening...";
             if (hasSuggestionStripView()) {
-                mSuggestionStripView.setVoiceStatusText(textInitializing, isArabic);
+                mSuggestionStripView.setVoiceStatusText(initializingText, isRtl);
             }
             // ====== نهاية التعديل ======
-
-            // نحفظ الـ InputConnection الحالي عشان نستخدمه لاحقاً
-            final android.view.inputmethod.InputConnection currentIc = getCurrentInputConnection();
 
             new android.os.Handler(android.os.Looper.getMainLooper()).post(new Runnable() {
                 @Override
@@ -1514,7 +1488,6 @@ public class LatinIME extends InputMethodService implements
                         final android.speech.SpeechRecognizer speechRecognizer = android.speech.SpeechRecognizer.createSpeechRecognizer(LatinIME.this);
                         android.content.Intent speechIntent = new android.content.Intent(android.speech.RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
                         speechIntent.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL, android.speech.RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-                        speechIntent.putExtra(android.speech.RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
 
                         try {
                             android.view.inputmethod.InputMethodSubtype subtype = mRichImm.getCurrentSubtype().getRawSubtype();
@@ -1525,133 +1498,64 @@ public class LatinIME extends InputMethodService implements
 
                         speechRecognizer.setRecognitionListener(new android.speech.RecognitionListener() {
                             @Override public void onReadyForSpeech(android.os.Bundle params) {
-                                // ====== بداية تعديل MacBoard ======
-                                new android.os.Handler(android.os.Looper.getMainLooper()).post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        if (hasSuggestionStripView()) {
-                                            mSuggestionStripView.setVoiceStatusText(textSpeakNow, isArabic);
-                                        }
-                                    }
-                                });
+                                // ====== MacBoard: تحديث شريط الأدوات ======
+                                if (hasSuggestionStripView()) {
+                                    mSuggestionStripView.setVoiceStatusText(speakNowText, isRtl);
+                                }
                                 // ====== نهاية التعديل ======
                             }
-
                             @Override public void onBeginningOfSpeech() {
-                                // ====== بداية تعديل MacBoard ======
-                                new android.os.Handler(android.os.Looper.getMainLooper()).post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        if (hasSuggestionStripView()) {
-                                            mSuggestionStripView.setVoiceStatusText(textListening, isArabic);
-                                        }
-                                    }
-                                });
+                                // ====== MacBoard: تحديث شريط الأدوات ======
+                                if (hasSuggestionStripView()) {
+                                    mSuggestionStripView.setVoiceStatusText(listeningText, isRtl);
+                                }
                                 // ====== نهاية التعديل ======
                             }
-
                             @Override public void onRmsChanged(float rmsdB) {}
                             @Override public void onBufferReceived(byte[] buffer) {}
-
                             @Override public void onEndOfSpeech() {
-                                // ====== بداية تعديل MacBoard ======
-                                new android.os.Handler(android.os.Looper.getMainLooper()).post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        if (hasSuggestionStripView()) {
-                                            mSuggestionStripView.setVoiceStatusText(null, isArabic);
-                                        }
-                                    }
-                                });
+                                // ====== MacBoard: تحديث شريط الأدوات ======
+                                if (hasSuggestionStripView()) {
+                                    mSuggestionStripView.setVoiceStatusText(null, isRtl);
+                                }
                                 // ====== نهاية التعديل ======
                             }
-
                             @Override public void onError(int error) {
-                                try {
-                                    // ====== بداية تعديل MacBoard ======
-                                    new android.os.Handler(android.os.Looper.getMainLooper()).post(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            if (hasSuggestionStripView()) {
-                                                mSuggestionStripView.setVoiceStatusText(null, isArabic);
-                                            }
-                                        }
-                                    });
-                                    // ====== نهاية التعديل ======
-
-                                    try {
-                                        android.widget.Toast.makeText(LatinIME.this, textStopped, android.widget.Toast.LENGTH_SHORT).show();
-                                    } catch (Exception ex) { /* ignore */ }
-                                } catch (Exception ex) {
-                                    Log.e(TAG, "Voice input: onError crashed", ex);
+                                android.widget.Toast.makeText(LatinIME.this, "❌ توقف الاستماع", android.widget.Toast.LENGTH_SHORT).show();
+                                // ====== MacBoard: تحديث شريط الأدوات ======
+                                if (hasSuggestionStripView()) {
+                                    mSuggestionStripView.setVoiceStatusText(null, isRtl);
                                 }
-                                try {
-                                    speechRecognizer.destroy();
-                                } catch (Exception ex) { /* ignore */ }
+                                // ====== نهاية التعديل ======
+                                speechRecognizer.destroy();
                             }
-
                             @Override public void onResults(android.os.Bundle results) {
-                                try {
-                                    // ====== بداية تعديل MacBoard ======
-                                    // إخفاء نص شريط الأدوات وإرجاع الحالة الطبيعية
-                                    new android.os.Handler(android.os.Looper.getMainLooper()).post(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            if (hasSuggestionStripView()) {
-                                                mSuggestionStripView.setVoiceStatusText(null, isArabic);
-                                            }
-                                        }
-                                    });
-                                    // ====== نهاية التعديل ======
-
-                                    final java.util.ArrayList<String> matches = results.getStringArrayList(android.speech.SpeechRecognizer.RESULTS_RECOGNITION);
-                                    if (matches != null && !matches.isEmpty()) {
-                                        final String text = matches.get(0);
-                                        // نكتب النص على Main Thread عشان ما يحصلش crash
-                                        new android.os.Handler(android.os.Looper.getMainLooper()).post(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                try {
-                                                    android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
-                                                    if (ic != null) {
-                                                        ic.commitText(text + " ", 1);
-                                                    }
-                                                } catch (Exception ex) {
-                                                    Log.w(TAG, "Voice input: commitText failed", ex);
-                                                }
-                                            }
-                                        });
+                                java.util.ArrayList<String> matches = results.getStringArrayList(android.speech.SpeechRecognizer.RESULTS_RECOGNITION);
+                                if (matches != null && !matches.isEmpty()) {
+                                    String text = matches.get(0);
+                                    android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
+                                    if (ic != null) {
+                                        ic.commitText(text + " ", 1);
                                     }
-                                } catch (Exception ex) {
-                                    Log.e(TAG, "Voice input: onResults crashed", ex);
                                 }
-                                try {
-                                    speechRecognizer.destroy();
-                                } catch (Exception ex) { /* ignore */ }
+                                // ====== MacBoard: تحديث شريط الأدوات ======
+                                if (hasSuggestionStripView()) {
+                                    mSuggestionStripView.setVoiceStatusText(null, isRtl);
+                                }
+                                // ====== نهاية التعديل ======
+                                speechRecognizer.destroy();
                             }
-
-                            @Override public void onPartialResults(android.os.Bundle partialResults) {
-                                // ممكن نعرض النتائج الجزئية في المستقبل
-                            }
-
+                            @Override public void onPartialResults(android.os.Bundle partialResults) {}
                             @Override public void onEvent(int eventType, android.os.Bundle params) {}
                         });
                         speechRecognizer.startListening(speechIntent);
                     } catch (Exception e) {
-                        // ====== بداية تعديل MacBoard ======
-                        new android.os.Handler(android.os.Looper.getMainLooper()).post(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (hasSuggestionStripView()) {
-                                    mSuggestionStripView.setVoiceStatusText(null, isArabic);
-                                }
-                            }
-                        });
+                        android.widget.Toast.makeText(LatinIME.this, "❌ تعذر تشغيل الإدخال الصوتي", android.widget.Toast.LENGTH_SHORT).show();
+                        // ====== MacBoard: تحديث شريط الأدوات ======
+                        if (hasSuggestionStripView()) {
+                            mSuggestionStripView.setVoiceStatusText(null, isRtl);
+                        }
                         // ====== نهاية التعديل ======
-
-                        try {
-                            android.widget.Toast.makeText(LatinIME.this, textFailed, android.widget.Toast.LENGTH_SHORT).show();
-                        } catch (Exception ex) { /* ignore */ }
                     }
                 }
             });
