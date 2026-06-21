@@ -523,6 +523,60 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         }
     }
 
+    // ====== بداية إضافة MacBoard - تحديث نص شريط الأدوات للإدخال الصوتي ======
+    /**
+     * تحديث نص شريط الأدوات (Suggestion Strip) لعرض حالة المايكروفون.
+     * @param statusText النص المراد عرضه، أو null لإعادة الوضع الطبيعي.
+     */
+    fun setVoiceStatusText(statusText: String?) {
+        // إذا كان النص null أو فارغ، نرجع للوضع الطبيعي
+        if (statusText.isNullOrEmpty()) {
+            voiceStatusTextView?.let {
+                suggestionsStrip.removeView(it)
+                voiceStatusTextView = null
+            }
+            // نرجع نعرض الـ suggestions الطبيعية
+            if (!isExternalSuggestionVisible) {
+                suggestionsStrip.visibility = VISIBLE
+                // إعادة رسم الـ suggestions الحالية
+                if (suggestedWords.size() > 0) {
+                    startIndexOfMoreSuggestions = layoutHelper.layoutAndReturnStartIndexOfMoreSuggestions(
+                        context, suggestedWords, suggestionsStrip, this
+                    )
+                }
+            }
+            return
+        }
+
+        // نخفي الـ suggestions عشان نعرض حالة المايكروفون
+        if (!isExternalSuggestionVisible) {
+            suggestionsStrip.removeAllViews()
+        }
+
+        // لو الـ TextView مش موجودة نعملها
+        if (voiceStatusTextView == null) {
+            voiceStatusTextView = TextView(context, null, R.attr.suggestionWordStyle).apply {
+                gravity = android.view.Gravity.CENTER
+                setTextColor(Settings.getValues().mColors.get(ColorType.KEY_TEXT))
+                textSize = 16f
+                isSingleLine = true
+                ellipsize = TextUtils.TruncateAt.END
+            }
+        }
+
+        voiceStatusTextView?.text = statusText
+        voiceStatusTextView?.let { textView ->
+            if (textView.parent == null) {
+                suggestionsStrip.addView(textView, LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.MATCH_PARENT
+                ))
+            }
+        }
+    }
+    private var voiceStatusTextView: TextView? = null
+    // ====== نهاية إضافة MacBoard ======
+
     fun updateVoiceKey() {
         val show = Settings.getValues().mShowsVoiceInputKey
         toolbar.findViewWithTag<View>(ToolbarKey.VOICE)?.isVisible = show
