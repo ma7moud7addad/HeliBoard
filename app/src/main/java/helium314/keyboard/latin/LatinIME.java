@@ -1483,12 +1483,11 @@ public class LatinIME extends InputMethodService implements
             // ====== بداية تعديل MacBoard - تحديث شريط الأدوات للإدخال الصوتي ======
             // تحديد اللغة الحالية (عربي ولا إنجليزي)
             final boolean isCurrentRtl = mRichImm.getCurrentSubtype().isRtlSubtype();
-            final String localeStr;
+            String localeStr = null;
             try {
                 localeStr = mRichImm.getCurrentSubtype().getRawSubtype().getLocale();
             } catch (Exception e) {
-                // fallback
-                // empty
+                // fallback: localeStr stays null
             }
             final boolean isArabic = isCurrentRtl || (localeStr != null && localeStr.toLowerCase().startsWith("ar"));
 
