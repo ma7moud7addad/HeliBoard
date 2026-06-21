@@ -872,6 +872,11 @@ public class LatinIME extends InputMethodService implements
     }
 
     private void onStartInputInternal(final EditorInfo editorInfo, final boolean restarting) {
+        // ====== بداية تعديل MacBoard - إعادة ضبط حالة المايكروفون ======
+        if (hasSuggestionStripView()) {
+            mSuggestionStripView.resetVoiceStatus();
+        }
+        // ====== نهاية التعديل ======
         super.onStartInput(editorInfo, restarting);
 
         final RichInputMethodSubtype subtypeForApp = editorInfo == null
@@ -887,6 +892,12 @@ public class LatinIME extends InputMethodService implements
 
     void onStartInputViewInternal(final EditorInfo editorInfo, final boolean restarting) {
         super.onStartInputView(editorInfo, restarting);
+        // ====== بداية تعديل MacBoard - إعادة ضبط حالة المايكروفون ======
+        // نتأكد إن نص المايكروفون متشال لما الكيبورد يتفتح
+        if (hasSuggestionStripView()) {
+            mSuggestionStripView.resetVoiceStatus();
+        }
+        // ====== نهاية التعديل ======
 
         setGestureDataGatheringMode(editorInfo);
 
@@ -1470,9 +1481,27 @@ public class LatinIME extends InputMethodService implements
         // 2. الإدخال الصوتي المدمج (MacBoard)
         if (KeyCode.VOICE_INPUT == event.getKeyCode()) {
             // ====== بداية تعديل MacBoard - تحديث شريط الأدوات للإدخال الصوتي ======
+            // تحديد اللغة الحالية (عربي ولا إنجليزي)
+            final boolean isCurrentRtl = mRichImm.getCurrentSubtype().isRtlSubtype();
+            final String localeStr;
+            try {
+                localeStr = mRichImm.getCurrentSubtype().getRawSubtype().getLocale();
+            } catch (Exception e) {
+                // fallback
+                // empty
+            }
+            final boolean isArabic = isCurrentRtl || (localeStr != null && localeStr.toLowerCase().startsWith("ar"));
+
+            // اختيار النصوص حسب اللغة
+            final String textInitializing = isArabic ? "جارِ التهيئة..." : "Initializing...";
+            final String textSpeakNow = isArabic ? "تحدث الآن" : "Speak now";
+            final String textListening = isArabic ? "جارِ الاستماع..." : "Listening...";
+            final String textStopped = isArabic ? "❌ توقف الاستماع" : "❌ Stopped listening";
+            final String textFailed = isArabic ? "❌ تعذر تشغيل الإدخال الصوتي" : "❌ Voice input failed";
+
             // تحديث شريط الأدوات لـ "جارِ التهيئة..."
             if (hasSuggestionStripView()) {
-                mSuggestionStripView.setVoiceStatusText("جارِ التهيئة...");
+                mSuggestionStripView.setVoiceStatusText(textInitializing, isArabic);
             }
             // ====== نهاية التعديل ======
 
@@ -1499,7 +1528,7 @@ public class LatinIME extends InputMethodService implements
                                     @Override
                                     public void run() {
                                         if (hasSuggestionStripView()) {
-                                            mSuggestionStripView.setVoiceStatusText("تحدث الآن");
+                                            mSuggestionStripView.setVoiceStatusText(textSpeakNow, isArabic);
                                         }
                                     }
                                 });
@@ -1513,7 +1542,7 @@ public class LatinIME extends InputMethodService implements
                                     @Override
                                     public void run() {
                                         if (hasSuggestionStripView()) {
-                                            mSuggestionStripView.setVoiceStatusText("جارِ الاستماع...");
+                                            mSuggestionStripView.setVoiceStatusText(textListening, isArabic);
                                         }
                                     }
                                 });
@@ -1530,11 +1559,14 @@ public class LatinIME extends InputMethodService implements
                                     @Override
                                     public void run() {
                                         if (hasSuggestionStripView()) {
-                                            mSuggestionStripView.setVoiceStatusText(null);
+                                            mSuggestionStripView.setVoiceStatusText(null, isArabic);
                                         }
                                     }
                                 });
                                 // ====== نهاية التعديل ======
+                                try {
+                                    speechRecognizer.destroy();
+                                } catch (Exception ex) { /* ignore */ }
                             }
 
                             @Override public void onError(int error) {
@@ -1544,14 +1576,18 @@ public class LatinIME extends InputMethodService implements
                                     @Override
                                     public void run() {
                                         if (hasSuggestionStripView()) {
-                                            mSuggestionStripView.setVoiceStatusText(null);
+                                            mSuggestionStripView.setVoiceStatusText(null, isArabic);
                                         }
                                     }
                                 });
                                 // ====== نهاية التعديل ======
 
-                                android.widget.Toast.makeText(LatinIME.this, "❌ توقف الاستماع", android.widget.Toast.LENGTH_SHORT).show();
-                                speechRecognizer.destroy();
+                                try {
+                                    android.widget.Toast.makeText(LatinIME.this, textStopped, android.widget.Toast.LENGTH_SHORT).show();
+                                } catch (Exception ex) { /* ignore */ }
+                                try {
+                                    speechRecognizer.destroy();
+                                } catch (Exception ex) { /* ignore */ }
                             }
 
                             @Override public void onResults(android.os.Bundle results) {
@@ -1561,7 +1597,7 @@ public class LatinIME extends InputMethodService implements
                                     @Override
                                     public void run() {
                                         if (hasSuggestionStripView()) {
-                                            mSuggestionStripView.setVoiceStatusText(null);
+                                            mSuggestionStripView.setVoiceStatusText(null, isArabic);
                                         }
                                     }
                                 });
@@ -1572,10 +1608,20 @@ public class LatinIME extends InputMethodService implements
                                     String text = matches.get(0);
                                     android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
                                     if (ic != null) {
-                                        ic.commitText(text + " ", 1);
+                                        try {
+                                            // نكتب النص بدون ما نضيف مسافة تلقائية
+                                            // ونستخدم newCursorPosition = 1 عشان الكيرور يبقى بعد النص
+                                            ic.commitText(text, 1);
+                                        } catch (Exception ex) {
+                                            Log.w(TAG, "Voice input: commitText failed", ex);
+                                        }
                                     }
                                 }
-                                speechRecognizer.destroy();
+                                try {
+                                    speechRecognizer.destroy();
+                                } catch (Exception ex) {
+                                    // ignore
+                                }
                             }
                             @Override public void onPartialResults(android.os.Bundle partialResults) {}
                             @Override public void onEvent(int eventType, android.os.Bundle params) {}
@@ -1588,13 +1634,13 @@ public class LatinIME extends InputMethodService implements
                             @Override
                             public void run() {
                                 if (hasSuggestionStripView()) {
-                                    mSuggestionStripView.setVoiceStatusText(null);
+                                    mSuggestionStripView.setVoiceStatusText(null, isArabic);
                                 }
                             }
                         });
                         // ====== نهاية التعديل ======
 
-                        android.widget.Toast.makeText(LatinIME.this, "❌ تعذر تشغيل الإدخال الصوتي", android.widget.Toast.LENGTH_SHORT).show();
+                        android.widget.Toast.makeText(LatinIME.this, textFailed, android.widget.Toast.LENGTH_SHORT).show();
                     }
                 }
             });
