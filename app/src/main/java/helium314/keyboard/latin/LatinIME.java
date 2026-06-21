@@ -1567,49 +1567,63 @@ public class LatinIME extends InputMethodService implements
                             }
 
                             @Override public void onError(int error) {
-                                // ====== بداية تعديل MacBoard ======
-                                new android.os.Handler(android.os.Looper.getMainLooper()).post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        if (hasSuggestionStripView()) {
-                                            mSuggestionStripView.setVoiceStatusText(null, isArabic);
-                                        }
-                                    }
-                                });
-                                // ====== نهاية التعديل ======
-
                                 try {
-                                    android.widget.Toast.makeText(LatinIME.this, textStopped, android.widget.Toast.LENGTH_SHORT).show();
-                                } catch (Exception ex) { /* ignore */ }
+                                    // ====== بداية تعديل MacBoard ======
+                                    new android.os.Handler(android.os.Looper.getMainLooper()).post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            if (hasSuggestionStripView()) {
+                                                mSuggestionStripView.setVoiceStatusText(null, isArabic);
+                                            }
+                                        }
+                                    });
+                                    // ====== نهاية التعديل ======
+
+                                    try {
+                                        android.widget.Toast.makeText(LatinIME.this, textStopped, android.widget.Toast.LENGTH_SHORT).show();
+                                    } catch (Exception ex) { /* ignore */ }
+                                } catch (Exception ex) {
+                                    Log.e(TAG, "Voice input: onError crashed", ex);
+                                }
                                 try {
                                     speechRecognizer.destroy();
                                 } catch (Exception ex) { /* ignore */ }
                             }
 
                             @Override public void onResults(android.os.Bundle results) {
-                                // ====== بداية تعديل MacBoard ======
-                                // إخفاء نص شريط الأدوات وإرجاع الحالة الطبيعية
-                                new android.os.Handler(android.os.Looper.getMainLooper()).post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        if (hasSuggestionStripView()) {
-                                            mSuggestionStripView.setVoiceStatusText(null, isArabic);
+                                try {
+                                    // ====== بداية تعديل MacBoard ======
+                                    // إخفاء نص شريط الأدوات وإرجاع الحالة الطبيعية
+                                    new android.os.Handler(android.os.Looper.getMainLooper()).post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            if (hasSuggestionStripView()) {
+                                                mSuggestionStripView.setVoiceStatusText(null, isArabic);
+                                            }
                                         }
-                                    }
-                                });
-                                // ====== نهاية التعديل ======
+                                    });
+                                    // ====== نهاية التعديل ======
 
-                                java.util.ArrayList<String> matches = results.getStringArrayList(android.speech.SpeechRecognizer.RESULTS_RECOGNITION);
-                                if (matches != null && !matches.isEmpty()) {
-                                    String text = matches.get(0);
-                                    android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
-                                    if (ic != null) {
-                                        try {
-                                            ic.commitText(text + " ", 1);
-                                        } catch (Exception ex) {
-                                            Log.w(TAG, "Voice input: commitText failed", ex);
-                                        }
+                                    final java.util.ArrayList<String> matches = results.getStringArrayList(android.speech.SpeechRecognizer.RESULTS_RECOGNITION);
+                                    if (matches != null && !matches.isEmpty()) {
+                                        final String text = matches.get(0);
+                                        // نكتب النص على Main Thread عشان ما يحصلش crash
+                                        new android.os.Handler(android.os.Looper.getMainLooper()).post(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                try {
+                                                    android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
+                                                    if (ic != null) {
+                                                        ic.commitText(text + " ", 1);
+                                                    }
+                                                } catch (Exception ex) {
+                                                    Log.w(TAG, "Voice input: commitText failed", ex);
+                                                }
+                                            }
+                                        });
                                     }
+                                } catch (Exception ex) {
+                                    Log.e(TAG, "Voice input: onResults crashed", ex);
                                 }
                                 try {
                                     speechRecognizer.destroy();
