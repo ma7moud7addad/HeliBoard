@@ -1127,6 +1127,8 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
                 mInCursorMode = false;
                 mInHorizontalSwipe = false;
                 mInVerticalSwipe = false;
+                // Sync with LatinIME - CRITICAL!
+                sListener.onExitCursorMode();
                 sListener.onEndSpaceSwipe();
                 return;
             }
@@ -1186,6 +1188,23 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
         if (key == null) {
             return;
         }
+        // --- بداية تعديل MacBoard (Long Press على المسطرة = وضع تحريك المؤشر) ---
+        final int code = key.getCode();
+        if (code == Constants.CODE_SPACE) {
+            // Long press on space enters cursor movement mode
+            mInCursorMode = true;
+            // Sync with LatinIME - CRITICAL!
+            sListener.onEnterCursorMode();
+            sTimerProxy.cancelKeyTimersOf(this);
+            if (isShowingPopupKeysPanel()) {
+                dismissPopupKeysPanel();
+            }
+            // Haptic feedback to indicate cursor mode
+            sListener.onPressKey(code, 0, true, HapticEvent.KEY_LONG_PRESS);
+            return;
+        }
+        // --- نهاية التعديل ---
+
         sListener.onLongPressKey(key.getCode());
         if (key.hasNoPanelAutoPopupKey()) {
             cancelKeyTracking();
@@ -1195,20 +1214,6 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
             sListener.onReleaseKey(popupKeyCode, false);
             return;
         }
-        final int code = key.getCode();
-        // --- بداية تعديل MacBoard (Long Press على المسطرة = وضع تحريك المؤشر) ---
-        if (code == Constants.CODE_SPACE) {
-            // Long press on space enters cursor movement mode
-            mInCursorMode = true;
-            sTimerProxy.cancelKeyTimersOf(this);
-            if (isShowingPopupKeysPanel()) {
-                dismissPopupKeysPanel();
-            }
-            // Provide haptic feedback to indicate cursor mode
-            sListener.onPressKey(code, 0, true, HapticEvent.NO_HAPTICS);
-            return;
-        }
-        // --- نهاية التعديل ---
         if (code == KeyCode.LANGUAGE_SWITCH) {
             // Long pressing the language switch key invokes IME switcher dialog.
             if (sListener.onCustomRequest(Constants.CUSTOM_CODE_SHOW_INPUT_METHOD_PICKER)) {
