@@ -129,6 +129,10 @@ public class LatinIME extends InputMethodService implements
 
     final Settings mSettings;
     public final KeyboardActionListener mKeyboardActionListener;
+
+    // --- بداية تعديل MacBoard (وضع تحريك المؤشر بالـ Long Press) ---
+    private boolean mInCursorMode = false;
+    // --- نهاية التعديل ---
     private int mOriginalNavBarColor = 0;
     private int mOriginalNavBarFlags = 0;
 
@@ -560,7 +564,118 @@ public class LatinIME extends InputMethodService implements
         mSettings = Settings.getInstance();
         mKeyboardSwitcher = KeyboardSwitcher.getInstance();
         mStatsUtilsManager = StatsUtilsManager.getInstance();
-        mKeyboardActionListener = new KeyboardActionListenerImpl(this, mInputLogic);
+        // --- بداية تعديل MacBoard (وضع تحريك المؤشر بالـ Long Press) ---
+        // Wrap the keyboard action listener to intercept space swipe in cursor mode
+        final KeyboardActionListenerImpl delegate = new KeyboardActionListenerImpl(this, mInputLogic);
+        mKeyboardActionListener = new KeyboardActionListener() {
+            @Override
+            public void onPressKey(int primaryCode, int repeatCount, boolean isSinglePointer, HapticEvent hapticEvent) {
+                delegate.onPressKey(primaryCode, repeatCount, isSinglePointer, hapticEvent);
+            }
+            @Override
+            public void onLongPressKey(int primaryCode) {
+                delegate.onLongPressKey(primaryCode);
+            }
+            @Override
+            public void onReleaseKey(int primaryCode, boolean withSliding) {
+                delegate.onReleaseKey(primaryCode, withSliding);
+            }
+            @Override
+            public boolean onKeyDown(int keyCode, KeyEvent keyEvent) {
+                return delegate.onKeyDown(keyCode, keyEvent);
+            }
+            @Override
+            public boolean onKeyUp(int keyCode, KeyEvent keyEvent) {
+                return delegate.onKeyUp(keyCode, keyEvent);
+            }
+            @Override
+            public void onCodeInput(int primaryCode, int x, int y, boolean isKeyRepeat) {
+                delegate.onCodeInput(primaryCode, x, y, isKeyRepeat);
+            }
+            @Override
+            public void onTextInput(String text) {
+                delegate.onTextInput(text);
+            }
+            @Override
+            public void onStartBatchInput() {
+                delegate.onStartBatchInput();
+            }
+            @Override
+            public void onUpdateBatchInput(InputPointers batchPointers) {
+                delegate.onUpdateBatchInput(batchPointers);
+            }
+            @Override
+            public void onEndBatchInput(InputPointers batchPointers) {
+                delegate.onEndBatchInput(batchPointers);
+            }
+            @Override
+            public void onCancelBatchInput() {
+                delegate.onCancelBatchInput();
+            }
+            @Override
+            public void onCancelInput() {
+                delegate.onCancelInput();
+            }
+            @Override
+            public void onFinishSlidingInput() {
+                delegate.onFinishSlidingInput();
+            }
+            @Override
+            public boolean onCustomRequest(int requestCode) {
+                return delegate.onCustomRequest(requestCode);
+            }
+            @Override
+            public boolean onHorizontalSpaceSwipe(int steps) {
+                // لو في وضع تحريك المؤشر (من long press)، نحرك المؤشر مباشرة
+                if (mInCursorMode) {
+                    final android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
+                    if (ic != null) {
+                        int direction = steps > 0 ? 1 : -1;
+                        for (int i = 0; i < Math.abs(steps); i++) {
+                            ic.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, 
+                                direction > 0 ? KeyEvent.KEYCODE_DPAD_RIGHT : KeyEvent.KEYCODE_DPAD_LEFT));
+                            ic.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, 
+                                direction > 0 ? KeyEvent.KEYCODE_DPAD_RIGHT : KeyEvent.KEYCODE_DPAD_LEFT));
+                        }
+                    }
+                    return true;
+                }
+                return delegate.onHorizontalSpaceSwipe(steps);
+            }
+            @Override
+            public boolean onVerticalSpaceSwipe(int steps) {
+                return delegate.onVerticalSpaceSwipe(steps);
+            }
+            @Override
+            public void onEndSpaceSwipe() {
+                delegate.onEndSpaceSwipe();
+            }
+            @Override
+            public boolean toggleNumpad(boolean withSliding, boolean forceReturnToAlpha) {
+                return delegate.toggleNumpad(withSliding, forceReturnToAlpha);
+            }
+            @Override
+            public void onMoveDeletePointer(int steps) {
+                delegate.onMoveDeletePointer(steps);
+            }
+            @Override
+            public void onUpWithDeletePointerActive() {
+                delegate.onUpWithDeletePointerActive();
+            }
+            @Override
+            public void resetMetaState() {
+                delegate.resetMetaState();
+            }
+            @Override
+            public void onEnterCursorMode() {
+                mInCursorMode = true;
+            }
+            @Override
+            public void onExitCursorMode() {
+                mInCursorMode = false;
+            }
+        };
+        // --- نهاية التعديل ---
         mIsHardwareAcceleratedDrawingEnabled = this.enableHardwareAcceleration();
         Log.i(TAG, "Hardware accelerated drawing: " + mIsHardwareAcceleratedDrawingEnabled);
     }
