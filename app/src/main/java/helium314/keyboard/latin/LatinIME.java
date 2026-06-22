@@ -630,28 +630,29 @@ public class LatinIME extends InputMethodService implements
                 if (mInCursorMode) {
                     final android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
                     if (ic != null) {
-                        // --- بداية تعديل MacBoard (دعم RTL للمؤشر) ---
+                        // --- بداية تعديل MacBoard (دعم RTL + منع خروج الـ Focus) ---
                         // Check if current text is RTL (Arabic/Hebrew/etc)
                         boolean isRtl = false;
                         try {
-                            android.view.inputmethod.InputMethodSubtype subtype = mRichImm.getCurrentSubtype().getRawSubtype();
-                            if (subtype != null) {
-                                isRtl = subtype.isRtlSubtype();
-                            }
+                            isRtl = mRichImm.getCurrentSubtype().isRtlSubtype();
                         } catch (Exception e) { }
                         // For RTL text, reverse the direction so swipe feels natural
-                        // Swipe right = cursor moves right visually (which is actually towards start of text in RTL)
                         if (isRtl) {
                             steps = -steps;
                         }
-                        // --- نهاية التعديل ---
-                        int direction = steps > 0 ? 1 : -1;
-                        for (int i = 0; i < Math.abs(steps); i++) {
-                            ic.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, 
-                                direction > 0 ? KeyEvent.KEYCODE_DPAD_RIGHT : KeyEvent.KEYCODE_DPAD_LEFT));
-                            ic.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, 
-                                direction > 0 ? KeyEvent.KEYCODE_DPAD_RIGHT : KeyEvent.KEYCODE_DPAD_LEFT));
+                        // Use setSelection instead of DPAD keys to avoid focus leaving text field
+                        android.view.inputmethod.ExtractedText extractedText = ic.getExtractedText(
+                            new android.view.inputmethod.ExtractedTextRequest(), 0);
+                        if (extractedText != null) {
+                            int currentCursor = extractedText.selectionStart;
+                            int newCursor = currentCursor + steps;
+                            // Clamp to valid range [0, textLength]
+                            int textLength = extractedText.text != null ? extractedText.text.length() : 0;
+                            if (newCursor < 0) newCursor = 0;
+                            if (newCursor > textLength) newCursor = textLength;
+                            ic.setSelection(newCursor, newCursor);
                         }
+                        // --- نهاية التعديل ---
                     }
                     return true;
                 }
