@@ -116,6 +116,18 @@ public interface KeyboardActionListener {
     void onUpWithDeletePointerActive();
     void resetMetaState();
 
+    // --- بداية تعديل MacBoard (وضع تحريك المؤشر بالـ Long Press) ---
+    /**
+     * Called when user enters cursor movement mode via long press on space bar.
+     */
+    void onEnterCursorMode();
+
+    /**
+     * Called when user exits cursor movement mode.
+     */
+    void onExitCursorMode();
+    // --- نهاية التعديل ---
+
     KeyboardActionListener EMPTY_LISTENER = new Adapter();
 
     enum SwipeAction { NONE, MOVE_CURSOR, SWITCH_LANGUAGE, TOGGLE_NUMPAD, HIDE_KEYBOARD, TOUCHPAD_MODE }
@@ -171,5 +183,12 @@ public interface KeyboardActionListener {
         public void onUpWithDeletePointerActive() {}
         @Override
         public void resetMetaState() {}
+
+        // --- بداية تعديل MacBoard (وضع تحريك المؤشر بالـ Long Press) ---
+        @Override
+        public void onEnterCursorMode() {}
+        @Override
+        public void onExitCursorMode() {}
+        // --- نهاية التعديل ---
     }
 }
