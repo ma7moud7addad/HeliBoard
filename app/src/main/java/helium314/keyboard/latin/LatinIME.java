@@ -81,7 +81,6 @@ import helium314.keyboard.latin.utils.LeakGuardHandlerWrapper;
 import helium314.keyboard.latin.utils.Log;
 import helium314.keyboard.latin.utils.RecapitalizeMode;
 import helium314.keyboard.latin.utils.StatsUtils;
-import android.speech.SpeechRecognizer;
 import helium314.keyboard.latin.utils.StatsUtilsManager;
 import helium314.keyboard.latin.utils.SubtypeLocaleUtils;
 import helium314.keyboard.latin.utils.SubtypeSettings;
@@ -192,8 +191,6 @@ public class LatinIME extends InputMethodService implements
 
     private final ClipboardHistoryManager mClipboardHistoryManager = new ClipboardHistoryManager(this);
     private final ImageSuggestionManager mImageSuggestionManager = new ImageSuggestionManager(this);
-    @Nullable
-    private SpeechRecognizer mSpeechRecognizer;
 
     private boolean mIsClipboardAuthenticated = false;
     
@@ -730,12 +727,6 @@ public class LatinIME extends InputMethodService implements
 
     @Override
     public void onDestroy() {
-        // ====== MacBoard: destroy SpeechRecognizer ======
-        if (mSpeechRecognizer != null) {
-            try { mSpeechRecognizer.destroy(); } catch (Exception ignored) {}
-            mSpeechRecognizer = null;
-        }
-        // ====== نهاية التعديل ======
         mClipboardHistoryManager.onDestroy();
         mImageSuggestionManager.onDestroy();
         mDictionaryFacilitator.closeDictionaries();
@@ -999,7 +990,8 @@ public class LatinIME extends InputMethodService implements
                     mHandler.postResumeSuggestions(true /* shouldDelay */);
                 }
                 needToCallLoadKeyboardLater = false;
-            } else {
+            }
+        } else {
             // If we have a hardware keyboard we don't need to call loadKeyboard later anyway.
             needToCallLoadKeyboardLater = false;
         }
@@ -1077,12 +1069,6 @@ public class LatinIME extends InputMethodService implements
     }
 
     void onFinishInputViewInternal(final boolean finishingInput) {
-        // ====== MacBoard: destroy SpeechRecognizer ======
-        if (mSpeechRecognizer != null) {
-            try { mSpeechRecognizer.destroy(); } catch (Exception ignored) {}
-            mSpeechRecognizer = null;
-        }
-        // ====== نهاية التعديل ======
         super.onFinishInputView(finishingInput);
         Log.i(TAG, "onFinishInputView");
         cleanupInternalStateForFinishInput();
@@ -1484,113 +1470,51 @@ public class LatinIME extends InputMethodService implements
         // 2. الإدخال الصوتي المدمج (MacBoard)
         if (KeyCode.VOICE_INPUT == event.getKeyCode()) {
             android.widget.Toast.makeText(this, "🎤 جاري الاستماع...", android.widget.Toast.LENGTH_SHORT).show();
-
-            final boolean isRtl = mRichImm.getCurrentSubtype().isRtlSubtype();
-            final String initializingText = isRtl ? "جارِ التهيئة..." : "Initializing...";
-            final String speakNowText = isRtl ? "تحدث الآن" : "Speak now";
-            final String listeningText = isRtl ? "جارِ الاستماع..." : "Listening...";
-            if (hasSuggestionStripView()) {
-                mSuggestionStripView.setVoiceStatusText(initializingText, isRtl);
-            }
-
-            mHandler.post(() -> {
-                try {
-                    if (mSpeechRecognizer != null) {
-                        try { mSpeechRecognizer.destroy(); } catch (Exception ignored) {}
-                        mSpeechRecognizer = null;
-                    }
-
-                    mSpeechRecognizer = android.speech.SpeechRecognizer.createSpeechRecognizer(LatinIME.this);
-                    final android.content.Intent speechIntent = new android.content.Intent(android.speech.RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-                    speechIntent.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL, android.speech.RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-
+            new android.os.Handler(android.os.Looper.getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
                     try {
-                        android.view.inputmethod.InputMethodSubtype subtype = mRichImm.getCurrentSubtype().getRawSubtype();
-                        if (subtype != null && subtype.getLocale() != null && !subtype.getLocale().isEmpty()) {
-                            speechIntent.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE, subtype.getLocale());
-                        }
-                    } catch (Exception e) { /* ignore */ }
+                        final android.speech.SpeechRecognizer speechRecognizer = android.speech.SpeechRecognizer.createSpeechRecognizer(LatinIME.this);
+                        android.content.Intent speechIntent = new android.content.Intent(android.speech.RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+                        speechIntent.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL, android.speech.RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+                        
+                        try {
+                            android.view.inputmethod.InputMethodSubtype subtype = mRichImm.getCurrentSubtype().getRawSubtype();
+                            if (subtype != null && subtype.getLocale() != null && !subtype.getLocale().isEmpty()) {
+                                speechIntent.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE, subtype.getLocale());
+                            }
+                        } catch (Exception e) { }
 
-                    mSpeechRecognizer.setRecognitionListener(new android.speech.RecognitionListener() {
-                        @Override public void onReadyForSpeech(android.os.Bundle params) {
-                            mHandler.post(() -> {
-                                if (hasSuggestionStripView()) {
-                                    mSuggestionStripView.setVoiceStatusText(speakNowText, isRtl);
-                                }
-                            });
-                        }
-
-                        @Override public void onBeginningOfSpeech() {
-                            mHandler.post(() -> {
-                                if (hasSuggestionStripView()) {
-                                    mSuggestionStripView.setVoiceStatusText(listeningText, isRtl);
-                                }
-                            });
-                        }
-
-                        @Override public void onEndOfSpeech() {
-                            mHandler.post(() -> {
-                                if (hasSuggestionStripView()) {
-                                    mSuggestionStripView.setVoiceStatusText(null, isRtl);
-                                }
-                            });
-                        }
-
-                        @Override public void onError(int error) {
-                            mHandler.post(() -> {
+                        speechRecognizer.setRecognitionListener(new android.speech.RecognitionListener() {
+                            @Override public void onReadyForSpeech(android.os.Bundle params) {}
+                            @Override public void onBeginningOfSpeech() {}
+                            @Override public void onRmsChanged(float rmsdB) {}
+                            @Override public void onBufferReceived(byte[] buffer) {}
+                            @Override public void onEndOfSpeech() {}
+                            @Override public void onError(int error) {
                                 android.widget.Toast.makeText(LatinIME.this, "❌ توقف الاستماع", android.widget.Toast.LENGTH_SHORT).show();
-                                if (hasSuggestionStripView()) {
-                                    mSuggestionStripView.setVoiceStatusText(null, isRtl);
-                                }
-                                if (mSpeechRecognizer != null) {
-                                    try { mSpeechRecognizer.destroy(); } catch (Exception ignored) {}
-                                    mSpeechRecognizer = null;
-                                }
-                            });
-                        }
-
-                        @Override public void onResults(android.os.Bundle results) {
-                            final java.util.ArrayList<String> matches = results.getStringArrayList(android.speech.SpeechRecognizer.RESULTS_RECOGNITION);
-                            mHandler.post(() -> {
+                                speechRecognizer.destroy();
+                            }
+                            @Override public void onResults(android.os.Bundle results) {
+                                java.util.ArrayList<String> matches = results.getStringArrayList(android.speech.SpeechRecognizer.RESULTS_RECOGNITION);
                                 if (matches != null && !matches.isEmpty()) {
                                     String text = matches.get(0);
-                                    final android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
+                                    android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
                                     if (ic != null) {
                                         ic.commitText(text + " ", 1);
                                     }
                                 }
-                                if (hasSuggestionStripView()) {
-                                    mSuggestionStripView.setVoiceStatusText(null, isRtl);
-                                }
-                                if (mSpeechRecognizer != null) {
-                                    try { mSpeechRecognizer.destroy(); } catch (Exception ignored) {}
-                                    mSpeechRecognizer = null;
-                                }
-                            });
-                        }
-
-                        @Override public void onPartialResults(android.os.Bundle partialResults) { /* no-op */ }
-                        @Override public void onRmsChanged(float rmsdB) { /* no-op */ }
-                        @Override public void onBufferReceived(byte[] buffer) { /* no-op */ }
-                        @Override public void onEvent(int eventType, android.os.Bundle params) { /* no-op */ }
-                    });
-
-                    mSpeechRecognizer.startListening(speechIntent);
-                } catch (Exception e) {
-                    mHandler.post(() -> {
+                                speechRecognizer.destroy();
+                            }
+                            @Override public void onPartialResults(android.os.Bundle partialResults) {}
+                            @Override public void onEvent(int eventType, android.os.Bundle params) {}
+                        });
+                        speechRecognizer.startListening(speechIntent);
+                    } catch (Exception e) {
                         android.widget.Toast.makeText(LatinIME.this, "❌ تعذر تشغيل الإدخال الصوتي", android.widget.Toast.LENGTH_SHORT).show();
-                        if (hasSuggestionStripView()) {
-                            mSuggestionStripView.setVoiceStatusText(null, isRtl);
-                        }
-                    });
-                    if (mSpeechRecognizer != null) {
-                        try { mSpeechRecognizer.destroy(); } catch (Exception ignored) {}
-                        mSpeechRecognizer = null;
                     }
                 }
             });
-
-            return;
         } else {
             // 3. حماية الحافظة من اللوحة الأساسية (MacBoard)
             if (event.getKeyCode() == KeyCode.CLIPBOARD) {
