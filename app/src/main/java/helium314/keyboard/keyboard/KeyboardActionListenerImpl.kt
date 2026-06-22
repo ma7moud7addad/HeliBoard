@@ -192,6 +192,16 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
         subtypeSwitchCount = 0
     }
 
+    // --- بداية تعديل MacBoard (وضع تحريك المؤشر بالـ Long Press) ---
+    override fun onEnterCursorMode() {
+        // No-op: cursor mode is handled in PointerTracker and LatinIME wrapper
+    }
+
+    override fun onExitCursorMode() {
+        // No-op: cursor mode is handled in PointerTracker and LatinIME wrapper
+    }
+    // --- نهاية التعديل ---
+
     override fun toggleNumpad(withSliding: Boolean, forceReturnToAlpha: Boolean): Boolean {
         keyboardSwitcher.toggleNumpad(withSliding, latinIME.currentAutoCapsState, latinIME.currentRecapitalizeState, forceReturnToAlpha)
         return true
