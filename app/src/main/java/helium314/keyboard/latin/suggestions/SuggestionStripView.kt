@@ -509,7 +509,6 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         if (!toolbarContainer.isVisible)
             suggestionsStrip.isVisible = true
         dismissMoreSuggestionsPanel()
-        voiceStatusTextView = null
         for (word in wordViews) {
             word.setOnTouchListener(null)
         }
@@ -523,61 +522,6 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
             }
         }
     }
-
-    // ====== MacBoard: تحديث نص شريط الأدوات للإدخال الصوتي ======
-    private var voiceStatusTextView: TextView? = null
-
-    fun setVoiceStatusText(statusText: String?, isRtlLanguage: Boolean = true) {
-        if (statusText.isNullOrEmpty()) {
-            voiceStatusTextView?.let {
-                suggestionsStrip.removeView(it)
-                voiceStatusTextView = null
-            }
-            if (!isExternalSuggestionVisible) {
-                suggestionsStrip.visibility = VISIBLE
-                if (suggestedWords.size() > 0) {
-                    startIndexOfMoreSuggestions = layoutHelper.layoutAndReturnStartIndexOfMoreSuggestions(
-                        context, suggestedWords, suggestionsStrip, this
-                    )
-                }
-            }
-            return
-        }
-
-        if (!isExternalSuggestionVisible) {
-            suggestionsStrip.removeAllViews()
-        }
-
-        if (voiceStatusTextView == null) {
-            voiceStatusTextView = TextView(context, null, R.attr.suggestionWordStyle).apply {
-                gravity = android.view.Gravity.CENTER
-                setTextColor(Settings.getValues().mColors.get(ColorType.KEY_TEXT))
-                textSize = 16f
-                isSingleLine = true
-                ellipsize = TextUtils.TruncateAt.END
-            }
-        }
-
-        voiceStatusTextView?.text = statusText
-        voiceStatusTextView?.layoutDirection = if (isRtlLanguage) LAYOUT_DIRECTION_RTL else LAYOUT_DIRECTION_LTR
-
-        voiceStatusTextView?.let { textView ->
-            if (textView.parent == null) {
-                suggestionsStrip.addView(textView, LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.MATCH_PARENT
-                ))
-            }
-        }
-    }
-
-    fun resetVoiceStatus() {
-        voiceStatusTextView?.let {
-            suggestionsStrip.removeView(it)
-            voiceStatusTextView = null
-        }
-    }
-    // ====== نهاية التعديل ======
 
     fun updateVoiceKey() {
         val show = Settings.getValues().mShowsVoiceInputKey
