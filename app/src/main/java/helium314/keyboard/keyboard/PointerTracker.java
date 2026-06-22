@@ -762,8 +762,10 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
     private boolean isSwiper(final int code) {
         final SettingsValues sv = Settings.getValues();
         return switch (code) {
-            case Constants.CODE_SPACE -> sv.mSpaceSwipeHorizontal != KeyboardActionListener.SwipeAction.NONE
-                    || sv.mSpaceSwipeVertical != KeyboardActionListener.SwipeAction.NONE;
+            // --- بداية تعديل MacBoard (وضع تحريك المؤشر بالـ Long Press) ---
+            // Space is ALWAYS a swiper to support cursor mode via long press
+            case Constants.CODE_SPACE -> true;
+            // --- نهاية التعديل ---
             case KeyCode.DELETE -> sv.mDeleteSwipeEnabled;
             default -> false;
         };
@@ -948,15 +950,14 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
             int dY = y - mStartY;
 
             // --- بداية تعديل MacBoard (وضع تحريك المؤشر بالـ Long Press) ---
-            // لو في وضع تحريك المؤشر (بعد long press)، نحرك المؤشر بدل ما نغير اللغة
+            // If in cursor mode (after long press), move cursor regardless of swipe settings
             if (mInCursorMode) {
-                int cursorStep = Math.max(1, sPointerStep / 2); // أسرع شوية من السويب العادي
+                int cursorStep = Math.max(1, sPointerStep / 2);
                 int stepsX = dX / cursorStep;
                 if (stepsX != 0) {
                     sListener.onHorizontalSpaceSwipe(stepsX);
                     mStartX += stepsX * cursorStep;
                 }
-                // في وضع المؤشر، نمنع الـ vertical swipe
                 return;
             }
             // --- نهاية التعديل ---
@@ -1122,7 +1123,6 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
             mTouchpadHandler.disableTouchpadMode();
 
             // --- بداية تعديل MacBoard (وضع تحريك المؤشر بالـ Long Press) ---
-            // لو كنا في وضع تحريك المؤشر، نخرج منه
             if (mInCursorMode) {
                 mInCursorMode = false;
                 mInHorizontalSwipe = false;
@@ -1198,16 +1198,17 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
         final int code = key.getCode();
         // --- بداية تعديل MacBoard (Long Press على المسطرة = وضع تحريك المؤشر) ---
         if (code == Constants.CODE_SPACE) {
-            // لما نعمل long press على المسطرة، ندخل في وضع تحريك المؤشر
+            // Long press on space enters cursor movement mode
             mInCursorMode = true;
             sTimerProxy.cancelKeyTimersOf(this);
             if (isShowingPopupKeysPanel()) {
                 dismissPopupKeysPanel();
             }
+            // Provide haptic feedback to indicate cursor mode
+            sListener.onPressKey(code, 0, true, HapticEvent.NO_HAPTICS);
             return;
         }
         // --- نهاية التعديل ---
-
         if (code == KeyCode.LANGUAGE_SWITCH) {
             // Long pressing the language switch key invokes IME switcher dialog.
             if (sListener.onCustomRequest(Constants.CUSTOM_CODE_SHOW_INPUT_METHOD_PICKER)) {
