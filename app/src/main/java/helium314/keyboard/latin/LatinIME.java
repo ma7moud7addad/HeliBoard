@@ -1600,7 +1600,6 @@ public class LatinIME extends InputMethodService implements
 
         // 2. الإدخال الصوتي المدمج (MacBoard)
         if (KeyCode.VOICE_INPUT == event.getKeyCode()) {
-            android.widget.Toast.makeText(this, "🎤 جاري الاستماع...", android.widget.Toast.LENGTH_SHORT).show();
             new android.os.Handler(android.os.Looper.getMainLooper()).post(new Runnable() {
                 @Override
                 public void run() {
@@ -1623,7 +1622,6 @@ public class LatinIME extends InputMethodService implements
                             @Override public void onBufferReceived(byte[] buffer) {}
                             @Override public void onEndOfSpeech() {}
                             @Override public void onError(int error) {
-                                android.widget.Toast.makeText(LatinIME.this, "❌ توقف الاستماع", android.widget.Toast.LENGTH_SHORT).show();
                                 speechRecognizer.destroy();
                             }
                             @Override public void onResults(android.os.Bundle results) {
@@ -1642,7 +1640,7 @@ public class LatinIME extends InputMethodService implements
                         });
                         speechRecognizer.startListening(speechIntent);
                     } catch (Exception e) {
-                        android.widget.Toast.makeText(LatinIME.this, "❌ تعذر تشغيل الإدخال الصوتي", android.widget.Toast.LENGTH_SHORT).show();
+                        // تم إزالة Toast الخطأ
                     }
                 }
             });
