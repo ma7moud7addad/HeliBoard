@@ -398,6 +398,17 @@ public final class EmojiPalettesView extends LinearLayout
         getRecentsKeyboard().flushPendingRecentKeys();
     }
 
+    /**
+     * MacBoard: Reset emoji category to Recently Used when opening emoji keyboard.
+     * This ensures the user always lands on Recents instead of the last visited category.
+     */
+    public void resetToRecentsCategory() {
+        if (mEmojiCategory != null) {
+            mEmojiCategory.setCurrentCategoryId(EmojiCategory.ID_RECENTS);
+            mEmojiCategory.setCurrentCategoryPageId(0);
+        }
+    }
+
     private DynamicGridKeyboard getRecentsKeyboard() {
         return mEmojiCategory.getKeyboard(EmojiCategory.ID_RECENTS, 0);
     }
