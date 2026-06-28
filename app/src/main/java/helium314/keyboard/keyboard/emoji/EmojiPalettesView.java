@@ -409,7 +409,18 @@ public final class EmojiPalettesView extends LinearLayout
         }
         // Also update the UI (pager position + tab strip highlight) if already initialized
         if (initialized) {
+            resetAllTabColors();
             setCurrentCategoryId(EmojiCategory.ID_RECENTS, true);
+        }
+    }
+
+    private void resetAllTabColors() {
+        if (mTabStrip == null || !Settings.getValues().mSecondaryStripVisible) return;
+        for (int i = 0; i < mTabStrip.getChildCount(); i++) {
+            View child = mTabStrip.getChildAt(i);
+            if (child instanceof ImageView) {
+                Settings.getValues().mColors.setColor((ImageView) child, ColorType.EMOJI_CATEGORY);
+            }
         }
     }
 
