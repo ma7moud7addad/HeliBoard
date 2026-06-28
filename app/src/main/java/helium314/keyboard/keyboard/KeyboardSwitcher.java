@@ -364,10 +364,12 @@ public final class KeyboardSwitcher implements KeyboardState.SwitchActions {
         mClipboardStripScrollView.setVisibility(View.GONE);
         mEmojiTabStripView.setVisibility(View.VISIBLE);
         mClipboardHistoryView.setVisibility(View.GONE);
-        // MacBoard: Always start emoji keyboard on Recently Used category
-        mEmojiPalettesView.resetToRecentsCategory();
         mEmojiPalettesView.startEmojiPalettes(mKeyboardView.getKeyVisualAttribute(),
                 mLatinIME.getCurrentInputEditorInfo(), mLatinIME.mKeyboardActionListener);
+        // MacBoard: Always start emoji keyboard on Recently Used category
+        // Must be AFTER startEmojiPalettes (which calls initialize() and loads old category from prefs)
+        // and BEFORE setVisibility(VISIBLE) to avoid flashing the old category
+        mEmojiPalettesView.resetToRecentsCategory();
         mEmojiPalettesView.setVisibility(View.VISIBLE);
     }
 
