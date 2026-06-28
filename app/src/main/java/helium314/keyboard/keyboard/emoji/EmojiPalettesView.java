@@ -407,6 +407,10 @@ public final class EmojiPalettesView extends LinearLayout
             mEmojiCategory.setCurrentCategoryId(EmojiCategory.ID_RECENTS);
             mEmojiCategory.setCurrentCategoryPageId(0);
         }
+        // Also update the UI (pager position + tab strip highlight) if already initialized
+        if (initialized) {
+            setCurrentCategoryId(EmojiCategory.ID_RECENTS, true);
+        }
     }
 
     private DynamicGridKeyboard getRecentsKeyboard() {
