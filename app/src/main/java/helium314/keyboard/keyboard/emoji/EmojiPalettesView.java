@@ -309,8 +309,12 @@ public final class EmojiPalettesView extends LinearLayout
             mKeyboardActionListener.onCodeInput(code, NOT_A_COORDINATE, NOT_A_COORDINATE, false);
         }
         mKeyboardActionListener.onReleaseKey(code, false);
-        if (Settings.getValues().mAlphaAfterEmojiInEmojiView)
+        if (Settings.getValues().mAlphaAfterEmojiInEmojiView) {
+            // MacBoard: Reset to Recents before auto-switching to main keyboard
+            // so next time emoji panel opens, it starts directly on Recently Used
+            resetToRecentsCategory();
             mKeyboardActionListener.onCodeInput(KeyCode.ALPHA, NOT_A_COORDINATE, NOT_A_COORDINATE, false);
+        }
     }
 
     @Override
