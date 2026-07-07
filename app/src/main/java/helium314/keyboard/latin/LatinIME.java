@@ -769,12 +769,11 @@ public class LatinIME extends InputMethodService implements
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
             restartAfterUnlockFilter.addAction(Intent.ACTION_USER_UNLOCKED);
         registerReceiver(mRestartAfterDeviceUnlockReceiver, restartAfterUnlockFilter);
-// تشغيل راديو MacBoard
-        // تشغيل راديو MacBoard
-        final IntentFilter macroFilter = new IntentFilter();
-        macroFilter.addAction("com.mahmoud.MACRO_OPEN_CLIPBOARD");
-        macroFilter.addAction("com.mahmoud.MACRO_AUTH_FAILED");
-        ContextCompat.registerReceiver(this, mMacroDroidReceiver, macroFilter, ContextCompat.RECEIVER_EXPORTED);
+// --- MacBoard: Register Biometric Auth Receiver (RECEIVER_NOT_EXPORTED for security) ---
+        final IntentFilter biometricFilter = new IntentFilter();
+        biometricFilter.addAction(BiometricAuthActivity.ACTION_AUTH_RESULT);
+        ContextCompat.registerReceiver(this, mBiometricAuthReceiver, biometricFilter, ContextCompat.RECEIVER_NOT_EXPORTED);
+        // --- End MacBoard ---
         StatsUtils.onCreate(mSettings.getCurrent(), mRichImm);
     }
 
