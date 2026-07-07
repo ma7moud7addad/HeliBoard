@@ -1,6 +1,6 @@
 package helium314.keyboard;
 
-import android.app.Activity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
@@ -8,7 +8,7 @@ import androidx.biometric.BiometricPrompt;
 import androidx.core.content.ContextCompat;
 import java.util.concurrent.Executor;
 
-public class BiometricAuthActivity extends Activity {
+public class BiometricAuthActivity extends AppCompatActivity {
 
     public static final String ACTION_AUTH_RESULT = "helium314.keyboard.BIOMETRIC_RESULT";
     public static final String EXTRA_SUCCESS = "success";
