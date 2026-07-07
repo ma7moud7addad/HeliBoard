@@ -146,6 +146,7 @@ dependencies {
     "debugNoMinifyImplementation"("androidx.compose.ui:ui-tooling")
     implementation("androidx.navigation:navigation-compose:2.9.8")
     implementation("sh.calvin.reorderable:reorderable:3.1.0") // for easier re-ordering
+    implementation("androidx.biometric:biometric:1.1.0") // MacBoard: Biometric auth
     implementation("com.github.skydoves:colorpicker-compose:1.1.3") // for user-defined colors
 
     // test
