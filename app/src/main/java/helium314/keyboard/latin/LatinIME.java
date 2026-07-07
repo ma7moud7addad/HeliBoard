@@ -87,6 +87,7 @@ import helium314.keyboard.latin.utils.SubtypeSettings;
 import helium314.keyboard.latin.utils.SubtypeState;
 import helium314.keyboard.latin.utils.ToolbarMode;
 import helium314.keyboard.settings.SettingsActivity2;
+import helium314.keyboard.BiometricAuthActivity;
 import kotlin.Unit;
 
 import java.io.FileDescriptor;
@@ -201,25 +202,53 @@ public class LatinIME extends InputMethodService implements
     private boolean mIsWaitingForBiometricResult = false;
     
     // ============================================================
-    // نقطة التفتيش المركزية لفتح الحافظة (MacBoard)
+    // MacBoard: Native Biometric Clipboard Protection
     // ============================================================
     private void openClipboardWithAuth() {
         if (!mIsClipboardAuthenticated) {
-            mIsWaitingForBiometricResult = true;
-            try {
-                Intent intent = new Intent("com.mahmoud.MACRO_REQ_FINGERPRINT");
-                sendBroadcast(intent);
-            } catch (Exception e) { /* ignore */ }
+            if (!mIsWaitingForBiometricResult) {
+                mIsWaitingForBiometricResult = true;
+                // Launch native biometric activity
+                Intent intent = new Intent(this, BiometricAuthActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
 
-            // مؤقت أمني: إلغاء حالة الانتظار تلقائياً بعد 10 ثوانٍ
-            mHandler.postDelayed(() -> mIsWaitingForBiometricResult = false, 10000);
+                // Safety timeout: cancel waiting after 15 seconds
+                mHandler.postDelayed(() -> {
+                    if (mIsWaitingForBiometricResult) {
+                        mIsWaitingForBiometricResult = false;
+                    }
+                }, 15000);
+            }
             return;
         }
 
-        // سحب التصريح وفتح الحافظة مباشرة من المحرك
+        // Auth passed - open clipboard and reset flag
         mIsClipboardAuthenticated = false;
         mKeyboardSwitcher.setClipboardKeyboard();
     }
+
+    // --- MacBoard: Biometric Result Receiver ---
+    private final BroadcastReceiver mBiometricAuthReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(final Context context, final Intent intent) {
+            if (intent == null) return;
+            if (BiometricAuthActivity.ACTION_AUTH_RESULT.equals(intent.getAction())) {
+                boolean success = intent.getBooleanExtra(BiometricAuthActivity.EXTRA_SUCCESS, false);
+                mIsWaitingForBiometricResult = false;
+
+                if (success) {
+                    mIsClipboardAuthenticated = true;
+                    // Open clipboard after successful auth
+                    openClipboardWithAuth();
+                } else {
+                    mIsClipboardAuthenticated = false;
+                    android.widget.Toast.makeText(LatinIME.this, "❌ فشل التحقق", android.widget.Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+    };
+    // --- End MacBoard ---
     
     public static final class UIHandler extends LeakGuardHandlerWrapper<LatinIME> {
         private static final int MSG_UPDATE_SHIFT_STATE = 0;
@@ -868,7 +897,9 @@ public class LatinIME extends InputMethodService implements
         unregisterReceiver(mDictionaryPackInstallReceiver);
         unregisterReceiver(mDictionaryDumpBroadcastReceiver);
         unregisterReceiver(mRestartAfterDeviceUnlockReceiver);
-        unregisterReceiver(mMacroDroidReceiver);
+        // --- MacBoard: Unregister Biometric Receiver ---
+        unregisterReceiver(mBiometricAuthReceiver);
+        // --- End MacBoard ---
         mStatsUtilsManager.onDestroy(this /* context */);
         super.onDestroy();
         mHandler.removeCallbacksAndMessages(null);
@@ -1941,38 +1972,7 @@ public class LatinIME extends InputMethodService implements
     // boolean onKeyMultiple(final int keyCode, final int count, final KeyEvent event);
 
     // receive ringer mode change.
-    // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid عبر الراديو) ---
-    // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid عبر الراديو) ---
-    // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid عبر الراديو) ---
-    // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid عبر الراديو) ---
-    // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid عبر الراديو) ---
-    // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid مع حماية بكلمة سر) ---
-    // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid عبر الراديو) ---
-    private final BroadcastReceiver mMacroDroidReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(final Context context, final Intent intent) {
-            if (intent == null) return;
-            String action = intent.getAction();
 
-            if ("com.mahmoud.MACRO_OPEN_CLIPBOARD".equals(action)) {
-                String token = intent.getStringExtra("auth_token");
-                if ("M3aB2gK6+U8Wm7F6^s8,JlY:o=3h~c".equals(token)) {
-                    mHandler.post(() -> {
-                        if (mIsWaitingForBiometricResult && isInputViewShown()) {
-                            mIsWaitingForBiometricResult = false;
-                            mIsClipboardAuthenticated = true;
-                            openClipboardWithAuth(); // توجيه لنقطة التفتيش
-                        }
-                    });
-                } else {
-                    Log.w(TAG, "محاولة اختراق: إشارة فتح الحافظة بدون كلمة سر صحيحة!");
-                }
-            } else if ("com.mahmoud.MACRO_AUTH_FAILED".equals(action)) {
-                mIsWaitingForBiometricResult = false;
-            }
-        }
-    };
-    // --- نهاية التعديل ---
     
     private final BroadcastReceiver mRingerModeChangeReceiver = new BroadcastReceiver() {
         @Override
