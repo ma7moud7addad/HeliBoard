@@ -1,21 +1,33 @@
 package helium314.keyboard.keyboard;
 
-import androidx.appcompat.app.AppCompatActivity;
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.biometric.BiometricPrompt;
 import androidx.core.content.ContextCompat;
 import java.util.concurrent.Executor;
 
-public class BiometricAuthActivity extends AppCompatActivity {
+public class BiometricAuthActivity extends Activity {
+    private static final String TAG = "MacBoardBio";
 
-    public static final String ACTION_AUTH_RESULT = "helium314.keyboard.BIOMETRIC_RESULT";
-    public static final String EXTRA_SUCCESS = "success";
+    // Static callback to communicate with LatinIME
+    public static BiometricCallback sCallback = null;
+
+    public interface BiometricCallback {
+        void onSuccess();
+        void onFailure();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "BiometricAuthActivity onCreate");
+
+        // Don't set content view - keep it transparent
 
         Executor executor = ContextCompat.getMainExecutor(this);
 
@@ -24,37 +36,65 @@ public class BiometricAuthActivity extends AppCompatActivity {
                 @Override
                 public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
                     super.onAuthenticationSucceeded(result);
-                    sendResult(true);
+                    Log.d(TAG, "Biometric SUCCESS");
+                    if (sCallback != null) {
+                        sCallback.onSuccess();
+                    }
+                    finishAndClear();
                 }
 
                 @Override
                 public void onAuthenticationFailed() {
                     super.onAuthenticationFailed();
-                    sendResult(false);
+                    Log.d(TAG, "Biometric FAILED");
+                    if (sCallback != null) {
+                        sCallback.onFailure();
+                    }
+                    finishAndClear();
                 }
 
                 @Override
                 public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
                     super.onAuthenticationError(errorCode, errString);
-                    sendResult(false);
+                    Log.d(TAG, "Biometric ERROR: " + errorCode + " - " + errString);
+                    if (sCallback != null) {
+                        sCallback.onFailure();
+                    }
+                    finishAndClear();
                 }
             });
 
         BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
-            .setTitle("🔒 MacBoard - الحافظة المحمية")
-            .setSubtitle("استخدم بصمة الإصبع للوصول")
+            .setTitle("🔒 MacBoard")
+            .setSubtitle("استخدم بصمة الإصبع للوصول للحافظة")
             .setNegativeButtonText("إلغاء")
             .setConfirmationRequired(false)
             .build();
 
-        biometricPrompt.authenticate(promptInfo);
+        try {
+            biometricPrompt.authenticate(promptInfo);
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to show biometric prompt", e);
+            if (sCallback != null) {
+                sCallback.onFailure();
+            }
+            finishAndClear();
+        }
     }
 
-    private void sendResult(boolean success) {
-        Intent intent = new Intent(ACTION_AUTH_RESULT);
-        intent.putExtra(EXTRA_SUCCESS, success);
-        intent.setPackage(getPackageName());
-        sendBroadcast(intent);
+    private void finishAndClear() {
+        sCallback = null;
+        finish();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // If activity is paused without auth result, treat as failure
+        if (sCallback != null) {
+            sCallback.onFailure();
+            sCallback = null;
+        }
         finish();
     }
 }
