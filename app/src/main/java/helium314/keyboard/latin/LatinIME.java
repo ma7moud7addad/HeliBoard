@@ -87,7 +87,7 @@ import helium314.keyboard.latin.utils.SubtypeSettings;
 import helium314.keyboard.latin.utils.SubtypeState;
 import helium314.keyboard.latin.utils.ToolbarMode;
 import helium314.keyboard.settings.SettingsActivity2;
-import helium314.keyboard.BiometricAuthActivity;
+import helium314.keyboard.keyboard.BiometricAuthActivity;
 import kotlin.Unit;
 
 import java.io.FileDescriptor;
