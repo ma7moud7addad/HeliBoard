@@ -87,7 +87,6 @@ import helium314.keyboard.latin.utils.SubtypeSettings;
 import helium314.keyboard.latin.utils.SubtypeState;
 import helium314.keyboard.latin.utils.ToolbarMode;
 import helium314.keyboard.settings.SettingsActivity2;
-import helium314.keyboard.keyboard.BiometricAuthActivity;
 import kotlin.Unit;
 
 import java.io.FileDescriptor;
@@ -228,27 +227,7 @@ public class LatinIME extends InputMethodService implements
         mKeyboardSwitcher.setClipboardKeyboard();
     }
 
-    // --- MacBoard: Biometric Result Receiver ---
-    private final BroadcastReceiver mBiometricAuthReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(final Context context, final Intent intent) {
-            if (intent == null) return;
-            if (BiometricAuthActivity.ACTION_AUTH_RESULT.equals(intent.getAction())) {
-                boolean success = intent.getBooleanExtra(BiometricAuthActivity.EXTRA_SUCCESS, false);
-                mIsWaitingForBiometricResult = false;
 
-                if (success) {
-                    mIsClipboardAuthenticated = true;
-                    // Open clipboard after successful auth
-                    openClipboardWithAuth();
-                } else {
-                    mIsClipboardAuthenticated = false;
-                    android.widget.Toast.makeText(LatinIME.this, "❌ فشل التحقق", android.widget.Toast.LENGTH_SHORT).show();
-                }
-            }
-        }
-    };
-    // --- End MacBoard ---
     
     public static final class UIHandler extends LeakGuardHandlerWrapper<LatinIME> {
         private static final int MSG_UPDATE_SHIFT_STATE = 0;
@@ -896,9 +875,7 @@ public class LatinIME extends InputMethodService implements
         unregisterReceiver(mDictionaryPackInstallReceiver);
         unregisterReceiver(mDictionaryDumpBroadcastReceiver);
         unregisterReceiver(mRestartAfterDeviceUnlockReceiver);
-        // --- MacBoard: Unregister Biometric Receiver ---
-        unregisterReceiver(mBiometricAuthReceiver);
-        // --- End MacBoard ---
+
         mStatsUtilsManager.onDestroy(this /* context */);
         super.onDestroy();
         mHandler.removeCallbacksAndMessages(null);
