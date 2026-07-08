@@ -87,6 +87,7 @@ import helium314.keyboard.latin.utils.SubtypeSettings;
 import helium314.keyboard.latin.utils.SubtypeState;
 import helium314.keyboard.latin.utils.ToolbarMode;
 import helium314.keyboard.settings.SettingsActivity2;
+import helium314.keyboard.keyboard.BiometricAuthActivity;
 import kotlin.Unit;
 
 import java.io.FileDescriptor;
@@ -207,17 +208,7 @@ public class LatinIME extends InputMethodService implements
         if (!mIsClipboardAuthenticated) {
             if (!mIsWaitingForBiometricResult) {
                 mIsWaitingForBiometricResult = true;
-                // Launch native biometric activity
-                Intent intent = new Intent(this, BiometricAuthActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
-
-                // Safety timeout: cancel waiting after 15 seconds
-                mHandler.postDelayed(() -> {
-                    if (mIsWaitingForBiometricResult) {
-                        mIsWaitingForBiometricResult = false;
-                    }
-                }, 15000);
+                launchBiometricActivity();
             }
             return;
         }
@@ -225,6 +216,44 @@ public class LatinIME extends InputMethodService implements
         // Auth passed - open clipboard and reset flag
         mIsClipboardAuthenticated = false;
         mKeyboardSwitcher.setClipboardKeyboard();
+    }
+
+    private void launchBiometricActivity() {
+        try {
+            // Set static callback BEFORE starting activity
+            BiometricAuthActivity.sCallback = new BiometricAuthActivity.BiometricCallback() {
+                @Override
+                public void onSuccess() {
+                    mIsWaitingForBiometricResult = false;
+                    mIsClipboardAuthenticated = true;
+                    openClipboardWithAuth();
+                }
+
+                @Override
+                public void onFailure() {
+                    mIsWaitingForBiometricResult = false;
+                    mIsClipboardAuthenticated = false;
+                }
+            };
+
+            Intent intent = new Intent(this, BiometricAuthActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_ANIMATION);
+            startActivity(intent);
+
+            // Safety timeout
+            mHandler.postDelayed(() -> {
+                if (mIsWaitingForBiometricResult) {
+                    mIsWaitingForBiometricResult = false;
+                    BiometricAuthActivity.sCallback = null;
+                }
+            }, 15000);
+
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to launch biometric activity", e);
+            mIsWaitingForBiometricResult = false;
+            mIsClipboardAuthenticated = true;
+            openClipboardWithAuth();
+        }
     }
 
 
@@ -748,11 +777,7 @@ public class LatinIME extends InputMethodService implements
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
             restartAfterUnlockFilter.addAction(Intent.ACTION_USER_UNLOCKED);
         registerReceiver(mRestartAfterDeviceUnlockReceiver, restartAfterUnlockFilter);
-// --- MacBoard: Register Biometric Auth Receiver (RECEIVER_NOT_EXPORTED for security) ---
-        final IntentFilter biometricFilter = new IntentFilter();
-        biometricFilter.addAction(BiometricAuthActivity.ACTION_AUTH_RESULT);
-        ContextCompat.registerReceiver(this, mBiometricAuthReceiver, biometricFilter, ContextCompat.RECEIVER_NOT_EXPORTED);
-        // --- End MacBoard ---
+
         StatsUtils.onCreate(mSettings.getCurrent(), mRichImm);
     }
 
