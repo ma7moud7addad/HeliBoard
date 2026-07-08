@@ -1,6 +1,6 @@
 package helium314.keyboard.keyboard;
 
-import android.app.Activity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -11,7 +11,7 @@ import androidx.biometric.BiometricPrompt;
 import androidx.core.content.ContextCompat;
 import java.util.concurrent.Executor;
 
-public class BiometricAuthActivity extends Activity {
+public class BiometricAuthActivity extends AppCompatActivity {
     private static final String TAG = "MacBoardBio";
 
     // Static callback to communicate with LatinIME
