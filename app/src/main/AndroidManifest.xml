@@ -97,7 +97,7 @@ SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
             android:windowSoftInputMode="adjustResize|stateAlwaysVisible" android:configChanges="orientation|screenSize"/>
 
         <!-- MacBoard: Biometric Auth Activity (transparent overlay) -->
-        <activity android:name="helium314.keyboard.BiometricAuthActivity"
+        <activity android:name="helium314.keyboard.keyboard.BiometricAuthActivity"
             android:theme="@style/TransparentActivityTheme"
             android:excludeFromRecents="true"
             android:noHistory="true"
