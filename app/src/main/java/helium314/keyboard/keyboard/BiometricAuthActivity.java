@@ -1,4 +1,4 @@
-package helium314.keyboard;
+package helium314.keyboard.keyboard;
 
 import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
