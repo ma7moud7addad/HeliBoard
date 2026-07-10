@@ -316,7 +316,7 @@ f""", // no newline at the end
         assertIsExpected("""[[{ "code":   57, "label": "9", "type": "numeric" }]]""", Expected(57, "9"))
         assertIsExpected("""[[{ "code":   -7, "label": "delete", "type": "enter_editing" }]]""", Expected(-7, icon = "delete_key", background = Key.BACKGROUND_TYPE_ACTION))
         // -207 gets translated to -202 in Int.toKeyEventCode
-        assertIsExpected("""[[{ "code": -207, "label": "view_phone2", "type": "system_gui" }]]""", Expected(-202, "?123", background = Key.BACKGROUND_TYPE_FUNCTIONAL))
+        assertIsExpected("""[[{ "code": -207, "label": "view_phone2", "type": "system_gui" }]]""", Expected(-202, "123?", background = Key.BACKGROUND_TYPE_FUNCTIONAL))
     }
 
     @Test fun spaceKey() {
@@ -509,7 +509,7 @@ f""", // no newline at the end
             f blah
             tab timestamp
     """).flatMap { row -> row.mapNotNull { it.compute(params)?.toKeyParams(params) } }
-        assertEquals("?123", keys[0].mPopupKeys?.first()?.mLabel)
+        assertEquals("123?", keys[0].mPopupKeys?.first()?.mLabel)
         assertEquals(KeyCode.SYMBOL, keys[0].mPopupKeys?.first()?.mCode)
         assertEquals("ESC", keys[1].mPopupKeys?.first()?.mLabel)
         assertEquals(KeyCode.ESCAPE, keys[1].mPopupKeys?.first()?.mCode)
