@@ -52,6 +52,15 @@ class ClipboardHistoryManager(
     private fun fetchPrimaryClip() {
         val clipData = clipboardManager.primaryClip ?: return
         if (clipData.itemCount == 0 || clipData.description?.hasMimeType("text/*") == false) return
+        
+        // --- بداية التعديل: منع حفظ المحتوى الحساس ---
+        // Check if the clip is marked as sensitive (Android 13+)
+        if (ClipboardManagerCompat.getClipSensitivity(clipData.description) == true) {
+            // Silently ignore sensitive clips - do not save to history
+            return
+        }
+        // --- نهاية التعديل ---
+        
         clipData.getItemAt(0)?.let { clipItem ->
             val timeStamp = ClipboardManagerCompat.getClipTimestamp(clipData)
             val content = clipItem.coerceToText(latinIME)
