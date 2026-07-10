@@ -820,8 +820,13 @@ public final class MainKeyboardView extends KeyboardView implements DrawingProxy
             final String l = KeyboardSwitcher.getInstance().getLocaleAndConfidenceInfo();
             spaceText = l != null ? l : layoutLanguageOnSpacebar(paint, keyboard.mId.mSubtype, width);
         }
-        else
-            spaceText = layoutLanguageOnSpacebar(paint, keyboard.mId.mSubtype, width);
+        else {
+            // Get the default language text first
+            String defaultLanguageText = layoutLanguageOnSpacebar(paint, keyboard.mId.mSubtype, width);
+            
+            // NOW INTERCEPT AND CUSTOMIZE HERE (كمين دكتور محمود)
+            spaceText = customizeSpacebarText(defaultLanguageText, keyboard.mId.mSubtype);
+        }
         paint.setTypeface(KeyboardTypeface.resolve(spaceText, Typeface.DEFAULT));
         // Draw language text with shadow
         final float descent = paint.descent();
@@ -842,6 +847,25 @@ public final class MainKeyboardView extends KeyboardView implements DrawingProxy
         canvas.drawText(spaceText, width / 2f, baseline - descent, paint);
         paint.clearShadowLayer();
         paint.setTextScaleX(1.0f);
+    }
+
+    // ADD THIS NEW METHOD after drawLanguageOnSpacebar() (الدالة الخاصة باسمك)
+    private String customizeSpacebarText(final String defaultText, final RichInputMethodSubtype subtype) {
+        // Get the locale from the subtype
+        final Locale locale = subtype.getLocale();
+        final String languageTag = locale.toLanguageTag();
+        
+        // Check language and customize accordingly
+        if (languageTag.startsWith("en")) {
+            // English language - show "dr ma7moud"
+            return "dr ma7moud";
+        } else if (languageTag.startsWith("ar")) {
+            // Arabic language - show "د محمود"
+            return "د محمود";
+        }
+        
+        // For any other language, keep the default behavior
+        return defaultText;
     }
 
     @Override
