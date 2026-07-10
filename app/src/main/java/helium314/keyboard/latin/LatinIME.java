@@ -1,9 +1,3 @@
-/*
- * Copyright (C) 2008 The Android Open Source Project
- * modified
- * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
- */
-
 package helium314.keyboard.latin;
 
 import android.annotation.SuppressLint;
@@ -1475,7 +1469,7 @@ public class LatinIME extends InputMethodService implements
     }
 
     @Override
-    @RequiresApi(api = Build.VERSION_CODES.R)
+    @RequiresApi(api = Build.VERSION.R)
     public boolean onInlineSuggestionsResponse(InlineSuggestionsResponse response) {
         Log.d(TAG,"onInlineSuggestionsResponse called");
         if (Settings.getValues().mSuggestionStripHiddenPerUserSettings) {
@@ -1577,9 +1571,9 @@ public class LatinIME extends InputMethodService implements
     // Implementation of {@link SuggestionStripView.Listener}.
     @Override
     public void onCodeInput(final int codePoint, final int x, final int y, final boolean isKeyRepeat) {
-        // حماية الحافظة من شريط الأدوات
+        // فتح الحافظة مباشرة بدون بصمة
         if (codePoint == KeyCode.CLIPBOARD) {
-            openClipboardWithAuth();
+            mKeyboardSwitcher.setClipboardKeyboard();
             return; 
         }
         mKeyboardActionListener.onCodeInput(codePoint, x, y, isKeyRepeat);
@@ -1645,10 +1639,10 @@ public class LatinIME extends InputMethodService implements
                 }
             });
         } else {
-            // 3. حماية الحافظة من اللوحة الأساسية (MacBoard)
+            // 3. فتح الحافظة مباشرة بدون بصمة (MacBoard)
             if (event.getKeyCode() == KeyCode.CLIPBOARD) {
-                openClipboardWithAuth();
-                return; // نوقف الكود هنا عشان الحافظة متفتحش
+                mKeyboardSwitcher.setClipboardKeyboard();
+                return; 
             }
 
             // 4. معالجة باقي الأزرار العادية
