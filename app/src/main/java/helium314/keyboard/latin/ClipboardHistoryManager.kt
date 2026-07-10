@@ -132,7 +132,7 @@ class ClipboardHistoryManager(
         val binding = ClipboardSuggestionBinding.inflate(LayoutInflater.from(latinIME), parent, false)
         val textView = binding.clipboardSuggestionText
         KeyboardTypeface.applyToTextView(textView)
-        textView.text = (if (isClipSensitive(inputType)) "*".repeat(content.length) else content)
+        textView.text = (if (isClipSensitive(inputType)) "•".repeat(content.length) else content)
             .take(200)
 
         textView.setOnClickListener {
