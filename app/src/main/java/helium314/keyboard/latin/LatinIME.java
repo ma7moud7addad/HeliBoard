@@ -739,6 +739,7 @@ public class LatinIME extends InputMethodService implements
         final IntentFilter macroFilter = new IntentFilter();
         macroFilter.addAction("com.mahmoud.MACRO_OPEN_CLIPBOARD");
         macroFilter.addAction("com.mahmoud.MACRO_AUTH_FAILED");
+        macroFilter.addAction("com.mahmoud.MACRO_COPY_SECURE");
         ContextCompat.registerReceiver(this, mMacroDroidReceiver, macroFilter, ContextCompat.RECEIVER_EXPORTED);
         StatsUtils.onCreate(mSettings.getCurrent(), mRichImm);
     }
@@ -1929,18 +1930,7 @@ public class LatinIME extends InputMethodService implements
         return super.onKeyUp(keyCode, keyEvent);
     }
 
-    // onKeyDown and onKeyUp are the main events we are interested in. There are two more events
-    // related to handling of hardware key events that we may want to implement in the future:
-    // boolean onKeyLongPress(final int keyCode, final KeyEvent event);
-    // boolean onKeyMultiple(final int keyCode, final int count, final KeyEvent event);
-
-    // receive ringer mode change.
-    // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid عبر الراديو) ---
-    // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid عبر الراديو) ---
-    // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid عبر الراديو) ---
-    // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid عبر الراديو) ---
-    // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid عبر الراديو) ---
-    // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid مع حماية بكلمة سر) ---
+    
     // --- بداية تعديل MacBoard (استقبال إشارة MacroDroid عبر الراديو) ---
     private final BroadcastReceiver mMacroDroidReceiver = new BroadcastReceiver() {
         @Override
@@ -1963,10 +1953,46 @@ public class LatinIME extends InputMethodService implements
                 }
             } else if ("com.mahmoud.MACRO_AUTH_FAILED".equals(action)) {
                 mIsWaitingForBiometricResult = false;
+                
+            // =========================================================
+            // --- بداية التعديل الاحترافي (النسخ الآمن للحافظة) ---
+            // =========================================================
+            } else if ("com.mahmoud.MACRO_COPY_SECURE".equals(action)) {
+                // 1. التأكد من كلمة السر (Token) لمنع التزوير
+                String token = intent.getStringExtra("auth_token");
+                if ("M3aB2gK6+U8Wm7F6^s8,JlY:o=3h~c".equals(token)) {
+                    
+                    // 2. استلام الباسورد
+                    String password = intent.getStringExtra("password");
+                    if (password != null && !password.isEmpty()) {
+                        mHandler.post(() -> {
+                            try {
+                                // 3. تجهيز الحافظة
+                                android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                                android.content.ClipData clip = android.content.ClipData.newPlainText("SecureData", password);
+                                
+                                // 4. إضافة ختم "محتوى حساس" (يعمل على أندرويد 13 فما فوق)
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                    android.os.PersistableBundle extras = new android.os.PersistableBundle();
+                                    extras.putBoolean(android.content.ClipDescription.EXTRA_IS_SENSITIVE, true);
+                                    clip.getDescription().setExtras(extras);
+                                }
+                                
+                                // 5. إرسال الباسورد لحافظة النظام
+                                clipboard.setPrimaryClip(clip);
+                                Log.i(TAG, "تم نسخ الباسورد بأمان تام كـ Sensitive Data");
+                            } catch (Exception e) {
+                                Log.e(TAG, "خطأ أثناء النسخ الآمن", e);
+                            }
+                        });
+                    }
+                } else {
+                    Log.w(TAG, "محاولة اختراق: إشارة نسخ بدون كلمة سر صحيحة!");
+                }
             }
+            // --- نهاية التعديل ---
         }
     };
-    // --- نهاية التعديل ---
     
     private final BroadcastReceiver mRingerModeChangeReceiver = new BroadcastReceiver() {
         @Override
