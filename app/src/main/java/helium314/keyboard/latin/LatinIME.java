@@ -1469,7 +1469,7 @@ public class LatinIME extends InputMethodService implements
     }
 
     @Override
-    @RequiresApi(api = Build.VERSION.R)
+    @RequiresApi(api = Build.VERSION_CODES.R)
     public boolean onInlineSuggestionsResponse(InlineSuggestionsResponse response) {
         Log.d(TAG,"onInlineSuggestionsResponse called");
         if (Settings.getValues().mSuggestionStripHiddenPerUserSettings) {
