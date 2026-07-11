@@ -1,7 +1,7 @@
-package helium314.keyboard
+package com.macboard.keyboard
 
-import helium314.keyboard.keyboard.internal.KeySpecParser
-import helium314.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode
+import com.macboard.keyboard.keyboard.internal.KeySpecParser
+import com.macboard.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

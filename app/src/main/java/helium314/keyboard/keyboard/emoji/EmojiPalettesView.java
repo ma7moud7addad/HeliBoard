@@ -54,7 +54,7 @@ import com.macboard.keyboard.latin.settings.SettingsValues;
 import com.macboard.keyboard.latin.utils.DictionaryInfoUtils;
 import com.macboard.keyboard.latin.utils.ResourceUtils;
 
-import static helium314.keyboard.latin.common.Constants.NOT_A_COORDINATE;
+import static com.macboard.keyboard.latin.common.Constants.NOT_A_COORDINATE;
 
 /**
  * View class to implement Emoji palettes.

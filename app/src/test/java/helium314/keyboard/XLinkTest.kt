@@ -1,11 +1,11 @@
-package helium314.keyboard
+package com.macboard.keyboard
 
 import androidx.test.core.app.ApplicationProvider
-import helium314.keyboard.latin.App
-import helium314.keyboard.latin.BuildConfig
-import helium314.keyboard.latin.common.Links
-import helium314.keyboard.latin.common.LocaleUtils.constructLocale
-import helium314.keyboard.latin.utils.getKnownDictionariesForLocale
+import com.macboard.keyboard.latin.App
+import com.macboard.keyboard.latin.BuildConfig
+import com.macboard.keyboard.latin.common.Links
+import com.macboard.keyboard.latin.common.LocaleUtils.constructLocale
+import com.macboard.keyboard.latin.utils.getKnownDictionariesForLocale
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.io.File

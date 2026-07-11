@@ -6,7 +6,7 @@
 
 package com.macboard.keyboard.keyboard.emoji;
 
-import static helium314.keyboard.keyboard.internal.keyboard_parser.EmojiParserKt.EMOJI_HINT_LABEL;
+import static com.macboard.keyboard.keyboard.internal.keyboard_parser.EmojiParserKt.EMOJI_HINT_LABEL;
 
 import android.content.SharedPreferences;
 import android.text.TextUtils;

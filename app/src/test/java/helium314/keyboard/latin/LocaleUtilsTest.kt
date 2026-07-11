@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
-package helium314.keyboard.latin
+package com.macboard.keyboard.latin
 
-import helium314.keyboard.latin.common.LocaleUtils.constructLocale
+import com.macboard.keyboard.latin.common.LocaleUtils.constructLocale
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

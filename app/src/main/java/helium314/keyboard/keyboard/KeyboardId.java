@@ -19,7 +19,7 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.Objects;
 
-import static helium314.keyboard.latin.common.Constants.Subtype.ExtraValue.KEYBOARD_LAYOUT_SET;
+import static com.macboard.keyboard.latin.common.Constants.Subtype.ExtraValue.KEYBOARD_LAYOUT_SET;
 
 /**
  * Unique identifier for each keyboard type.
