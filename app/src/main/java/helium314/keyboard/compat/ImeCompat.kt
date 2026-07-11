@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-only
 @file:Suppress("DEPRECATION")
 
-package helium314.keyboard.compat
+package com.macboard.keyboard.compat
 
 import android.inputmethodservice.InputMethodService
 import android.os.Build
 import android.view.inputmethod.InputMethodInfo
 import android.view.inputmethod.InputMethodSubtype
-import helium314.keyboard.latin.RichInputMethodManager
-import helium314.keyboard.latin.settings.Settings
+import com.macboard.keyboard.latin.RichInputMethodManager
+import com.macboard.keyboard.latin.settings.Settings
 
 object ImeCompat {
     fun InputMethodService.switchInputMethod(): Boolean {

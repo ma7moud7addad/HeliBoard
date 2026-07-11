@@ -3,7 +3,7 @@
  * modified
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
-package helium314.keyboard.latin
+package com.macboard.keyboard.latin
 
 import android.content.Context
 import android.inputmethodservice.InputMethodService
@@ -11,18 +11,18 @@ import android.os.Build
 import android.view.inputmethod.InputMethodInfo
 import android.view.inputmethod.InputMethodManager
 import android.view.inputmethod.InputMethodSubtype
-import helium314.keyboard.compat.locale
-import helium314.keyboard.latin.common.Constants
-import helium314.keyboard.latin.common.LocaleUtils.getBestMatch
-import helium314.keyboard.latin.settings.Settings
-import helium314.keyboard.latin.utils.LanguageOnSpacebarUtils
-import helium314.keyboard.latin.utils.Log
-import helium314.keyboard.latin.utils.ScriptUtils.script
-import helium314.keyboard.latin.utils.SubtypeLocaleUtils
-import helium314.keyboard.latin.utils.SubtypeSettings
-import helium314.keyboard.latin.utils.getSecondaryLocales
-import helium314.keyboard.latin.utils.locale
-import helium314.keyboard.latin.utils.prefs
+import com.macboard.keyboard.compat.locale
+import com.macboard.keyboard.latin.common.Constants
+import com.macboard.keyboard.latin.common.LocaleUtils.getBestMatch
+import com.macboard.keyboard.latin.settings.Settings
+import com.macboard.keyboard.latin.utils.LanguageOnSpacebarUtils
+import com.macboard.keyboard.latin.utils.Log
+import com.macboard.keyboard.latin.utils.ScriptUtils.script
+import com.macboard.keyboard.latin.utils.SubtypeLocaleUtils
+import com.macboard.keyboard.latin.utils.SubtypeSettings
+import com.macboard.keyboard.latin.utils.getSecondaryLocales
+import com.macboard.keyboard.latin.utils.locale
+import com.macboard.keyboard.latin.utils.prefs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

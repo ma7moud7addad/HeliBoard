@@ -4,28 +4,28 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.keyboard;
+package com.macboard.keyboard.keyboard;
 
 import android.content.Context;
 import android.text.InputType;
 import android.view.inputmethod.EditorInfo;
 
-import helium314.keyboard.keyboard.internal.KeyboardBuilder;
-import helium314.keyboard.keyboard.internal.KeyboardIconsSet;
-import helium314.keyboard.keyboard.internal.KeyboardParams;
-import helium314.keyboard.keyboard.internal.UniqueKeysCache;
-import helium314.keyboard.keyboard.internal.keyboard_parser.LayoutParser;
-import helium314.keyboard.keyboard.internal.keyboard_parser.LocaleKeyboardInfos;
-import helium314.keyboard.keyboard.internal.keyboard_parser.LocaleKeyboardInfosKt;
-import helium314.keyboard.latin.RichInputMethodManager;
-import helium314.keyboard.latin.RichInputMethodSubtype;
-import helium314.keyboard.latin.settings.Settings;
-import helium314.keyboard.latin.utils.DictionaryInfoUtils;
-import helium314.keyboard.latin.utils.InputTypeUtils;
-import helium314.keyboard.latin.utils.Log;
-import helium314.keyboard.latin.utils.ResourceUtils;
-import helium314.keyboard.latin.utils.ScriptUtils;
-import helium314.keyboard.latin.utils.SubtypeLocaleUtils;
+import com.macboard.keyboard.keyboard.internal.KeyboardBuilder;
+import com.macboard.keyboard.keyboard.internal.KeyboardIconsSet;
+import com.macboard.keyboard.keyboard.internal.KeyboardParams;
+import com.macboard.keyboard.keyboard.internal.UniqueKeysCache;
+import com.macboard.keyboard.keyboard.internal.keyboard_parser.LayoutParser;
+import com.macboard.keyboard.keyboard.internal.keyboard_parser.LocaleKeyboardInfos;
+import com.macboard.keyboard.keyboard.internal.keyboard_parser.LocaleKeyboardInfosKt;
+import com.macboard.keyboard.latin.RichInputMethodManager;
+import com.macboard.keyboard.latin.RichInputMethodSubtype;
+import com.macboard.keyboard.latin.settings.Settings;
+import com.macboard.keyboard.latin.utils.DictionaryInfoUtils;
+import com.macboard.keyboard.latin.utils.InputTypeUtils;
+import com.macboard.keyboard.latin.utils.Log;
+import com.macboard.keyboard.latin.utils.ResourceUtils;
+import com.macboard.keyboard.latin.utils.ScriptUtils;
+import com.macboard.keyboard.latin.utils.SubtypeLocaleUtils;
 
 import java.lang.ref.SoftReference;
 import java.util.HashMap;

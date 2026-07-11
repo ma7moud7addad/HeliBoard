@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.keyboard.internal;
+package com.macboard.keyboard.keyboard.internal;
 
 import android.content.res.TypedArray;
 
-import helium314.keyboard.latin.R;
-import helium314.keyboard.latin.common.ColorType;
-import helium314.keyboard.latin.settings.Settings;
+import com.macboard.keyboard.latin.R;
+import com.macboard.keyboard.latin.common.ColorType;
+import com.macboard.keyboard.latin.settings.Settings;
 
 /**
  * This class holds parameters to control how a gesture trail is drawn and animated on the screen.

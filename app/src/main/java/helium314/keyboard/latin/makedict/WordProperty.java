@@ -4,17 +4,17 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.latin.makedict;
+package com.macboard.keyboard.latin.makedict;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.inputmethod.latin.BinaryDictionary;
-import helium314.keyboard.latin.dictionary.Dictionary;
-import helium314.keyboard.latin.NgramContext;
-import helium314.keyboard.latin.NgramContext.WordInfo;
-import helium314.keyboard.latin.common.StringUtils;
-import helium314.keyboard.latin.utils.CombinedFormatUtils;
+import com.macboard.keyboard.latin.dictionary.Dictionary;
+import com.macboard.keyboard.latin.NgramContext;
+import com.macboard.keyboard.latin.NgramContext.WordInfo;
+import com.macboard.keyboard.latin.common.StringUtils;
+import com.macboard.keyboard.latin.utils.CombinedFormatUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;

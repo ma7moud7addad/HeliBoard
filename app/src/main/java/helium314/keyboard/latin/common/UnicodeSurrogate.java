@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.latin.common;
+package com.macboard.keyboard.latin.common;
 
 /**
  * Emojis are supplementary characters expressed as a low+high pair. For instance,

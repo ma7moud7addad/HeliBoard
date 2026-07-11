@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: GPL-3.0-only
-package helium314.keyboard.keyboard.internal.keyboard_parser
+package com.macboard.keyboard.keyboard.internal.keyboard_parser
 
 import android.content.Context
-import helium314.keyboard.keyboard.Key
-import helium314.keyboard.keyboard.KeyboardId
-import helium314.keyboard.keyboard.internal.KeyboardParams
-import helium314.keyboard.keyboard.internal.keyboard_parser.floris.KeyData
-import helium314.keyboard.keyboard.internal.keyboard_parser.floris.toTextKey
-import helium314.keyboard.latin.R
-import helium314.keyboard.latin.common.splitOnFirstSpacesOnly
-import helium314.keyboard.latin.common.splitOnWhitespace
-import helium314.keyboard.latin.settings.Settings
-import helium314.keyboard.latin.utils.SpacedTokens
-import helium314.keyboard.latin.utils.SubtypeLocaleUtils
+import com.macboard.keyboard.keyboard.Key
+import com.macboard.keyboard.keyboard.KeyboardId
+import com.macboard.keyboard.keyboard.internal.KeyboardParams
+import com.macboard.keyboard.keyboard.internal.keyboard_parser.floris.KeyData
+import com.macboard.keyboard.keyboard.internal.keyboard_parser.floris.toTextKey
+import com.macboard.keyboard.latin.R
+import com.macboard.keyboard.latin.common.splitOnFirstSpacesOnly
+import com.macboard.keyboard.latin.common.splitOnWhitespace
+import com.macboard.keyboard.latin.settings.Settings
+import com.macboard.keyboard.latin.utils.SpacedTokens
+import com.macboard.keyboard.latin.utils.SubtypeLocaleUtils
 import java.io.InputStream
 import java.util.Locale
 

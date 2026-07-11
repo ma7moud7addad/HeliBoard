@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.latin.common;
+package com.macboard.keyboard.latin.common;
 
 import androidx.annotation.NonNull;
 
-import helium314.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode;
-import helium314.keyboard.latin.BuildConfig;
+import com.macboard.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode;
+import com.macboard.keyboard.latin.BuildConfig;
 
 public final class Constants {
 

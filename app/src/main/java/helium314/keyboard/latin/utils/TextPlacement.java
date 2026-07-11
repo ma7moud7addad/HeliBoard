@@ -1,4 +1,4 @@
-package helium314.keyboard.latin.utils;
+package com.macboard.keyboard.latin.utils;
 
 public final class TextPlacement {
     public String text;

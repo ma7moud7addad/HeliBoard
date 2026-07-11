@@ -4,15 +4,15 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.latin;
+package com.macboard.keyboard.latin;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import helium314.keyboard.keyboard.internal.KeySpecParser;
-import helium314.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode;
-import helium314.keyboard.latin.common.StringUtils;
-import helium314.keyboard.latin.dictionary.Dictionary;
+import com.macboard.keyboard.keyboard.internal.KeySpecParser;
+import com.macboard.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode;
+import com.macboard.keyboard.latin.common.StringUtils;
+import com.macboard.keyboard.latin.dictionary.Dictionary;
 
 import java.util.ArrayList;
 import java.util.Arrays;

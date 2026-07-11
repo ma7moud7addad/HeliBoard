@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.keyboard.emoji;
+package com.macboard.keyboard.keyboard.emoji;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -15,8 +15,8 @@ import android.graphics.PorterDuffXfermode;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.widget.LinearLayout;
-import helium314.keyboard.keyboard.PopupTextView;
-import helium314.keyboard.latin.utils.Log;
+import com.macboard.keyboard.keyboard.PopupTextView;
+import com.macboard.keyboard.latin.utils.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -29,19 +29,19 @@ import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import helium314.keyboard.accessibility.AccessibilityUtils;
-import helium314.keyboard.accessibility.KeyboardAccessibilityDelegate;
-import helium314.keyboard.keyboard.Key;
-import helium314.keyboard.keyboard.KeyDetector;
-import helium314.keyboard.keyboard.Keyboard;
-import helium314.keyboard.keyboard.KeyboardView;
-import helium314.keyboard.keyboard.PopupKeysKeyboard;
-import helium314.keyboard.keyboard.PopupKeysKeyboardView;
-import helium314.keyboard.keyboard.PopupKeysPanel;
-import helium314.keyboard.keyboard.internal.PopupKeySpec;
-import helium314.keyboard.latin.R;
-import helium314.keyboard.latin.common.CoordinateUtils;
-import helium314.keyboard.latin.settings.Settings;
+import com.macboard.keyboard.accessibility.AccessibilityUtils;
+import com.macboard.keyboard.accessibility.KeyboardAccessibilityDelegate;
+import com.macboard.keyboard.keyboard.Key;
+import com.macboard.keyboard.keyboard.KeyDetector;
+import com.macboard.keyboard.keyboard.Keyboard;
+import com.macboard.keyboard.keyboard.KeyboardView;
+import com.macboard.keyboard.keyboard.PopupKeysKeyboard;
+import com.macboard.keyboard.keyboard.PopupKeysKeyboardView;
+import com.macboard.keyboard.keyboard.PopupKeysPanel;
+import com.macboard.keyboard.keyboard.internal.PopupKeySpec;
+import com.macboard.keyboard.latin.R;
+import com.macboard.keyboard.latin.common.CoordinateUtils;
+import com.macboard.keyboard.latin.settings.Settings;
 
 import java.util.WeakHashMap;
 

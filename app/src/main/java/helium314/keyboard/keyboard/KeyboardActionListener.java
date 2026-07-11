@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.keyboard;
+package com.macboard.keyboard.keyboard;
 
 import android.view.KeyEvent;
 
-import helium314.keyboard.event.HapticEvent;
-import helium314.keyboard.latin.common.Constants;
-import helium314.keyboard.latin.common.InputPointers;
+import com.macboard.keyboard.event.HapticEvent;
+import com.macboard.keyboard.latin.common.Constants;
+import com.macboard.keyboard.latin.common.InputPointers;
 
 public interface KeyboardActionListener {
     /**

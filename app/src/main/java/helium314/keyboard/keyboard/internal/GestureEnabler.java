@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.keyboard.internal;
+package com.macboard.keyboard.keyboard.internal;
 
-import helium314.keyboard.accessibility.AccessibilityUtils;
+import com.macboard.keyboard.accessibility.AccessibilityUtils;
 
 public final class GestureEnabler {
     /** True if we should handle gesture events. */

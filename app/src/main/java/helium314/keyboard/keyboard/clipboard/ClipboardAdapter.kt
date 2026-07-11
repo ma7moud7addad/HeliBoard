@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-package helium314.keyboard.keyboard.clipboard
+package com.macboard.keyboard.keyboard.clipboard
 
 import android.annotation.SuppressLint
 import android.graphics.Typeface
@@ -12,11 +12,11 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import helium314.keyboard.latin.ClipboardHistoryEntry
-import helium314.keyboard.latin.ClipboardHistoryManager
-import helium314.keyboard.latin.R
-import helium314.keyboard.latin.common.ColorType
-import helium314.keyboard.latin.settings.Settings
+import com.macboard.keyboard.latin.ClipboardHistoryEntry
+import com.macboard.keyboard.latin.ClipboardHistoryManager
+import com.macboard.keyboard.latin.R
+import com.macboard.keyboard.latin.common.ColorType
+import com.macboard.keyboard.latin.settings.Settings
 
 class ClipboardAdapter(
        val clipboardLayoutParams: ClipboardLayoutParams,

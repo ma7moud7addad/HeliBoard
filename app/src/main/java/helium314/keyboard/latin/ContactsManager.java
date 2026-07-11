@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.latin;
+package com.macboard.keyboard.latin;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -12,9 +12,9 @@ import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.provider.ContactsContract.Contacts;
 import android.text.TextUtils;
-import helium314.keyboard.latin.utils.Log;
+import com.macboard.keyboard.latin.utils.Log;
 
-import helium314.keyboard.latin.common.Constants;
+import com.macboard.keyboard.latin.common.Constants;
 
 import java.util.ArrayList;
 import java.util.Collections;

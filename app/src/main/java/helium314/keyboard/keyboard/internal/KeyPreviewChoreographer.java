@@ -4,18 +4,18 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.keyboard.internal;
+package com.macboard.keyboard.keyboard.internal;
 
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 
-import helium314.keyboard.keyboard.Key;
-import helium314.keyboard.latin.common.ColorType;
-import helium314.keyboard.latin.common.Colors;
-import helium314.keyboard.latin.common.CoordinateUtils;
-import helium314.keyboard.latin.settings.Settings;
-import helium314.keyboard.latin.utils.ViewLayoutUtils;
+import com.macboard.keyboard.keyboard.Key;
+import com.macboard.keyboard.latin.common.ColorType;
+import com.macboard.keyboard.latin.common.Colors;
+import com.macboard.keyboard.latin.common.CoordinateUtils;
+import com.macboard.keyboard.latin.settings.Settings;
+import com.macboard.keyboard.latin.utils.ViewLayoutUtils;
 
 import java.util.ArrayDeque;
 import java.util.HashMap;

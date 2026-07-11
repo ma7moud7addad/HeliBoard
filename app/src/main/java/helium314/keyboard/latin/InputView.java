@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.latin;
+package com.macboard.keyboard.latin;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -16,13 +16,13 @@ import android.widget.FrameLayout;
 
 import androidx.core.view.ViewKt;
 
-import helium314.keyboard.accessibility.AccessibilityUtils;
-import helium314.keyboard.keyboard.MainKeyboardView;
-import helium314.keyboard.latin.common.ColorType;
-import helium314.keyboard.latin.settings.Settings;
-import helium314.keyboard.latin.suggestions.MoreSuggestionsView;
-import helium314.keyboard.latin.suggestions.SuggestionStripView;
-import helium314.keyboard.latin.utils.FloatingKeyboardUtils;
+import com.macboard.keyboard.accessibility.AccessibilityUtils;
+import com.macboard.keyboard.keyboard.MainKeyboardView;
+import com.macboard.keyboard.latin.common.ColorType;
+import com.macboard.keyboard.latin.settings.Settings;
+import com.macboard.keyboard.latin.suggestions.MoreSuggestionsView;
+import com.macboard.keyboard.latin.suggestions.SuggestionStripView;
+import com.macboard.keyboard.latin.utils.FloatingKeyboardUtils;
 import kotlin.Unit;
 
 

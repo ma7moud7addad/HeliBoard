@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.latin.define
+package com.macboard.keyboard.latin.define
 
 object ProductionFlags {
     // supporting hardware keyboard still has a bunch of issues
@@ -17,7 +17,7 @@ object ProductionFlags {
 
     /**
      * Include all suggestions from all dictionaries in
-     * [helium314.keyboard.latin.SuggestedWords.mRawSuggestions].
+     * [com.macboard.keyboard.latin.SuggestedWords.mRawSuggestions].
      */
     const val INCLUDE_RAW_SUGGESTIONS = false
 }

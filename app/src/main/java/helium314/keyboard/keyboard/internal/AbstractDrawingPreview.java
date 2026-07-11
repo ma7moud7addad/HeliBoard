@@ -4,15 +4,15 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.keyboard.internal;
+package com.macboard.keyboard.keyboard.internal;
 
 import android.graphics.Canvas;
 import android.view.View;
 
 import androidx.annotation.NonNull;
 
-import helium314.keyboard.keyboard.MainKeyboardView;
-import helium314.keyboard.keyboard.PointerTracker;
+import com.macboard.keyboard.keyboard.MainKeyboardView;
+import com.macboard.keyboard.keyboard.PointerTracker;
 
 /**
  * Abstract base class for previews that are drawn on DrawingPreviewPlacerView, e.g.,

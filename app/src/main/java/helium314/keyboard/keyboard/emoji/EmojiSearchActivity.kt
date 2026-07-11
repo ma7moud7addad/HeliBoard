@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-package helium314.keyboard.keyboard.emoji
+package com.macboard.keyboard.keyboard.emoji
 
 import android.R.string.cancel
 import android.content.Context
@@ -74,38 +74,38 @@ import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import helium314.keyboard.keyboard.Key
-import helium314.keyboard.keyboard.KeyboardId
-import helium314.keyboard.keyboard.KeyboardLayoutSet
-import helium314.keyboard.keyboard.KeyboardSwitcher
-import helium314.keyboard.keyboard.KeyboardTheme
-import helium314.keyboard.keyboard.KeyboardTypeface
-import helium314.keyboard.keyboard.internal.KeyboardBuilder
-import helium314.keyboard.keyboard.internal.KeyboardParams
-import helium314.keyboard.keyboard.internal.keyboard_parser.EMOJI_HINT_LABEL
-import helium314.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode
-import helium314.keyboard.keyboard.internal.keyboard_parser.getCode
-import helium314.keyboard.keyboard.internal.keyboard_parser.getEmojiDefaultVersion
-import helium314.keyboard.keyboard.internal.keyboard_parser.getEmojiKeyDimensions
-import helium314.keyboard.keyboard.internal.keyboard_parser.getEmojiNeutralVersion
-import helium314.keyboard.keyboard.internal.keyboard_parser.getEmojiPopupSpec
-import helium314.keyboard.keyboard.internal.keyboard_parser.loadEmojiDefaultVersionsAndPopupSpecs
-import helium314.keyboard.latin.LatinIME
-import helium314.keyboard.latin.R
-import helium314.keyboard.latin.RichInputMethodManager
-import helium314.keyboard.latin.RichInputMethodSubtype
-import helium314.keyboard.latin.SingleDictionaryFacilitator
-import helium314.keyboard.latin.common.ColorType
-import helium314.keyboard.latin.common.splitOnWhitespace
-import helium314.keyboard.latin.dictionary.Dictionary
-import helium314.keyboard.latin.dictionary.DictionaryFactory
-import helium314.keyboard.latin.settings.Settings
-import helium314.keyboard.latin.utils.CloseIcon
-import helium314.keyboard.latin.utils.DictionaryInfoUtils
-import helium314.keyboard.latin.utils.Log
-import helium314.keyboard.latin.utils.ResourceUtils
-import helium314.keyboard.latin.utils.SearchIcon
-import helium314.keyboard.latin.utils.prefs
+import com.macboard.keyboard.keyboard.Key
+import com.macboard.keyboard.keyboard.KeyboardId
+import com.macboard.keyboard.keyboard.KeyboardLayoutSet
+import com.macboard.keyboard.keyboard.KeyboardSwitcher
+import com.macboard.keyboard.keyboard.KeyboardTheme
+import com.macboard.keyboard.keyboard.KeyboardTypeface
+import com.macboard.keyboard.keyboard.internal.KeyboardBuilder
+import com.macboard.keyboard.keyboard.internal.KeyboardParams
+import com.macboard.keyboard.keyboard.internal.keyboard_parser.EMOJI_HINT_LABEL
+import com.macboard.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode
+import com.macboard.keyboard.keyboard.internal.keyboard_parser.getCode
+import com.macboard.keyboard.keyboard.internal.keyboard_parser.getEmojiDefaultVersion
+import com.macboard.keyboard.keyboard.internal.keyboard_parser.getEmojiKeyDimensions
+import com.macboard.keyboard.keyboard.internal.keyboard_parser.getEmojiNeutralVersion
+import com.macboard.keyboard.keyboard.internal.keyboard_parser.getEmojiPopupSpec
+import com.macboard.keyboard.keyboard.internal.keyboard_parser.loadEmojiDefaultVersionsAndPopupSpecs
+import com.macboard.keyboard.latin.LatinIME
+import com.macboard.keyboard.latin.R
+import com.macboard.keyboard.latin.RichInputMethodManager
+import com.macboard.keyboard.latin.RichInputMethodSubtype
+import com.macboard.keyboard.latin.SingleDictionaryFacilitator
+import com.macboard.keyboard.latin.common.ColorType
+import com.macboard.keyboard.latin.common.splitOnWhitespace
+import com.macboard.keyboard.latin.dictionary.Dictionary
+import com.macboard.keyboard.latin.dictionary.DictionaryFactory
+import com.macboard.keyboard.latin.settings.Settings
+import com.macboard.keyboard.latin.utils.CloseIcon
+import com.macboard.keyboard.latin.utils.DictionaryInfoUtils
+import com.macboard.keyboard.latin.utils.Log
+import com.macboard.keyboard.latin.utils.ResourceUtils
+import com.macboard.keyboard.latin.utils.SearchIcon
+import com.macboard.keyboard.latin.utils.prefs
 import kotlin.properties.Delegates
 
 private const val TAG = "emoji-search"
@@ -382,7 +382,7 @@ class EmojiSearchActivity : ComponentActivity() {
         const val EMOJI_SEARCH_DONE_ACTION: String = "EMOJI_SEARCH_DONE"
         const val IME_CLOSED_KEY: String = "IME_CLOSED"
         const val EMOJI_KEY: String = "EMOJI"
-        private const val PRIVATE_IME_OPTIONS_PREFIX: String = "helium314.keyboard.keyboard.emoji.search"
+        private const val PRIVATE_IME_OPTIONS_PREFIX: String = "com.macboard.keyboard.keyboard.emoji.search"
         private var dictionaryFacilitator: SingleDictionaryFacilitator? = null
         private var searchText: String = ""
 

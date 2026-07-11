@@ -4,25 +4,25 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.keyboard.emoji;
+package com.macboard.keyboard.keyboard.emoji;
 
 import static helium314.keyboard.keyboard.internal.keyboard_parser.EmojiParserKt.EMOJI_HINT_LABEL;
 
 import android.content.SharedPreferences;
 import android.text.TextUtils;
 
-import helium314.keyboard.latin.common.Constants;
-import helium314.keyboard.latin.settings.Defaults;
-import helium314.keyboard.latin.utils.Log;
+import com.macboard.keyboard.latin.common.Constants;
+import com.macboard.keyboard.latin.settings.Defaults;
+import com.macboard.keyboard.latin.utils.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import helium314.keyboard.keyboard.Key;
-import helium314.keyboard.keyboard.Keyboard;
-import helium314.keyboard.keyboard.internal.PopupKeySpec;
-import helium314.keyboard.latin.settings.Settings;
-import helium314.keyboard.latin.utils.JsonUtils;
+import com.macboard.keyboard.keyboard.Key;
+import com.macboard.keyboard.keyboard.Keyboard;
+import com.macboard.keyboard.keyboard.internal.PopupKeySpec;
+import com.macboard.keyboard.latin.settings.Settings;
+import com.macboard.keyboard.latin.utils.JsonUtils;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;

@@ -4,29 +4,29 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.latin.dictionary;
+package com.macboard.keyboard.latin.dictionary;
 
 import android.content.Context;
-import helium314.keyboard.latin.NgramContext;
-import helium314.keyboard.latin.utils.Log;
+import com.macboard.keyboard.latin.NgramContext;
+import com.macboard.keyboard.latin.utils.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.inputmethod.latin.BinaryDictionary;
 
-import helium314.keyboard.latin.SuggestedWords.SuggestedWordInfo;
-import helium314.keyboard.latin.common.ComposedData;
-import helium314.keyboard.latin.common.FileUtils;
-import helium314.keyboard.latin.define.DecoderSpecificConstants;
-import helium314.keyboard.latin.makedict.DictionaryHeader;
-import helium314.keyboard.latin.makedict.FormatSpec;
-import helium314.keyboard.latin.makedict.UnsupportedFormatException;
-import helium314.keyboard.latin.makedict.WordProperty;
-import helium314.keyboard.latin.settings.SettingsValuesForSuggestion;
-import helium314.keyboard.latin.utils.AsyncResultHolder;
-import helium314.keyboard.latin.utils.CombinedFormatUtils;
-import helium314.keyboard.latin.utils.ExecutorUtils;
+import com.macboard.keyboard.latin.SuggestedWords.SuggestedWordInfo;
+import com.macboard.keyboard.latin.common.ComposedData;
+import com.macboard.keyboard.latin.common.FileUtils;
+import com.macboard.keyboard.latin.define.DecoderSpecificConstants;
+import com.macboard.keyboard.latin.makedict.DictionaryHeader;
+import com.macboard.keyboard.latin.makedict.FormatSpec;
+import com.macboard.keyboard.latin.makedict.UnsupportedFormatException;
+import com.macboard.keyboard.latin.makedict.WordProperty;
+import com.macboard.keyboard.latin.settings.SettingsValuesForSuggestion;
+import com.macboard.keyboard.latin.utils.AsyncResultHolder;
+import com.macboard.keyboard.latin.utils.CombinedFormatUtils;
+import com.macboard.keyboard.latin.utils.ExecutorUtils;
 
 import java.io.File;
 import java.util.ArrayList;

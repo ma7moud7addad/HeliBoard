@@ -4,19 +4,19 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.keyboard;
+package com.macboard.keyboard.keyboard;
 
 import android.content.Context;
 import android.graphics.Paint;
 
 import androidx.annotation.NonNull;
 
-import helium314.keyboard.keyboard.internal.KeyboardBuilder;
-import helium314.keyboard.keyboard.internal.KeyboardParams;
-import helium314.keyboard.keyboard.internal.PopupKeySpec;
-import helium314.keyboard.latin.R;
-import helium314.keyboard.latin.common.StringUtils;
-import helium314.keyboard.latin.utils.TypefaceUtils;
+import com.macboard.keyboard.keyboard.internal.KeyboardBuilder;
+import com.macboard.keyboard.keyboard.internal.KeyboardParams;
+import com.macboard.keyboard.keyboard.internal.PopupKeySpec;
+import com.macboard.keyboard.latin.R;
+import com.macboard.keyboard.latin.common.StringUtils;
+import com.macboard.keyboard.latin.utils.TypefaceUtils;
 
 public final class PopupKeysKeyboard extends Keyboard {
     private final int mDefaultKeyCoordX;

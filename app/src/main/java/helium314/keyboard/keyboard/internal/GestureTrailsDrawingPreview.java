@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.keyboard.internal;
+package com.macboard.keyboard.keyboard.internal;
 
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
@@ -19,7 +19,7 @@ import android.util.SparseArray;
 
 import androidx.annotation.NonNull;
 
-import helium314.keyboard.keyboard.PointerTracker;
+import com.macboard.keyboard.keyboard.PointerTracker;
 
 /**
  * Draw preview graphics of multiple gesture trails during gesture input.

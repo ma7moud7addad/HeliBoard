@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<helium314.keyboard.keyboard.emoji.EmojiPalettesView
+<com.macboard.keyboard.keyboard.emoji.EmojiPalettesView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -20,14 +20,14 @@
             android:layout_height="match_parent" />
             
         <!-- إخفاء الشريط الأزرق لأنه مبرمج للرسم أفقياً فقط -->
-        <helium314.keyboard.keyboard.emoji.EmojiCategoryPageIndicatorView
+        <com.macboard.keyboard.keyboard.emoji.EmojiCategoryPageIndicatorView
             android:id="@+id/emoji_category_page_id_view"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:visibility="gone" />
 
         <!-- الأزرار تطفو في الأسفل بخلفية شفافة -->
-        <helium314.keyboard.keyboard.MainKeyboardView
+        <com.macboard.keyboard.keyboard.MainKeyboardView
             android:id="@+id/bottom_row_keyboard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -36,4 +36,4 @@
 
     </FrameLayout>
 
-</helium314.keyboard.keyboard.emoji.EmojiPalettesView>
+</com.macboard.keyboard.keyboard.emoji.EmojiPalettesView>

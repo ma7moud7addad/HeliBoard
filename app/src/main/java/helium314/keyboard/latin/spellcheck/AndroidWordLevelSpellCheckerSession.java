@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.latin.spellcheck;
+package com.macboard.keyboard.latin.spellcheck;
 
 import android.content.ContentResolver;
 import android.content.SharedPreferences;
@@ -14,30 +14,30 @@ import android.provider.UserDictionary.Words;
 import android.service.textservice.SpellCheckerService.Session;
 import android.text.TextUtils;
 
-import helium314.keyboard.latin.settings.Defaults;
-import helium314.keyboard.latin.settings.Settings;
-import helium314.keyboard.latin.utils.KtxKt;
-import helium314.keyboard.latin.utils.Log;
+import com.macboard.keyboard.latin.settings.Defaults;
+import com.macboard.keyboard.latin.settings.Settings;
+import com.macboard.keyboard.latin.utils.KtxKt;
+import com.macboard.keyboard.latin.utils.Log;
 import android.util.LruCache;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
 import android.view.textservice.SuggestionsInfo;
 import android.view.textservice.TextInfo;
 
-import helium314.keyboard.keyboard.Keyboard;
-import helium314.keyboard.latin.NgramContext;
-import helium314.keyboard.latin.SuggestedWords.SuggestedWordInfo;
-import helium314.keyboard.latin.WordComposer;
-import helium314.keyboard.latin.common.Constants;
-import helium314.keyboard.latin.common.LocaleUtils;
-import helium314.keyboard.latin.common.StringUtils;
-import helium314.keyboard.latin.define.DebugFlags;
+import com.macboard.keyboard.keyboard.Keyboard;
+import com.macboard.keyboard.latin.NgramContext;
+import com.macboard.keyboard.latin.SuggestedWords.SuggestedWordInfo;
+import com.macboard.keyboard.latin.WordComposer;
+import com.macboard.keyboard.latin.common.Constants;
+import com.macboard.keyboard.latin.common.LocaleUtils;
+import com.macboard.keyboard.latin.common.StringUtils;
+import com.macboard.keyboard.latin.define.DebugFlags;
 import com.android.inputmethod.latin.utils.BinaryDictionaryUtils;
 
-import helium314.keyboard.latin.utils.ScriptUtils;
-import helium314.keyboard.latin.utils.StatsUtils;
-import helium314.keyboard.latin.utils.SubtypeSettings;
-import helium314.keyboard.latin.utils.SuggestionResults;
+import com.macboard.keyboard.latin.utils.ScriptUtils;
+import com.macboard.keyboard.latin.utils.StatsUtils;
+import com.macboard.keyboard.latin.utils.SubtypeSettings;
+import com.macboard.keyboard.latin.utils.SuggestionResults;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;

@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.latin.makedict;
+package com.macboard.keyboard.latin.makedict;
 
 import androidx.annotation.NonNull;
 
-import helium314.keyboard.latin.define.DecoderSpecificConstants;
+import com.macboard.keyboard.latin.define.DecoderSpecificConstants;
 
 import java.util.Date;
 import java.util.HashMap;

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-package helium314.keyboard.latin.utils
+package com.macboard.keyboard.latin.utils
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -13,13 +13,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.content.edit
-import helium314.keyboard.keyboard.KeyboardSwitcher
-import helium314.keyboard.latin.R
-import helium314.keyboard.latin.settings.Settings
-import helium314.keyboard.settings.SettingsDestination
-import helium314.keyboard.settings.dialogs.ThreeButtonAlertDialog
-import helium314.keyboard.settings.screens.gesturedata.END_DATE_EPOCH_MILLIS
-import helium314.keyboard.settings.screens.gesturedata.TWO_WEEKS_IN_MILLIS
+import com.macboard.keyboard.keyboard.KeyboardSwitcher
+import com.macboard.keyboard.latin.R
+import com.macboard.keyboard.latin.settings.Settings
+import com.macboard.keyboard.settings.SettingsDestination
+import com.macboard.keyboard.settings.dialogs.ThreeButtonAlertDialog
+import com.macboard.keyboard.settings.screens.gesturedata.END_DATE_EPOCH_MILLIS
+import com.macboard.keyboard.settings.screens.gesturedata.TWO_WEEKS_IN_MILLIS
 import kotlinx.serialization.json.Json
 import java.text.DateFormat
 import java.util.Date

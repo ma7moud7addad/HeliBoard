@@ -1,21 +1,21 @@
-package helium314.keyboard.latin.utils
+package com.macboard.keyboard.latin.utils
 
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
 import android.view.inputmethod.InputMethodSubtype
 import android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder
-import helium314.keyboard.latin.R
-import helium314.keyboard.latin.common.Constants
-import helium314.keyboard.latin.common.Constants.Separators
-import helium314.keyboard.latin.common.Constants.Subtype.ExtraValue
-import helium314.keyboard.latin.settings.Defaults
-import helium314.keyboard.latin.settings.Defaults.default
-import helium314.keyboard.latin.settings.Settings
-import helium314.keyboard.latin.settings.SettingsSubtype
-import helium314.keyboard.latin.settings.SettingsSubtype.Companion.toSettingsSubtype
-import helium314.keyboard.latin.utils.LayoutType.Companion.toExtraValue
-import helium314.keyboard.latin.utils.ScriptUtils.script
+import com.macboard.keyboard.latin.R
+import com.macboard.keyboard.latin.common.Constants
+import com.macboard.keyboard.latin.common.Constants.Separators
+import com.macboard.keyboard.latin.common.Constants.Subtype.ExtraValue
+import com.macboard.keyboard.latin.settings.Defaults
+import com.macboard.keyboard.latin.settings.Defaults.default
+import com.macboard.keyboard.latin.settings.Settings
+import com.macboard.keyboard.latin.settings.SettingsSubtype
+import com.macboard.keyboard.latin.settings.SettingsSubtype.Companion.toSettingsSubtype
+import com.macboard.keyboard.latin.utils.LayoutType.Companion.toExtraValue
+import com.macboard.keyboard.latin.utils.ScriptUtils.script
 import java.util.Locale
 import androidx.core.content.edit
 

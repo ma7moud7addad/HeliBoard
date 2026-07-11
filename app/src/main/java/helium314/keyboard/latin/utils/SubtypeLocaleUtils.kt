@@ -3,18 +3,18 @@
  * modified
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
-package helium314.keyboard.latin.utils
+package com.macboard.keyboard.latin.utils
 
 import android.content.Context
 import android.content.res.Resources
 import android.view.inputmethod.InputMethodSubtype
-import helium314.keyboard.compat.locale
-import helium314.keyboard.latin.R
-import helium314.keyboard.latin.common.Constants.Subtype.ExtraValue
-import helium314.keyboard.latin.common.LocaleUtils.constructLocale
-import helium314.keyboard.latin.common.LocaleUtils.localizedDisplayName
-import helium314.keyboard.latin.common.StringUtils
-import helium314.keyboard.latin.utils.LayoutType.Companion.getMainLayoutFromExtraValue
+import com.macboard.keyboard.compat.locale
+import com.macboard.keyboard.latin.R
+import com.macboard.keyboard.latin.common.Constants.Subtype.ExtraValue
+import com.macboard.keyboard.latin.common.LocaleUtils.constructLocale
+import com.macboard.keyboard.latin.common.LocaleUtils.localizedDisplayName
+import com.macboard.keyboard.latin.common.StringUtils
+import com.macboard.keyboard.latin.utils.LayoutType.Companion.getMainLayoutFromExtraValue
 import java.util.Locale
 import kotlin.concurrent.Volatile
 

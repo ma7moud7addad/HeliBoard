@@ -137,7 +137,7 @@
      subtype.-->
 <input-method xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
-        android:settingsActivity="helium314.keyboard.settings.SettingsActivity"
+        android:settingsActivity="com.macboard.keyboard.settings.SettingsActivity"
         android:isDefault="@bool/im_is_default"
         android:supportsSwitchingToNextInputMethod="true"
         android:supportsInlineSuggestions="true"

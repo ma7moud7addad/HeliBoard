@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.keyboard.internal;
+package com.macboard.keyboard.keyboard.internal;
 
-import helium314.keyboard.latin.settings.Settings;
-import helium314.keyboard.latin.utils.Log;
+import com.macboard.keyboard.latin.settings.Settings;
+import com.macboard.keyboard.latin.utils.Log;
 
-import helium314.keyboard.latin.common.Constants;
-import helium314.keyboard.latin.common.InputPointers;
-import helium314.keyboard.latin.common.ResizableIntArray;
+import com.macboard.keyboard.latin.common.Constants;
+import com.macboard.keyboard.latin.common.InputPointers;
+import com.macboard.keyboard.latin.common.ResizableIntArray;
 
 import java.util.Locale;
 

@@ -4,15 +4,15 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.keyboard.emoji;
+package com.macboard.keyboard.keyboard.emoji;
 
-import helium314.keyboard.latin.utils.Log;
+import com.macboard.keyboard.latin.utils.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import helium314.keyboard.keyboard.Keyboard;
-import helium314.keyboard.latin.R;
+import com.macboard.keyboard.keyboard.Keyboard;
+import com.macboard.keyboard.latin.R;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;

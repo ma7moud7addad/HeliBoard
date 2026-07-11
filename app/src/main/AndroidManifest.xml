@@ -20,7 +20,7 @@ SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
 
 
     <application android:label="@string/english_ime_name"
-            android:name="helium314.keyboard.latin.App"
+            android:name="com.macboard.keyboard.latin.App"
             android:icon="@drawable/macboard"
             android:roundIcon="@drawable/macboard"
             android:supportsRtl="true"
@@ -56,7 +56,7 @@ SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
         </service>
 
         <!-- Activities -->
-        <activity android:name="helium314.keyboard.settings.SettingsActivity"
+        <activity android:name="com.macboard.keyboard.settings.SettingsActivity"
                 android:theme="@style/platformActivityTheme"
                 android:icon="@drawable/macboard"
                 android:windowSoftInputMode="adjustResize"
@@ -68,7 +68,7 @@ SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
         </activity>
 
         <!-- separate activity that's used internally, only necessary in case the launcher icon is disabled on Android < 10 -->
-        <activity android:name="helium314.keyboard.settings.SettingsActivity2"
+        <activity android:name="com.macboard.keyboard.settings.SettingsActivity2"
             android:theme="@style/platformActivityTheme"
             android:icon="@drawable/macboard"
             android:windowSoftInputMode="adjustResize"
@@ -91,7 +91,7 @@ SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
             </intent-filter>
         </activity>
 
-        <activity android:name="helium314.keyboard.keyboard.emoji.EmojiSearchActivity" android:exported="false"
+        <activity android:name="com.macboard.keyboard.keyboard.emoji.EmojiSearchActivity" android:exported="false"
             android:theme="@style/TransparentActivityTheme" android:excludeFromRecents="true" android:noHistory="true"
             android:windowSoftInputMode="adjustResize|stateAlwaysVisible" android:configChanges="orientation|screenSize"/>
 
@@ -108,12 +108,12 @@ SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
 
         <receiver android:name="DictionaryPackInstallBroadcastReceiver" android:exported="false">
             <intent-filter>
-                <action android:name="helium314.keyboard.dictionarypack.aosp.UNKNOWN_CLIENT" />
+                <action android:name="com.macboard.keyboard.dictionarypack.aosp.UNKNOWN_CLIENT" />
             </intent-filter>
         </receiver>
 
         <!-- necessary for sending mail attachments, remove when data gathering phase is done (end of 2026 latest) -->
-        <provider android:name="helium314.keyboard.settings.screens.gesturedata.GestureFileProvider"
+        <provider android:name="com.macboard.keyboard.settings.screens.gesturedata.GestureFileProvider"
             android:authorities="@string/gesture_data_provider_authority"
             android:enabled="true"
             android:grantUriPermissions="true"

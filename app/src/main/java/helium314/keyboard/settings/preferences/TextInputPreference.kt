@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-package helium314.keyboard.settings.preferences
+package com.macboard.keyboard.settings.preferences
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -9,12 +9,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import helium314.keyboard.keyboard.KeyboardSwitcher
-import helium314.keyboard.latin.utils.prefs
-import helium314.keyboard.settings.Setting
-import helium314.keyboard.settings.dialogs.TextInputDialog
+import com.macboard.keyboard.keyboard.KeyboardSwitcher
+import com.macboard.keyboard.latin.utils.prefs
+import com.macboard.keyboard.settings.Setting
+import com.macboard.keyboard.settings.dialogs.TextInputDialog
 import androidx.core.content.edit
-import helium314.keyboard.latin.R
+import com.macboard.keyboard.latin.R
 
 @Composable
 fun TextInputPreference(setting: Setting, default: String, info: String? = null, checkTextValid: (String) -> Boolean = { true }) {

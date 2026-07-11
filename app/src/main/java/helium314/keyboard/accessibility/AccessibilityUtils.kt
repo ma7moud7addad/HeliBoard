@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.accessibility
+package com.macboard.keyboard.accessibility
 
 import android.content.Context
 import android.media.AudioDeviceInfo.*
@@ -13,16 +13,16 @@ import android.os.Build
 import android.os.SystemClock
 import android.provider.Settings
 import android.text.TextUtils
-import helium314.keyboard.latin.utils.Log
+import com.macboard.keyboard.latin.utils.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityManager
 import android.view.inputmethod.EditorInfo
-import helium314.keyboard.latin.R
-import helium314.keyboard.latin.SuggestedWords
-import helium314.keyboard.latin.utils.InputTypeUtils
+import com.macboard.keyboard.latin.R
+import com.macboard.keyboard.latin.SuggestedWords
+import com.macboard.keyboard.latin.utils.InputTypeUtils
 
 class AccessibilityUtils private constructor() {
     private lateinit var mContext: Context

@@ -3,7 +3,7 @@
  * modified
  * SPDX-License-Identifier: Apache-2.0
  */
-package helium314.keyboard.keyboard.internal.keyboard_parser.floris
+package com.macboard.keyboard.keyboard.internal.keyboard_parser.floris
 
 import android.view.KeyEvent
 

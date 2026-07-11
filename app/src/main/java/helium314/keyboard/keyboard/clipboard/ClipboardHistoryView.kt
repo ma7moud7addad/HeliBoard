@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-package helium314.keyboard.keyboard.clipboard
+package com.macboard.keyboard.keyboard.clipboard
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -13,32 +13,32 @@ import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import helium314.keyboard.event.HapticEvent
-import helium314.keyboard.keyboard.KeyboardActionListener
-import helium314.keyboard.keyboard.KeyboardId
-import helium314.keyboard.keyboard.KeyboardLayoutSet
-import helium314.keyboard.keyboard.KeyboardSwitcher
-import helium314.keyboard.keyboard.KeyboardTypeface
-import helium314.keyboard.keyboard.MainKeyboardView
-import helium314.keyboard.keyboard.PointerTracker
-import helium314.keyboard.keyboard.internal.KeyDrawParams
-import helium314.keyboard.keyboard.internal.KeyVisualAttributes
-import helium314.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode
-import helium314.keyboard.latin.AudioAndHapticFeedbackManager
-import helium314.keyboard.latin.ClipboardHistoryManager
-import helium314.keyboard.latin.R
-import helium314.keyboard.latin.common.ColorType
-import helium314.keyboard.latin.common.Constants
-import helium314.keyboard.latin.database.ClipboardDao
-import helium314.keyboard.latin.settings.Settings
-import helium314.keyboard.latin.utils.ResourceUtils
-import helium314.keyboard.latin.utils.ToolbarKey
-import helium314.keyboard.latin.utils.createToolbarKey
-import helium314.keyboard.latin.utils.getCodeForToolbarKey
-import helium314.keyboard.latin.utils.getCodeForToolbarKeyLongClick
-import helium314.keyboard.latin.utils.getEnabledClipboardToolbarKeys
-import helium314.keyboard.latin.utils.prefs
-import helium314.keyboard.latin.utils.setToolbarButtonsActivatedStateOnPrefChange
+import com.macboard.keyboard.event.HapticEvent
+import com.macboard.keyboard.keyboard.KeyboardActionListener
+import com.macboard.keyboard.keyboard.KeyboardId
+import com.macboard.keyboard.keyboard.KeyboardLayoutSet
+import com.macboard.keyboard.keyboard.KeyboardSwitcher
+import com.macboard.keyboard.keyboard.KeyboardTypeface
+import com.macboard.keyboard.keyboard.MainKeyboardView
+import com.macboard.keyboard.keyboard.PointerTracker
+import com.macboard.keyboard.keyboard.internal.KeyDrawParams
+import com.macboard.keyboard.keyboard.internal.KeyVisualAttributes
+import com.macboard.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode
+import com.macboard.keyboard.latin.AudioAndHapticFeedbackManager
+import com.macboard.keyboard.latin.ClipboardHistoryManager
+import com.macboard.keyboard.latin.R
+import com.macboard.keyboard.latin.common.ColorType
+import com.macboard.keyboard.latin.common.Constants
+import com.macboard.keyboard.latin.database.ClipboardDao
+import com.macboard.keyboard.latin.settings.Settings
+import com.macboard.keyboard.latin.utils.ResourceUtils
+import com.macboard.keyboard.latin.utils.ToolbarKey
+import com.macboard.keyboard.latin.utils.createToolbarKey
+import com.macboard.keyboard.latin.utils.getCodeForToolbarKey
+import com.macboard.keyboard.latin.utils.getCodeForToolbarKeyLongClick
+import com.macboard.keyboard.latin.utils.getEnabledClipboardToolbarKeys
+import com.macboard.keyboard.latin.utils.prefs
+import com.macboard.keyboard.latin.utils.setToolbarButtonsActivatedStateOnPrefChange
 
 @SuppressLint("CustomViewStyleable")
 class ClipboardHistoryView @JvmOverloads constructor(

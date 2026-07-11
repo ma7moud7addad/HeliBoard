@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-package helium314.keyboard.latin
+package com.macboard.keyboard.latin
 
-import helium314.keyboard.latin.settings.Settings
+import com.macboard.keyboard.latin.settings.Settings
 
 class ClipboardHistoryEntry(
     val id: Long,

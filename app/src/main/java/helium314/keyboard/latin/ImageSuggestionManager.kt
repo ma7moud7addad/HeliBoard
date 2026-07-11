@@ -1,4 +1,4 @@
-package helium314.keyboard.latin
+package com.macboard.keyboard.latin
 
 import android.Manifest
 import android.content.ClipboardManager
@@ -23,9 +23,9 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.view.inputmethod.EditorInfoCompat
-import helium314.keyboard.event.HapticEvent
-import helium314.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode
-import helium314.keyboard.latin.common.ColorType
+import com.macboard.keyboard.event.HapticEvent
+import com.macboard.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode
+import com.macboard.keyboard.latin.common.ColorType
 
 class ImageSuggestionManager(private val latinIME: LatinIME) {
 

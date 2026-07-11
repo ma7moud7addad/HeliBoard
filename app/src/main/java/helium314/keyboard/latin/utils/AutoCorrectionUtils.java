@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.latin.utils;
+package com.macboard.keyboard.latin.utils;
 
 import com.android.inputmethod.latin.utils.BinaryDictionaryUtils;
 
-import helium314.keyboard.latin.SuggestedWords.SuggestedWordInfo;
-import helium314.keyboard.latin.define.DebugFlags;
+import com.macboard.keyboard.latin.SuggestedWords.SuggestedWordInfo;
+import com.macboard.keyboard.latin.define.DebugFlags;
 
 public final class AutoCorrectionUtils {
     private static final String TAG = AutoCorrectionUtils.class.getSimpleName();

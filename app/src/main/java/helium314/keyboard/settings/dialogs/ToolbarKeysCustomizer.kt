@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-package helium314.keyboard.settings.dialogs
+package com.macboard.keyboard.settings.dialogs
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -23,21 +23,21 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import helium314.keyboard.keyboard.internal.KeyboardIconsSet
-import helium314.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode.checkAndConvertCode
-import helium314.keyboard.latin.R
-import helium314.keyboard.latin.utils.ToolbarKey
-import helium314.keyboard.latin.utils.getCodeForToolbarKey
-import helium314.keyboard.latin.utils.getCodeForToolbarKeyLongClick
-import helium314.keyboard.latin.utils.getStringResourceOrName
-import helium314.keyboard.latin.utils.prefs
-import helium314.keyboard.latin.utils.readCustomKeyCodes
-import helium314.keyboard.latin.utils.writeCustomKeyCodes
-import helium314.keyboard.latin.utils.Theme
-import helium314.keyboard.settings.initPreview
-import helium314.keyboard.latin.utils.previewDark
+import com.macboard.keyboard.keyboard.internal.KeyboardIconsSet
+import com.macboard.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode.checkAndConvertCode
+import com.macboard.keyboard.latin.R
+import com.macboard.keyboard.latin.utils.ToolbarKey
+import com.macboard.keyboard.latin.utils.getCodeForToolbarKey
+import com.macboard.keyboard.latin.utils.getCodeForToolbarKeyLongClick
+import com.macboard.keyboard.latin.utils.getStringResourceOrName
+import com.macboard.keyboard.latin.utils.prefs
+import com.macboard.keyboard.latin.utils.readCustomKeyCodes
+import com.macboard.keyboard.latin.utils.writeCustomKeyCodes
+import com.macboard.keyboard.latin.utils.Theme
+import com.macboard.keyboard.settings.initPreview
+import com.macboard.keyboard.latin.utils.previewDark
 import androidx.core.content.edit
-import helium314.keyboard.settings.GetIconOrEmpty
+import com.macboard.keyboard.settings.GetIconOrEmpty
 
 @Composable
 fun ToolbarKeysCustomizer(

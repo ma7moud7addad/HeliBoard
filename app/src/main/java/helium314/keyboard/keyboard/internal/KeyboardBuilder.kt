@@ -3,26 +3,26 @@
  * modified
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
-package helium314.keyboard.keyboard.internal
+package com.macboard.keyboard.keyboard.internal
 
 import android.content.Context
 import android.content.res.Resources
 import android.util.Xml
 import androidx.annotation.XmlRes
-import helium314.keyboard.keyboard.Key
-import helium314.keyboard.keyboard.Key.KeyParams
-import helium314.keyboard.keyboard.Keyboard
-import helium314.keyboard.keyboard.KeyboardId
-import helium314.keyboard.keyboard.internal.keyboard_parser.EmojiParser
-import helium314.keyboard.keyboard.internal.keyboard_parser.KeyboardParser
-import helium314.keyboard.keyboard.internal.keyboard_parser.addLocaleKeyTextsToParams
-import helium314.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode
-import helium314.keyboard.latin.R
-import helium314.keyboard.latin.common.Constants
-import helium314.keyboard.latin.define.DebugFlags
-import helium314.keyboard.latin.settings.Settings
-import helium314.keyboard.latin.utils.Log
-import helium314.keyboard.latin.utils.sumOf
+import com.macboard.keyboard.keyboard.Key
+import com.macboard.keyboard.keyboard.Key.KeyParams
+import com.macboard.keyboard.keyboard.Keyboard
+import com.macboard.keyboard.keyboard.KeyboardId
+import com.macboard.keyboard.keyboard.internal.keyboard_parser.EmojiParser
+import com.macboard.keyboard.keyboard.internal.keyboard_parser.KeyboardParser
+import com.macboard.keyboard.keyboard.internal.keyboard_parser.addLocaleKeyTextsToParams
+import com.macboard.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode
+import com.macboard.keyboard.latin.R
+import com.macboard.keyboard.latin.common.Constants
+import com.macboard.keyboard.latin.define.DebugFlags
+import com.macboard.keyboard.latin.settings.Settings
+import com.macboard.keyboard.latin.utils.Log
+import com.macboard.keyboard.latin.utils.sumOf
 import org.xmlpull.v1.XmlPullParser
 
 open class KeyboardBuilder<KP : KeyboardParams>(protected val mContext: Context, @JvmField val mParams: KP) {

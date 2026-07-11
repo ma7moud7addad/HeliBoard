@@ -3,16 +3,16 @@
  * modified
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
-package helium314.keyboard.latin.common
+package com.macboard.keyboard.latin.common
 
 import android.content.res.Resources
-import helium314.keyboard.compat.locale
-import helium314.keyboard.latin.R
-import helium314.keyboard.latin.RichInputMethodSubtype
-import helium314.keyboard.latin.utils.ScriptUtils.script
-import helium314.keyboard.latin.utils.SubtypeLocaleUtils
-import helium314.keyboard.latin.utils.getSecondaryLocales
-import helium314.keyboard.latin.utils.runInLocale
+import com.macboard.keyboard.compat.locale
+import com.macboard.keyboard.latin.R
+import com.macboard.keyboard.latin.RichInputMethodSubtype
+import com.macboard.keyboard.latin.utils.ScriptUtils.script
+import com.macboard.keyboard.latin.utils.SubtypeLocaleUtils
+import com.macboard.keyboard.latin.utils.getSecondaryLocales
+import com.macboard.keyboard.latin.utils.runInLocale
 import java.util.Locale
 
 /**

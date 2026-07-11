@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-package helium314.keyboard.event
+package com.macboard.keyboard.event
 
-import helium314.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode
-import helium314.keyboard.latin.common.Constants
-import helium314.keyboard.latin.settings.Settings
-import helium314.keyboard.latin.utils.Log
+import com.macboard.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode
+import com.macboard.keyboard.latin.common.Constants
+import com.macboard.keyboard.latin.settings.Settings
+import com.macboard.keyboard.latin.utils.Log
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.util.ArrayList

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-package helium314.keyboard.latin.common
+package com.macboard.keyboard.latin.common
 
 object Links {
     const val DICTIONARY_URL = "https://codeberg.org/Helium314/aosp-dictionaries"

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-package helium314.keyboard.latin
+package com.macboard.keyboard.latin
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -11,15 +11,15 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageButton
-import helium314.keyboard.keyboard.KeyboardActionListener
-import helium314.keyboard.keyboard.KeyboardSwitcher
-import helium314.keyboard.keyboard.internal.KeyboardIconsSet
-import helium314.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode
-import helium314.keyboard.latin.common.ColorType
-import helium314.keyboard.latin.common.Constants
-import helium314.keyboard.latin.settings.Settings
-import helium314.keyboard.latin.utils.FoldableUtils
-import helium314.keyboard.latin.utils.prefs
+import com.macboard.keyboard.keyboard.KeyboardActionListener
+import com.macboard.keyboard.keyboard.KeyboardSwitcher
+import com.macboard.keyboard.keyboard.internal.KeyboardIconsSet
+import com.macboard.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode
+import com.macboard.keyboard.latin.common.ColorType
+import com.macboard.keyboard.latin.common.Constants
+import com.macboard.keyboard.latin.settings.Settings
+import com.macboard.keyboard.latin.utils.FoldableUtils
+import com.macboard.keyboard.latin.utils.prefs
 import kotlin.math.abs
 
 class KeyboardWrapperView @JvmOverloads constructor(

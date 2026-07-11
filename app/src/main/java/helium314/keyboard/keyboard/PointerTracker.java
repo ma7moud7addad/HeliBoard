@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.keyboard;
+package com.macboard.keyboard.keyboard;
 
 import static java.lang.Math.abs;
 
@@ -16,28 +16,28 @@ import android.view.MotionEvent;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import helium314.keyboard.event.HapticEvent;
-import helium314.keyboard.keyboard.internal.BatchInputArbiter;
-import helium314.keyboard.keyboard.internal.BatchInputArbiter.BatchInputArbiterListener;
-import helium314.keyboard.keyboard.internal.BogusMoveEventDetector;
-import helium314.keyboard.keyboard.internal.DrawingProxy;
-import helium314.keyboard.keyboard.internal.GestureEnabler;
-import helium314.keyboard.keyboard.internal.GestureStrokeDrawingParams;
-import helium314.keyboard.keyboard.internal.GestureStrokeDrawingPoints;
-import helium314.keyboard.keyboard.internal.GestureStrokeRecognitionParams;
-import helium314.keyboard.keyboard.internal.PointerTrackerQueue;
-import helium314.keyboard.keyboard.internal.TimerProxy;
-import helium314.keyboard.keyboard.internal.TypingTimeRecorder;
-import helium314.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode;
-import helium314.keyboard.latin.R;
-import helium314.keyboard.latin.common.Constants;
-import helium314.keyboard.latin.common.CoordinateUtils;
-import helium314.keyboard.latin.common.InputPointers;
-import helium314.keyboard.latin.define.DebugFlags;
-import helium314.keyboard.latin.settings.Settings;
-import helium314.keyboard.latin.settings.SettingsValues;
-import helium314.keyboard.latin.utils.KtxKt;
-import helium314.keyboard.latin.utils.Log;
+import com.macboard.keyboard.event.HapticEvent;
+import com.macboard.keyboard.keyboard.internal.BatchInputArbiter;
+import com.macboard.keyboard.keyboard.internal.BatchInputArbiter.BatchInputArbiterListener;
+import com.macboard.keyboard.keyboard.internal.BogusMoveEventDetector;
+import com.macboard.keyboard.keyboard.internal.DrawingProxy;
+import com.macboard.keyboard.keyboard.internal.GestureEnabler;
+import com.macboard.keyboard.keyboard.internal.GestureStrokeDrawingParams;
+import com.macboard.keyboard.keyboard.internal.GestureStrokeDrawingPoints;
+import com.macboard.keyboard.keyboard.internal.GestureStrokeRecognitionParams;
+import com.macboard.keyboard.keyboard.internal.PointerTrackerQueue;
+import com.macboard.keyboard.keyboard.internal.TimerProxy;
+import com.macboard.keyboard.keyboard.internal.TypingTimeRecorder;
+import com.macboard.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode;
+import com.macboard.keyboard.latin.R;
+import com.macboard.keyboard.latin.common.Constants;
+import com.macboard.keyboard.latin.common.CoordinateUtils;
+import com.macboard.keyboard.latin.common.InputPointers;
+import com.macboard.keyboard.latin.define.DebugFlags;
+import com.macboard.keyboard.latin.settings.Settings;
+import com.macboard.keyboard.latin.settings.SettingsValues;
+import com.macboard.keyboard.latin.utils.KtxKt;
+import com.macboard.keyboard.latin.utils.Log;
 
 import java.util.ArrayList;
 import java.util.Locale;

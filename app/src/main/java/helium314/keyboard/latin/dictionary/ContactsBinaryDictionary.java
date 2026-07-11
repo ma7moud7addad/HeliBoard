@@ -4,26 +4,26 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.latin.dictionary;
+package com.macboard.keyboard.latin.dictionary;
 
 import android.Manifest;
 import android.content.Context;
 import android.net.Uri;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.Contacts;
-import helium314.keyboard.latin.ContactsDictionaryConstants;
-import helium314.keyboard.latin.ContactsDictionaryUtils;
-import helium314.keyboard.latin.ContactsManager;
-import helium314.keyboard.latin.NgramContext;
-import helium314.keyboard.latin.utils.Log;
+import com.macboard.keyboard.latin.ContactsDictionaryConstants;
+import com.macboard.keyboard.latin.ContactsDictionaryUtils;
+import com.macboard.keyboard.latin.ContactsManager;
+import com.macboard.keyboard.latin.NgramContext;
+import com.macboard.keyboard.latin.utils.Log;
 
 import androidx.annotation.NonNull;
 
 import com.android.inputmethod.latin.BinaryDictionary;
 
-import helium314.keyboard.latin.ContactsManager.ContactsChangedListener;
-import helium314.keyboard.latin.common.StringUtils;
-import helium314.keyboard.latin.permissions.PermissionsUtil;
+import com.macboard.keyboard.latin.ContactsManager.ContactsChangedListener;
+import com.macboard.keyboard.latin.common.StringUtils;
+import com.macboard.keyboard.latin.permissions.PermissionsUtil;
 
 import java.io.File;
 import java.util.ArrayList;

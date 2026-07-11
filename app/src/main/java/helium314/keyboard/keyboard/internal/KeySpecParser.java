@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.keyboard.internal;
+package com.macboard.keyboard.keyboard.internal;
 
-import helium314.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode;
-import helium314.keyboard.latin.common.Constants;
-import helium314.keyboard.latin.common.StringUtils;
-import helium314.keyboard.latin.define.DebugFlags;
+import com.macboard.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode;
+import com.macboard.keyboard.latin.common.Constants;
+import com.macboard.keyboard.latin.common.StringUtils;
+import com.macboard.keyboard.latin.define.DebugFlags;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;

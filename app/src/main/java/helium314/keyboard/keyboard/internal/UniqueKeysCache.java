@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.keyboard.internal;
+package com.macboard.keyboard.keyboard.internal;
 
 import androidx.annotation.NonNull;
 
-import helium314.keyboard.keyboard.Key;
+import com.macboard.keyboard.keyboard.Key;
 
 import java.util.HashMap;
 

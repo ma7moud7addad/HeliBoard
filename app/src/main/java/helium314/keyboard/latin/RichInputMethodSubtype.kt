@@ -3,22 +3,22 @@
  * modified
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
-package helium314.keyboard.latin
+package com.macboard.keyboard.latin
 
 import android.view.inputmethod.InputMethodSubtype
 import android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder
-import helium314.keyboard.latin.common.Constants
-import helium314.keyboard.latin.common.Constants.Subtype.ExtraValue.KEYBOARD_LAYOUT_SET
-import helium314.keyboard.latin.common.LocaleUtils.constructLocale
-import helium314.keyboard.latin.utils.LayoutType
-import helium314.keyboard.latin.utils.LayoutUtilsCustom
-import helium314.keyboard.latin.utils.Log
-import helium314.keyboard.latin.utils.ScriptUtils
-import helium314.keyboard.latin.utils.ScriptUtils.script
-import helium314.keyboard.latin.utils.SubtypeLocaleUtils
-import helium314.keyboard.latin.utils.SubtypeSettings
-import helium314.keyboard.latin.utils.locale
-import helium314.keyboard.latin.utils.mainLayoutNameOrQwerty
+import com.macboard.keyboard.latin.common.Constants
+import com.macboard.keyboard.latin.common.Constants.Subtype.ExtraValue.KEYBOARD_LAYOUT_SET
+import com.macboard.keyboard.latin.common.LocaleUtils.constructLocale
+import com.macboard.keyboard.latin.utils.LayoutType
+import com.macboard.keyboard.latin.utils.LayoutUtilsCustom
+import com.macboard.keyboard.latin.utils.Log
+import com.macboard.keyboard.latin.utils.ScriptUtils
+import com.macboard.keyboard.latin.utils.ScriptUtils.script
+import com.macboard.keyboard.latin.utils.SubtypeLocaleUtils
+import com.macboard.keyboard.latin.utils.SubtypeSettings
+import com.macboard.keyboard.latin.utils.locale
+import com.macboard.keyboard.latin.utils.mainLayoutNameOrQwerty
 import java.util.Locale
 
 /**

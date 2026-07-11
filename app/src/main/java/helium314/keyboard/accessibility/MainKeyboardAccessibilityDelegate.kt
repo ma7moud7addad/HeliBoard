@@ -4,17 +4,17 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.accessibility
+package com.macboard.keyboard.accessibility
 
 import android.graphics.Rect
 import android.os.SystemClock
-import helium314.keyboard.latin.utils.Log
+import com.macboard.keyboard.latin.utils.Log
 import android.util.SparseIntArray
 import android.view.MotionEvent
-import helium314.keyboard.accessibility.AccessibilityLongPressTimer.LongPressTimerCallback
-import helium314.keyboard.keyboard.*
-import helium314.keyboard.latin.R
-import helium314.keyboard.latin.utils.SubtypeLocaleUtils.displayName
+import com.macboard.keyboard.accessibility.AccessibilityLongPressTimer.LongPressTimerCallback
+import com.macboard.keyboard.keyboard.*
+import com.macboard.keyboard.latin.R
+import com.macboard.keyboard.latin.utils.SubtypeLocaleUtils.displayName
 
 /**
  * This class represents a delegate that can be registered in [MainKeyboardView] to enhance

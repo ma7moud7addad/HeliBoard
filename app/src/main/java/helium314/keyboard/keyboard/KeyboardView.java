@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.keyboard;
+package com.macboard.keyboard.keyboard;
 
 import static helium314.keyboard.keyboard.KeyboardTheme.STYLE_ROUNDED;
 
@@ -27,19 +27,19 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import helium314.keyboard.keyboard.emoji.EmojiPageKeyboardView;
-import helium314.keyboard.keyboard.internal.KeyDrawParams;
-import helium314.keyboard.keyboard.internal.KeyVisualAttributes;
-import helium314.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode;
-import helium314.keyboard.latin.R;
-import helium314.keyboard.latin.common.ColorType;
-import helium314.keyboard.latin.common.Colors;
-import helium314.keyboard.latin.common.Constants;
-import helium314.keyboard.latin.common.StringUtilsKt;
-import helium314.keyboard.latin.settings.Settings;
-import helium314.keyboard.latin.suggestions.MoreSuggestions;
-import helium314.keyboard.latin.suggestions.MoreSuggestionsView;
-import helium314.keyboard.latin.utils.TypefaceUtils;
+import com.macboard.keyboard.keyboard.emoji.EmojiPageKeyboardView;
+import com.macboard.keyboard.keyboard.internal.KeyDrawParams;
+import com.macboard.keyboard.keyboard.internal.KeyVisualAttributes;
+import com.macboard.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode;
+import com.macboard.keyboard.latin.R;
+import com.macboard.keyboard.latin.common.ColorType;
+import com.macboard.keyboard.latin.common.Colors;
+import com.macboard.keyboard.latin.common.Constants;
+import com.macboard.keyboard.latin.common.StringUtilsKt;
+import com.macboard.keyboard.latin.settings.Settings;
+import com.macboard.keyboard.latin.suggestions.MoreSuggestions;
+import com.macboard.keyboard.latin.suggestions.MoreSuggestionsView;
+import com.macboard.keyboard.latin.utils.TypefaceUtils;
 
 import java.util.HashSet;
 

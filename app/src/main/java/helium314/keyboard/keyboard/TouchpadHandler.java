@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-only
-package helium314.keyboard.keyboard;
+package com.macboard.keyboard.keyboard;
 
 import android.os.SystemClock;
 
-import helium314.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode;
-import helium314.keyboard.latin.common.Constants;
-import helium314.keyboard.latin.settings.Settings;
-import helium314.keyboard.latin.settings.SettingsValues;
+import com.macboard.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode;
+import com.macboard.keyboard.latin.common.Constants;
+import com.macboard.keyboard.latin.settings.Settings;
+import com.macboard.keyboard.latin.settings.SettingsValues;
 
 public class TouchpadHandler {
     private KeyboardActionListener mListener;

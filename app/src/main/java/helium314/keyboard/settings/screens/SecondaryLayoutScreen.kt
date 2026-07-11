@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-package helium314.keyboard.settings.screens
+package com.macboard.keyboard.settings.screens
 
 import android.content.Context
 import androidx.compose.material3.Surface
@@ -12,23 +12,23 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import helium314.keyboard.latin.R
-import helium314.keyboard.latin.settings.Settings
-import helium314.keyboard.latin.utils.LayoutType
-import helium314.keyboard.latin.utils.LayoutType.Companion.displayNameId
-import helium314.keyboard.latin.utils.LayoutUtilsCustom
-import helium314.keyboard.latin.utils.Log
-import helium314.keyboard.latin.utils.getActivity
-import helium314.keyboard.latin.utils.getStringResourceOrName
-import helium314.keyboard.latin.utils.prefs
-import helium314.keyboard.settings.SearchSettingsScreen
-import helium314.keyboard.settings.Setting
-import helium314.keyboard.settings.SettingsActivity
-import helium314.keyboard.latin.utils.Theme
-import helium314.keyboard.settings.dialogs.LayoutPickerDialog
-import helium314.keyboard.settings.initPreview
-import helium314.keyboard.settings.preferences.Preference
-import helium314.keyboard.latin.utils.previewDark
+import com.macboard.keyboard.latin.R
+import com.macboard.keyboard.latin.settings.Settings
+import com.macboard.keyboard.latin.utils.LayoutType
+import com.macboard.keyboard.latin.utils.LayoutType.Companion.displayNameId
+import com.macboard.keyboard.latin.utils.LayoutUtilsCustom
+import com.macboard.keyboard.latin.utils.Log
+import com.macboard.keyboard.latin.utils.getActivity
+import com.macboard.keyboard.latin.utils.getStringResourceOrName
+import com.macboard.keyboard.latin.utils.prefs
+import com.macboard.keyboard.settings.SearchSettingsScreen
+import com.macboard.keyboard.settings.Setting
+import com.macboard.keyboard.settings.SettingsActivity
+import com.macboard.keyboard.latin.utils.Theme
+import com.macboard.keyboard.settings.dialogs.LayoutPickerDialog
+import com.macboard.keyboard.settings.initPreview
+import com.macboard.keyboard.settings.preferences.Preference
+import com.macboard.keyboard.latin.utils.previewDark
 
 @Composable
 fun SecondaryLayoutScreen(

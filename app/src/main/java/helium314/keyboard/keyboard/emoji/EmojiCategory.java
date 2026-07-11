@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.keyboard.emoji;
+package com.macboard.keyboard.keyboard.emoji;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -13,18 +13,18 @@ import android.content.res.TypedArray;
 import android.graphics.Paint;
 import android.graphics.Rect;
 
-import helium314.keyboard.latin.settings.Defaults;
-import helium314.keyboard.latin.utils.KtxKt;
-import helium314.keyboard.latin.utils.Log;
+import com.macboard.keyboard.latin.settings.Defaults;
+import com.macboard.keyboard.latin.utils.KtxKt;
+import com.macboard.keyboard.latin.utils.Log;
 
 import androidx.core.graphics.PaintCompat;
-import helium314.keyboard.keyboard.Key;
-import helium314.keyboard.keyboard.Keyboard;
-import helium314.keyboard.keyboard.KeyboardId;
-import helium314.keyboard.keyboard.KeyboardLayoutSet;
-import helium314.keyboard.latin.R;
-import helium314.keyboard.latin.settings.Settings;
-import helium314.keyboard.latin.utils.ResourceUtils;
+import com.macboard.keyboard.keyboard.Key;
+import com.macboard.keyboard.keyboard.Keyboard;
+import com.macboard.keyboard.keyboard.KeyboardId;
+import com.macboard.keyboard.keyboard.KeyboardLayoutSet;
+import com.macboard.keyboard.latin.R;
+import com.macboard.keyboard.latin.settings.Settings;
+import com.macboard.keyboard.latin.utils.ResourceUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;

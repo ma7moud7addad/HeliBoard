@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
-package helium314.keyboard.latin.utils
+package com.macboard.keyboard.latin.utils
 
 import android.content.ContentValues
 import android.content.Context
-import helium314.keyboard.latin.database.Database
+import com.macboard.keyboard.latin.database.Database
 import kotlinx.serialization.json.Json
 
 // functionality for gesture data gathering as part of the NLNet Project https://nlnet.nl/project/GestureTyping/

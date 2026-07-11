@@ -3,9 +3,9 @@
  * modified
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
-package helium314.keyboard.event
+package com.macboard.keyboard.event
 
-import helium314.keyboard.latin.settings.SettingsValues
+import com.macboard.keyboard.latin.settings.SettingsValues
 
 /** An object encapsulating a single transaction for input. */
 class InputTransaction(

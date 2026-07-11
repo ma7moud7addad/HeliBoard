@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-package helium314.keyboard.settings.dialogs
+package com.macboard.keyboard.settings.dialogs
 
 import android.content.Intent
 import androidx.compose.foundation.layout.Column
@@ -16,25 +16,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import helium314.keyboard.compat.locale
-import helium314.keyboard.dictionarypack.DictionaryPackConstants
-import helium314.keyboard.latin.dictionary.Dictionary
-import helium314.keyboard.latin.R
-import helium314.keyboard.latin.dictionary.ReadOnlyBinaryDictionary
-import helium314.keyboard.latin.common.LocaleUtils.constructLocale
-import helium314.keyboard.latin.common.LocaleUtils.localizedDisplayName
-import helium314.keyboard.latin.makedict.DictionaryHeader
-import helium314.keyboard.latin.utils.DictionaryInfoUtils
-import helium314.keyboard.latin.utils.ScriptUtils.script
-import helium314.keyboard.latin.utils.SubtypeSettings
-import helium314.keyboard.latin.utils.locale
-import helium314.keyboard.settings.DropDownField
-import helium314.keyboard.settings.WithSmallTitle
+import com.macboard.keyboard.compat.locale
+import com.macboard.keyboard.dictionarypack.DictionaryPackConstants
+import com.macboard.keyboard.latin.dictionary.Dictionary
+import com.macboard.keyboard.latin.R
+import com.macboard.keyboard.latin.dictionary.ReadOnlyBinaryDictionary
+import com.macboard.keyboard.latin.common.LocaleUtils.constructLocale
+import com.macboard.keyboard.latin.common.LocaleUtils.localizedDisplayName
+import com.macboard.keyboard.latin.makedict.DictionaryHeader
+import com.macboard.keyboard.latin.utils.DictionaryInfoUtils
+import com.macboard.keyboard.latin.utils.ScriptUtils.script
+import com.macboard.keyboard.latin.utils.SubtypeSettings
+import com.macboard.keyboard.latin.utils.locale
+import com.macboard.keyboard.settings.DropDownField
+import com.macboard.keyboard.settings.WithSmallTitle
 import java.io.File
 import java.util.Locale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalResources
-import helium314.keyboard.latin.RichInputMethodManager
+import com.macboard.keyboard.latin.RichInputMethodManager
 
 @Composable
 fun NewDictionaryDialog(

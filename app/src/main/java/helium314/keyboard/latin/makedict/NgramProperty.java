@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.latin.makedict;
+package com.macboard.keyboard.latin.makedict;
 
-import helium314.keyboard.latin.NgramContext;
+import com.macboard.keyboard.latin.NgramContext;
 
 public class NgramProperty {
     public final WeightedString mTargetWord;

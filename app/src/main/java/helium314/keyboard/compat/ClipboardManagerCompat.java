@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-package helium314.keyboard.compat;
+package com.macboard.keyboard.compat;
 
 import android.content.ClipData;
 import android.content.ClipDescription;

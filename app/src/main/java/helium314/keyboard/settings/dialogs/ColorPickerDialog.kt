@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-package helium314.keyboard.settings.dialogs
+package com.macboard.keyboard.settings.dialogs
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -36,10 +36,10 @@ import com.github.skydoves.colorpicker.compose.AlphaSlider
 import com.github.skydoves.colorpicker.compose.BrightnessSlider
 import com.github.skydoves.colorpicker.compose.HsvColorPicker
 import com.github.skydoves.colorpicker.compose.rememberColorPickerController
-import helium314.keyboard.latin.R
-import helium314.keyboard.latin.utils.Theme
-import helium314.keyboard.latin.utils.previewDark
-import helium314.keyboard.settings.isWideScreen
+import com.macboard.keyboard.latin.R
+import com.macboard.keyboard.latin.utils.Theme
+import com.macboard.keyboard.latin.utils.previewDark
+import com.macboard.keyboard.settings.isWideScreen
 
 @Composable
 fun ColorPickerDialog(

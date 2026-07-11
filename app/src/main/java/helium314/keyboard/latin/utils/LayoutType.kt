@@ -1,8 +1,8 @@
-package helium314.keyboard.latin.utils
+package com.macboard.keyboard.latin.utils
 
-import helium314.keyboard.latin.R
-import helium314.keyboard.latin.common.Constants.Separators
-import helium314.keyboard.latin.common.Constants.Subtype.ExtraValue
+import com.macboard.keyboard.latin.R
+import com.macboard.keyboard.latin.common.Constants.Separators
+import com.macboard.keyboard.latin.common.Constants.Subtype.ExtraValue
 import java.io.File
 import java.util.EnumMap
 

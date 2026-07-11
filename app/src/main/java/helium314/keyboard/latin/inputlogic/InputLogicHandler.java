@@ -4,15 +4,15 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.latin.inputlogic;
+package com.macboard.keyboard.latin.inputlogic;
 
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 
-import helium314.keyboard.latin.LatinIME;
-import helium314.keyboard.latin.SuggestedWords;
-import helium314.keyboard.latin.common.InputPointers;
+import com.macboard.keyboard.latin.LatinIME;
+import com.macboard.keyboard.latin.SuggestedWords;
+import com.macboard.keyboard.latin.common.InputPointers;
 
 /**
  * A helper to manage deferred tasks for the input logic.

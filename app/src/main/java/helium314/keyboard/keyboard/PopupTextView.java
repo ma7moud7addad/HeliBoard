@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.keyboard;
+package com.macboard.keyboard.keyboard;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -12,12 +12,12 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.TextView;
-import helium314.keyboard.keyboard.emoji.EmojiViewCallback;
-import helium314.keyboard.keyboard.internal.KeyDrawParams;
-import helium314.keyboard.latin.R;
-import helium314.keyboard.latin.common.ColorType;
-import helium314.keyboard.latin.common.CoordinateUtils;
-import helium314.keyboard.latin.settings.Settings;
+import com.macboard.keyboard.keyboard.emoji.EmojiViewCallback;
+import com.macboard.keyboard.keyboard.internal.KeyDrawParams;
+import com.macboard.keyboard.latin.R;
+import com.macboard.keyboard.latin.common.ColorType;
+import com.macboard.keyboard.latin.common.CoordinateUtils;
+import com.macboard.keyboard.latin.settings.Settings;
 
 
 /**

@@ -1,4 +1,4 @@
-package helium314.keyboard.compat
+package com.macboard.keyboard.compat
 
 import android.content.res.Configuration
 import android.os.Build

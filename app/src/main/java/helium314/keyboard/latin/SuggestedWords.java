@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.latin;
+package com.macboard.keyboard.latin;
 
 import android.text.TextUtils;
 import android.view.inputmethod.CompletionInfo;
@@ -12,11 +12,11 @@ import android.view.inputmethod.CompletionInfo;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import helium314.keyboard.latin.common.StringUtils;
-import helium314.keyboard.latin.common.StringUtilsKt;
-import helium314.keyboard.latin.define.DebugFlags;
-import helium314.keyboard.latin.dictionary.Dictionary;
-import helium314.keyboard.latin.settings.Settings;
+import com.macboard.keyboard.latin.common.StringUtils;
+import com.macboard.keyboard.latin.common.StringUtilsKt;
+import com.macboard.keyboard.latin.define.DebugFlags;
+import com.macboard.keyboard.latin.dictionary.Dictionary;
+import com.macboard.keyboard.latin.settings.Settings;
 
 import java.util.ArrayList;
 import java.util.Arrays;

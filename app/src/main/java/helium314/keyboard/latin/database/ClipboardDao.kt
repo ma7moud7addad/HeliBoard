@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-only
-package helium314.keyboard.latin.database
+package com.macboard.keyboard.latin.database
 
 import android.content.ContentValues
 import android.content.Context
 import android.os.SystemClock
-import helium314.keyboard.latin.ClipboardHistoryEntry
-import helium314.keyboard.latin.settings.Settings
-import helium314.keyboard.latin.utils.Log
+import com.macboard.keyboard.latin.ClipboardHistoryEntry
+import com.macboard.keyboard.latin.settings.Settings
+import com.macboard.keyboard.latin.utils.Log
 
 /*
  possible extension for later: allow non-text

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-package helium314.keyboard.latin
+package com.macboard.keyboard.latin
 
 import android.content.ClipboardManager
 import android.content.Context
@@ -11,16 +11,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import androidx.core.view.isGone
-import helium314.keyboard.keyboard.KeyboardTypeface
-import helium314.keyboard.compat.ClipboardManagerCompat
-import helium314.keyboard.event.HapticEvent
-import helium314.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode
-import helium314.keyboard.latin.common.ColorType
-import helium314.keyboard.latin.common.isValidNumber
-import helium314.keyboard.latin.database.ClipboardDao
-import helium314.keyboard.latin.databinding.ClipboardSuggestionBinding
-import helium314.keyboard.latin.utils.InputTypeUtils
-import helium314.keyboard.latin.utils.ToolbarKey
+import com.macboard.keyboard.keyboard.KeyboardTypeface
+import com.macboard.keyboard.compat.ClipboardManagerCompat
+import com.macboard.keyboard.event.HapticEvent
+import com.macboard.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode
+import com.macboard.keyboard.latin.common.ColorType
+import com.macboard.keyboard.latin.common.isValidNumber
+import com.macboard.keyboard.latin.database.ClipboardDao
+import com.macboard.keyboard.latin.databinding.ClipboardSuggestionBinding
+import com.macboard.keyboard.latin.utils.InputTypeUtils
+import com.macboard.keyboard.latin.utils.ToolbarKey
 
 class ClipboardHistoryManager(
         private val latinIME: LatinIME

@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: GPL-3.0-only
-package helium314.keyboard.latin
+package com.macboard.keyboard.latin
 
 import android.content.Context
 import android.util.LruCache
-import helium314.keyboard.keyboard.Keyboard
-import helium314.keyboard.keyboard.KeyboardSwitcher
-import helium314.keyboard.keyboard.emoji.SupportedEmojis
-import helium314.keyboard.latin.DictionaryFacilitator.DictionaryInitializationListener
-import helium314.keyboard.latin.common.ComposedData
-import helium314.keyboard.latin.dictionary.Dictionary
-import helium314.keyboard.latin.dictionary.DictionaryStats
-import helium314.keyboard.latin.makedict.WordProperty
-import helium314.keyboard.latin.settings.SettingsValuesForSuggestion
-import helium314.keyboard.latin.utils.SuggestionResults
+import com.macboard.keyboard.keyboard.Keyboard
+import com.macboard.keyboard.keyboard.KeyboardSwitcher
+import com.macboard.keyboard.keyboard.emoji.SupportedEmojis
+import com.macboard.keyboard.latin.DictionaryFacilitator.DictionaryInitializationListener
+import com.macboard.keyboard.latin.common.ComposedData
+import com.macboard.keyboard.latin.dictionary.Dictionary
+import com.macboard.keyboard.latin.dictionary.DictionaryStats
+import com.macboard.keyboard.latin.makedict.WordProperty
+import com.macboard.keyboard.latin.settings.SettingsValuesForSuggestion
+import com.macboard.keyboard.latin.utils.SuggestionResults
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 

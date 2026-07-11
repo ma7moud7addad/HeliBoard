@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.latin;
+package com.macboard.keyboard.latin;
 
 import android.content.Context;
 import android.media.AudioAttributes;
@@ -14,10 +14,10 @@ import android.os.Vibrator;
 import android.view.HapticFeedbackConstants;
 import android.view.View;
 
-import helium314.keyboard.event.HapticEvent;
-import helium314.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode;
-import helium314.keyboard.latin.common.Constants;
-import helium314.keyboard.latin.settings.SettingsValues;
+import com.macboard.keyboard.event.HapticEvent;
+import com.macboard.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode;
+import com.macboard.keyboard.latin.common.Constants;
+import com.macboard.keyboard.latin.settings.SettingsValues;
 
 /**
  * This class gathers audio feedback and haptic feedback functions.

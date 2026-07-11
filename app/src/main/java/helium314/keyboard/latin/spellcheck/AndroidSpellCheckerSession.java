@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.latin.spellcheck;
+package com.macboard.keyboard.latin.spellcheck;
 
 import android.content.res.Resources;
 import android.os.Binder;
@@ -13,10 +13,10 @@ import android.view.textservice.SentenceSuggestionsInfo;
 import android.view.textservice.SuggestionsInfo;
 import android.view.textservice.TextInfo;
 
-import helium314.keyboard.latin.NgramContext;
-import helium314.keyboard.latin.common.LocaleUtils;
-import helium314.keyboard.latin.utils.Log;
-import helium314.keyboard.latin.utils.SpannableStringUtils;
+import com.macboard.keyboard.latin.NgramContext;
+import com.macboard.keyboard.latin.common.LocaleUtils;
+import com.macboard.keyboard.latin.utils.Log;
+import com.macboard.keyboard.latin.utils.SpannableStringUtils;
 
 import java.util.ArrayList;
 

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-package helium314.keyboard.settings.screens
+package com.macboard.keyboard.settings.screens
 
 import android.content.Context
 import android.os.Build
@@ -25,29 +25,29 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import helium314.keyboard.latin.R
-import helium314.keyboard.latin.common.Constants.Separators
-import helium314.keyboard.latin.common.Constants.Subtype.ExtraValue
-import helium314.keyboard.latin.common.LocaleUtils.constructLocale
-import helium314.keyboard.latin.common.LocaleUtils.localizedDisplayName
-import helium314.keyboard.latin.common.splitOnWhitespace
-import helium314.keyboard.latin.settings.Defaults
-import helium314.keyboard.latin.settings.SettingsSubtype.Companion.toSettingsSubtype
-import helium314.keyboard.latin.utils.DictionaryInfoUtils
-import helium314.keyboard.latin.utils.Log
-import helium314.keyboard.latin.utils.MissingDictionaryDialog
-import helium314.keyboard.latin.utils.SubtypeLocaleUtils
-import helium314.keyboard.latin.utils.SubtypeLocaleUtils.displayName
-import helium314.keyboard.latin.utils.SubtypeSettings
-import helium314.keyboard.latin.utils.getActivity
-import helium314.keyboard.latin.utils.locale
-import helium314.keyboard.latin.utils.prefs
-import helium314.keyboard.settings.SearchScreen
-import helium314.keyboard.settings.SettingsActivity
-import helium314.keyboard.settings.SettingsDestination
-import helium314.keyboard.latin.utils.Theme
-import helium314.keyboard.settings.initPreview
-import helium314.keyboard.latin.utils.previewDark
+import com.macboard.keyboard.latin.R
+import com.macboard.keyboard.latin.common.Constants.Separators
+import com.macboard.keyboard.latin.common.Constants.Subtype.ExtraValue
+import com.macboard.keyboard.latin.common.LocaleUtils.constructLocale
+import com.macboard.keyboard.latin.common.LocaleUtils.localizedDisplayName
+import com.macboard.keyboard.latin.common.splitOnWhitespace
+import com.macboard.keyboard.latin.settings.Defaults
+import com.macboard.keyboard.latin.settings.SettingsSubtype.Companion.toSettingsSubtype
+import com.macboard.keyboard.latin.utils.DictionaryInfoUtils
+import com.macboard.keyboard.latin.utils.Log
+import com.macboard.keyboard.latin.utils.MissingDictionaryDialog
+import com.macboard.keyboard.latin.utils.SubtypeLocaleUtils
+import com.macboard.keyboard.latin.utils.SubtypeLocaleUtils.displayName
+import com.macboard.keyboard.latin.utils.SubtypeSettings
+import com.macboard.keyboard.latin.utils.getActivity
+import com.macboard.keyboard.latin.utils.locale
+import com.macboard.keyboard.latin.utils.prefs
+import com.macboard.keyboard.settings.SearchScreen
+import com.macboard.keyboard.settings.SettingsActivity
+import com.macboard.keyboard.settings.SettingsDestination
+import com.macboard.keyboard.latin.utils.Theme
+import com.macboard.keyboard.settings.initPreview
+import com.macboard.keyboard.latin.utils.previewDark
 import java.util.Locale
 
 @Composable

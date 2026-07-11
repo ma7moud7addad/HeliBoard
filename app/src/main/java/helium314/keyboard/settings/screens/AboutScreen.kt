@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-package helium314.keyboard.settings.screens
+package com.macboard.keyboard.settings.screens
 
 import android.app.Activity
 import android.app.AlertDialog
@@ -22,23 +22,23 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.net.toUri
-import helium314.keyboard.latin.BuildConfig
-import helium314.keyboard.latin.R
-import helium314.keyboard.latin.common.Links
-import helium314.keyboard.latin.settings.DebugSettings
-import helium314.keyboard.latin.settings.Defaults
-import helium314.keyboard.latin.utils.Log
-import helium314.keyboard.latin.utils.SpannableStringUtils
-import helium314.keyboard.latin.utils.getActivity
-import helium314.keyboard.latin.utils.prefs
-import helium314.keyboard.settings.SettingsContainer
-import helium314.keyboard.settings.SettingsWithoutKey
-import helium314.keyboard.settings.Setting
-import helium314.keyboard.settings.preferences.Preference
-import helium314.keyboard.settings.SearchSettingsScreen
-import helium314.keyboard.settings.SettingsActivity
-import helium314.keyboard.latin.utils.Theme
-import helium314.keyboard.latin.utils.previewDark
+import com.macboard.keyboard.latin.BuildConfig
+import com.macboard.keyboard.latin.R
+import com.macboard.keyboard.latin.common.Links
+import com.macboard.keyboard.latin.settings.DebugSettings
+import com.macboard.keyboard.latin.settings.Defaults
+import com.macboard.keyboard.latin.utils.Log
+import com.macboard.keyboard.latin.utils.SpannableStringUtils
+import com.macboard.keyboard.latin.utils.getActivity
+import com.macboard.keyboard.latin.utils.prefs
+import com.macboard.keyboard.settings.SettingsContainer
+import com.macboard.keyboard.settings.SettingsWithoutKey
+import com.macboard.keyboard.settings.Setting
+import com.macboard.keyboard.settings.preferences.Preference
+import com.macboard.keyboard.settings.SearchSettingsScreen
+import com.macboard.keyboard.settings.SettingsActivity
+import com.macboard.keyboard.latin.utils.Theme
+import com.macboard.keyboard.latin.utils.previewDark
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat

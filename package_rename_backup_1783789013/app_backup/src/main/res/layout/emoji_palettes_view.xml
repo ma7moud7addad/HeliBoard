@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<helium314.keyboard.keyboard.emoji.EmojiPalettesView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="bottom"
+    android:orientation="vertical"
+    android:visibility="gone"
+    android:background="@android:color/transparent"
+    style="?attr/emojiPalettesViewStyle">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <!-- شبكة الإيموجي تأخذ المساحة كاملة -->
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/emoji_pager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+            
+        <!-- إخفاء الشريط الأزرق لأنه مبرمج للرسم أفقياً فقط -->
+        <helium314.keyboard.keyboard.emoji.EmojiCategoryPageIndicatorView
+            android:id="@+id/emoji_category_page_id_view"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:visibility="gone" />
+
+        <!-- الأزرار تطفو في الأسفل بخلفية شفافة -->
+        <helium314.keyboard.keyboard.MainKeyboardView
+            android:id="@+id/bottom_row_keyboard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:background="@android:color/transparent" />
+
+    </FrameLayout>
+
+</helium314.keyboard.keyboard.emoji.EmojiPalettesView>

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-package helium314.keyboard.settings.preferences
+package com.macboard.keyboard.settings.preferences
 
 import android.content.Intent
 import android.content.SharedPreferences
@@ -15,26 +15,26 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import helium314.keyboard.dictionarypack.DictionaryPackConstants
-import helium314.keyboard.keyboard.KeyboardSwitcher
-import helium314.keyboard.keyboard.emoji.SupportedEmojis
-import helium314.keyboard.latin.R
-import helium314.keyboard.latin.common.FileUtils
-import helium314.keyboard.latin.database.Database
-import helium314.keyboard.latin.settings.Settings
-import helium314.keyboard.latin.utils.DeviceProtectedUtils
-import helium314.keyboard.latin.utils.ExecutorUtils
-import helium314.keyboard.latin.utils.LayoutUtilsCustom
-import helium314.keyboard.latin.utils.Log
-import helium314.keyboard.latin.utils.SubtypeSettings
-import helium314.keyboard.latin.utils.getActivity
-import helium314.keyboard.latin.utils.prefs
-import helium314.keyboard.latin.utils.protectedPrefs
-import helium314.keyboard.settings.Setting
-import helium314.keyboard.settings.SettingsActivity
-import helium314.keyboard.settings.dialogs.ConfirmationDialog
-import helium314.keyboard.settings.dialogs.InfoDialog
-import helium314.keyboard.settings.filePicker
+import com.macboard.keyboard.dictionarypack.DictionaryPackConstants
+import com.macboard.keyboard.keyboard.KeyboardSwitcher
+import com.macboard.keyboard.keyboard.emoji.SupportedEmojis
+import com.macboard.keyboard.latin.R
+import com.macboard.keyboard.latin.common.FileUtils
+import com.macboard.keyboard.latin.database.Database
+import com.macboard.keyboard.latin.settings.Settings
+import com.macboard.keyboard.latin.utils.DeviceProtectedUtils
+import com.macboard.keyboard.latin.utils.ExecutorUtils
+import com.macboard.keyboard.latin.utils.LayoutUtilsCustom
+import com.macboard.keyboard.latin.utils.Log
+import com.macboard.keyboard.latin.utils.SubtypeSettings
+import com.macboard.keyboard.latin.utils.getActivity
+import com.macboard.keyboard.latin.utils.prefs
+import com.macboard.keyboard.latin.utils.protectedPrefs
+import com.macboard.keyboard.settings.Setting
+import com.macboard.keyboard.settings.SettingsActivity
+import com.macboard.keyboard.settings.dialogs.ConfirmationDialog
+import com.macboard.keyboard.settings.dialogs.InfoDialog
+import com.macboard.keyboard.settings.filePicker
 import kotlinx.serialization.json.Json
 import java.io.File
 import java.io.FileInputStream
@@ -47,8 +47,8 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
 import androidx.core.content.edit
-import helium314.keyboard.latin.checkVersionUpgrade
-import helium314.keyboard.latin.transferOldPinnedClips
+import com.macboard.keyboard.latin.checkVersionUpgrade
+import com.macboard.keyboard.latin.transferOldPinnedClips
 
 @Composable
 fun BackupRestorePreference(setting: Setting) {

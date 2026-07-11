@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-only
-package helium314.keyboard.latin.spellcheck
+package com.macboard.keyboard.latin.spellcheck
 
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import helium314.keyboard.settings.SettingsActivity2
+import com.macboard.keyboard.settings.SettingsActivity2
 
 class SpellCheckerSettingsActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {

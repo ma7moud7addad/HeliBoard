@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-package helium314.keyboard.latin.utils
+package com.macboard.keyboard.latin.utils
 
 import android.content.Context
 import android.content.pm.PackageManager
@@ -13,7 +13,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
-import helium314.keyboard.latin.define.DebugFlags
+import com.macboard.keyboard.latin.define.DebugFlags
 import java.util.regex.Pattern
 import kotlin.text.split
 

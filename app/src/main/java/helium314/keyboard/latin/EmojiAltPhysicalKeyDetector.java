@@ -4,17 +4,17 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.latin;
+package com.macboard.keyboard.latin;
 
 import android.content.res.Resources;
-import helium314.keyboard.latin.utils.Log;
+import com.macboard.keyboard.latin.utils.Log;
 import android.util.Pair;
 import android.view.KeyEvent;
 
 import androidx.annotation.NonNull;
 
-import helium314.keyboard.keyboard.KeyboardSwitcher;
-import helium314.keyboard.latin.settings.Settings;
+import com.macboard.keyboard.keyboard.KeyboardSwitcher;
+import com.macboard.keyboard.latin.settings.Settings;
 
 import java.util.ArrayList;
 import java.util.HashSet;

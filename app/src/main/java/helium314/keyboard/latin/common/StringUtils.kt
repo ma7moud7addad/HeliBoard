@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-package helium314.keyboard.latin.common
+package com.macboard.keyboard.latin.common
 
-import helium314.keyboard.latin.common.StringUtils.mightBeEmoji
-import helium314.keyboard.latin.common.StringUtils.newSingleCodePointString
-import helium314.keyboard.latin.settings.SpacingAndPunctuations
-import helium314.keyboard.latin.utils.ScriptUtils
-import helium314.keyboard.latin.utils.SpacedTokens
-import helium314.keyboard.latin.utils.SpannableStringUtils
-import helium314.keyboard.latin.utils.TextRange
+import com.macboard.keyboard.latin.common.StringUtils.mightBeEmoji
+import com.macboard.keyboard.latin.common.StringUtils.newSingleCodePointString
+import com.macboard.keyboard.latin.settings.SpacingAndPunctuations
+import com.macboard.keyboard.latin.utils.ScriptUtils
+import com.macboard.keyboard.latin.utils.SpacedTokens
+import com.macboard.keyboard.latin.utils.SpannableStringUtils
+import com.macboard.keyboard.latin.utils.TextRange
 import java.math.BigInteger
 import java.text.BreakIterator
 import java.util.Locale

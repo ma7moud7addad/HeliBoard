@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.latin;
+package com.macboard.keyboard.latin;
 
 import android.content.Context;
-import helium314.keyboard.latin.utils.Log;
+import com.macboard.keyboard.latin.utils.Log;
 
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;

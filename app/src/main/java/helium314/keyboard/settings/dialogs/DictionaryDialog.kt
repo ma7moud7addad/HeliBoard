@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-package helium314.keyboard.settings.dialogs
+package com.macboard.keyboard.settings.dialogs
 
 import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
@@ -26,23 +26,23 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
-import helium314.keyboard.compat.locale
-import helium314.keyboard.latin.dictionary.Dictionary
-import helium314.keyboard.latin.R
-import helium314.keyboard.latin.common.LocaleUtils.localizedDisplayName
-import helium314.keyboard.latin.utils.DictionaryInfoUtils
-import helium314.keyboard.latin.utils.createDictionaryTextAnnotated
-import helium314.keyboard.latin.utils.DeleteButton
-import helium314.keyboard.latin.utils.ExpandButton
-import helium314.keyboard.latin.utils.Theme
-import helium314.keyboard.settings.dictionaryFilePicker
-import helium314.keyboard.latin.utils.previewDark
-import helium314.keyboard.settings.screens.getUserAndInternalDictionaries
+import com.macboard.keyboard.compat.locale
+import com.macboard.keyboard.latin.dictionary.Dictionary
+import com.macboard.keyboard.latin.R
+import com.macboard.keyboard.latin.common.LocaleUtils.localizedDisplayName
+import com.macboard.keyboard.latin.utils.DictionaryInfoUtils
+import com.macboard.keyboard.latin.utils.createDictionaryTextAnnotated
+import com.macboard.keyboard.latin.utils.DeleteButton
+import com.macboard.keyboard.latin.utils.ExpandButton
+import com.macboard.keyboard.latin.utils.Theme
+import com.macboard.keyboard.settings.dictionaryFilePicker
+import com.macboard.keyboard.latin.utils.previewDark
+import com.macboard.keyboard.settings.screens.getUserAndInternalDictionaries
 import java.io.File
 import java.util.Locale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalResources
-import helium314.keyboard.dictionarypack.DictionaryPackConstants
+import com.macboard.keyboard.dictionarypack.DictionaryPackConstants
 
 @Composable
 fun DictionaryDialog(

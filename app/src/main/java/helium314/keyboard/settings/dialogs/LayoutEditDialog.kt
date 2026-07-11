@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-package helium314.keyboard.settings.dialogs
+package com.macboard.keyboard.settings.dialogs
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.WindowInsets
@@ -23,20 +23,20 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
-import helium314.keyboard.keyboard.KeyboardSwitcher
-import helium314.keyboard.latin.R
-import helium314.keyboard.latin.utils.LayoutType
-import helium314.keyboard.latin.utils.LayoutUtilsCustom
-import helium314.keyboard.latin.utils.Log
-import helium314.keyboard.latin.utils.SubtypeSettings
-import helium314.keyboard.latin.utils.getActivity
-import helium314.keyboard.latin.utils.getStringResourceOrName
-import helium314.keyboard.latin.utils.CloseIcon
-import helium314.keyboard.settings.SettingsActivity
-import helium314.keyboard.latin.utils.Theme
-import helium314.keyboard.settings.contentTextDirectionStyle
-import helium314.keyboard.settings.initPreview
-import helium314.keyboard.latin.utils.previewDark
+import com.macboard.keyboard.keyboard.KeyboardSwitcher
+import com.macboard.keyboard.latin.R
+import com.macboard.keyboard.latin.utils.LayoutType
+import com.macboard.keyboard.latin.utils.LayoutUtilsCustom
+import com.macboard.keyboard.latin.utils.Log
+import com.macboard.keyboard.latin.utils.SubtypeSettings
+import com.macboard.keyboard.latin.utils.getActivity
+import com.macboard.keyboard.latin.utils.getStringResourceOrName
+import com.macboard.keyboard.latin.utils.CloseIcon
+import com.macboard.keyboard.settings.SettingsActivity
+import com.macboard.keyboard.latin.utils.Theme
+import com.macboard.keyboard.settings.contentTextDirectionStyle
+import com.macboard.keyboard.settings.initPreview
+import com.macboard.keyboard.latin.utils.previewDark
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay

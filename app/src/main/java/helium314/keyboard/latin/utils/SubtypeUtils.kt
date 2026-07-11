@@ -1,21 +1,21 @@
-package helium314.keyboard.latin.utils
+package com.macboard.keyboard.latin.utils
 
 import android.content.SharedPreferences
 import android.content.res.Resources
 import android.os.Build
 import android.view.inputmethod.InputMethodSubtype
-import helium314.keyboard.latin.R
-import helium314.keyboard.latin.RichInputMethodManager
-import helium314.keyboard.latin.RichInputMethodSubtype
-import helium314.keyboard.latin.common.Constants.Separators
-import helium314.keyboard.latin.common.Constants.Subtype.ExtraValue
-import helium314.keyboard.latin.common.Constants.Subtype.ExtraValue.KEYBOARD_LAYOUT_SET
-import helium314.keyboard.latin.common.LocaleUtils.constructLocale
-import helium314.keyboard.latin.common.LocaleUtils.isGoodMatch
-import helium314.keyboard.latin.settings.Defaults
-import helium314.keyboard.latin.settings.Settings
-import helium314.keyboard.latin.settings.SettingsSubtype.Companion.getExtraValueOf
-import helium314.keyboard.latin.utils.SubtypeSettings.isEnabled
+import com.macboard.keyboard.latin.R
+import com.macboard.keyboard.latin.RichInputMethodManager
+import com.macboard.keyboard.latin.RichInputMethodSubtype
+import com.macboard.keyboard.latin.common.Constants.Separators
+import com.macboard.keyboard.latin.common.Constants.Subtype.ExtraValue
+import com.macboard.keyboard.latin.common.Constants.Subtype.ExtraValue.KEYBOARD_LAYOUT_SET
+import com.macboard.keyboard.latin.common.LocaleUtils.constructLocale
+import com.macboard.keyboard.latin.common.LocaleUtils.isGoodMatch
+import com.macboard.keyboard.latin.settings.Defaults
+import com.macboard.keyboard.latin.settings.Settings
+import com.macboard.keyboard.latin.settings.SettingsSubtype.Companion.getExtraValueOf
+import com.macboard.keyboard.latin.utils.SubtypeSettings.isEnabled
 import org.xmlpull.v1.XmlPullParser
 import java.util.Locale
 

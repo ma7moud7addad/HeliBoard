@@ -3,12 +3,12 @@
  * modified
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
-package helium314.keyboard.keyboard.internal.keyboard_parser.floris
+package com.macboard.keyboard.keyboard.internal.keyboard_parser.floris
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import helium314.keyboard.keyboard.KeyboardId
-import helium314.keyboard.keyboard.internal.KeyboardParams
+import com.macboard.keyboard.keyboard.KeyboardId
+import com.macboard.keyboard.keyboard.internal.KeyboardParams
 
 // taken from FlorisBoard, small modifications
 //  popup not nullable (maybe change back, but currently that's necessary for number keys)

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.keyboard;
+package com.macboard.keyboard.keyboard;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -29,34 +29,34 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import helium314.keyboard.event.Event;
-import helium314.keyboard.keyboard.KeyboardLayoutSet.KeyboardLayoutSetException;
-import helium314.keyboard.keyboard.clipboard.ClipboardHistoryView;
-import helium314.keyboard.keyboard.emoji.EmojiPalettesView;
-import helium314.keyboard.keyboard.internal.KeyboardState;
-import helium314.keyboard.keyboard.internal.keyboard_parser.EmojiParserKt;
-import helium314.keyboard.latin.utils.FloatingKeyboardUtils;
-import helium314.keyboard.latin.InputView;
-import helium314.keyboard.latin.KeyboardWrapperView;
-import helium314.keyboard.latin.LatinIME;
-import helium314.keyboard.latin.R;
-import helium314.keyboard.latin.RichInputMethodManager;
-import helium314.keyboard.latin.RichInputMethodSubtype;
-import helium314.keyboard.latin.WordComposer;
-import helium314.keyboard.latin.settings.Settings;
-import helium314.keyboard.latin.settings.SettingsKt;
-import helium314.keyboard.latin.settings.SettingsValues;
-import helium314.keyboard.latin.suggestions.SuggestionStripView;
-import helium314.keyboard.latin.utils.CapsModeUtils;
-import helium314.keyboard.latin.utils.FoldableUtils;
-import helium314.keyboard.latin.utils.KtxKt;
-import helium314.keyboard.latin.utils.LanguageOnSpacebarUtils;
-import helium314.keyboard.latin.utils.Log;
-import helium314.keyboard.latin.utils.RecapitalizeMode;
-import helium314.keyboard.latin.utils.ResourceUtils;
-import helium314.keyboard.latin.utils.ScriptUtils;
-import helium314.keyboard.latin.utils.SubtypeUtilsAdditional;
-import helium314.keyboard.latin.utils.ToolbarMode;
+import com.macboard.keyboard.event.Event;
+import com.macboard.keyboard.keyboard.KeyboardLayoutSet.KeyboardLayoutSetException;
+import com.macboard.keyboard.keyboard.clipboard.ClipboardHistoryView;
+import com.macboard.keyboard.keyboard.emoji.EmojiPalettesView;
+import com.macboard.keyboard.keyboard.internal.KeyboardState;
+import com.macboard.keyboard.keyboard.internal.keyboard_parser.EmojiParserKt;
+import com.macboard.keyboard.latin.utils.FloatingKeyboardUtils;
+import com.macboard.keyboard.latin.InputView;
+import com.macboard.keyboard.latin.KeyboardWrapperView;
+import com.macboard.keyboard.latin.LatinIME;
+import com.macboard.keyboard.latin.R;
+import com.macboard.keyboard.latin.RichInputMethodManager;
+import com.macboard.keyboard.latin.RichInputMethodSubtype;
+import com.macboard.keyboard.latin.WordComposer;
+import com.macboard.keyboard.latin.settings.Settings;
+import com.macboard.keyboard.latin.settings.SettingsKt;
+import com.macboard.keyboard.latin.settings.SettingsValues;
+import com.macboard.keyboard.latin.suggestions.SuggestionStripView;
+import com.macboard.keyboard.latin.utils.CapsModeUtils;
+import com.macboard.keyboard.latin.utils.FoldableUtils;
+import com.macboard.keyboard.latin.utils.KtxKt;
+import com.macboard.keyboard.latin.utils.LanguageOnSpacebarUtils;
+import com.macboard.keyboard.latin.utils.Log;
+import com.macboard.keyboard.latin.utils.RecapitalizeMode;
+import com.macboard.keyboard.latin.utils.ResourceUtils;
+import com.macboard.keyboard.latin.utils.ScriptUtils;
+import com.macboard.keyboard.latin.utils.SubtypeUtilsAdditional;
+import com.macboard.keyboard.latin.utils.ToolbarMode;
 
 public final class KeyboardSwitcher implements KeyboardState.SwitchActions {
     private static final String TAG = KeyboardSwitcher.class.getSimpleName();

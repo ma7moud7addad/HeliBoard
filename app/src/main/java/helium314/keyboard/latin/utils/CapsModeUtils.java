@@ -4,15 +4,15 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.latin.utils;
+package com.macboard.keyboard.latin.utils;
 
 import android.text.InputType;
 import android.text.TextUtils;
 
-import helium314.keyboard.latin.WordComposer;
-import helium314.keyboard.latin.common.Constants;
-import helium314.keyboard.latin.common.StringUtils;
-import helium314.keyboard.latin.settings.SpacingAndPunctuations;
+import com.macboard.keyboard.latin.WordComposer;
+import com.macboard.keyboard.latin.common.Constants;
+import com.macboard.keyboard.latin.common.StringUtils;
+import com.macboard.keyboard.latin.settings.SpacingAndPunctuations;
 
 import java.util.ArrayList;
 import java.util.Locale;

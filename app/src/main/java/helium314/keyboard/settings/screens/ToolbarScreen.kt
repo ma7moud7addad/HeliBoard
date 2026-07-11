@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-package helium314.keyboard.settings.screens
+package com.macboard.keyboard.settings.screens
 
 import android.content.Context
 import androidx.compose.material3.Surface
@@ -12,26 +12,26 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import helium314.keyboard.keyboard.KeyboardSwitcher
-import helium314.keyboard.latin.R
-import helium314.keyboard.latin.settings.Defaults
-import helium314.keyboard.latin.settings.Settings
-import helium314.keyboard.latin.utils.Log
-import helium314.keyboard.latin.utils.ToolbarMode
-import helium314.keyboard.latin.utils.getActivity
-import helium314.keyboard.latin.utils.getStringResourceOrName
-import helium314.keyboard.latin.utils.prefs
-import helium314.keyboard.settings.SearchSettingsScreen
-import helium314.keyboard.settings.Setting
-import helium314.keyboard.settings.SettingsActivity
-import helium314.keyboard.latin.utils.Theme
-import helium314.keyboard.settings.dialogs.ToolbarKeysCustomizer
-import helium314.keyboard.settings.initPreview
-import helium314.keyboard.settings.preferences.ListPreference
-import helium314.keyboard.settings.preferences.Preference
-import helium314.keyboard.settings.preferences.ReorderSwitchPreference
-import helium314.keyboard.settings.preferences.SwitchPreference
-import helium314.keyboard.latin.utils.previewDark
+import com.macboard.keyboard.keyboard.KeyboardSwitcher
+import com.macboard.keyboard.latin.R
+import com.macboard.keyboard.latin.settings.Defaults
+import com.macboard.keyboard.latin.settings.Settings
+import com.macboard.keyboard.latin.utils.Log
+import com.macboard.keyboard.latin.utils.ToolbarMode
+import com.macboard.keyboard.latin.utils.getActivity
+import com.macboard.keyboard.latin.utils.getStringResourceOrName
+import com.macboard.keyboard.latin.utils.prefs
+import com.macboard.keyboard.settings.SearchSettingsScreen
+import com.macboard.keyboard.settings.Setting
+import com.macboard.keyboard.settings.SettingsActivity
+import com.macboard.keyboard.latin.utils.Theme
+import com.macboard.keyboard.settings.dialogs.ToolbarKeysCustomizer
+import com.macboard.keyboard.settings.initPreview
+import com.macboard.keyboard.settings.preferences.ListPreference
+import com.macboard.keyboard.settings.preferences.Preference
+import com.macboard.keyboard.settings.preferences.ReorderSwitchPreference
+import com.macboard.keyboard.settings.preferences.SwitchPreference
+import com.macboard.keyboard.latin.utils.previewDark
 
 @Composable
 fun ToolbarScreen(

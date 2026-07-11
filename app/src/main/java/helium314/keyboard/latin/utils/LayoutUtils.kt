@@ -1,12 +1,12 @@
-package helium314.keyboard.latin.utils
+package com.macboard.keyboard.latin.utils
 
 import android.content.Context
-import helium314.keyboard.keyboard.internal.keyboard_parser.floris.SimplePopups
-import helium314.keyboard.keyboard.internal.keyboard_parser.getOrCreate
-import helium314.keyboard.latin.R
-import helium314.keyboard.latin.settings.Defaults.default
-import helium314.keyboard.latin.utils.LayoutType.Companion.folder
-import helium314.keyboard.latin.utils.ScriptUtils.script
+import com.macboard.keyboard.keyboard.internal.keyboard_parser.floris.SimplePopups
+import com.macboard.keyboard.keyboard.internal.keyboard_parser.getOrCreate
+import com.macboard.keyboard.latin.R
+import com.macboard.keyboard.latin.settings.Defaults.default
+import com.macboard.keyboard.latin.utils.LayoutType.Companion.folder
+import com.macboard.keyboard.latin.utils.ScriptUtils.script
 import java.io.File
 import java.util.Locale
 

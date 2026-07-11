@@ -1,19 +1,19 @@
 // SPDX-License-Identifier: GPL-3.0-only
-package helium314.keyboard.settings
+package com.macboard.keyboard.settings
 
 import android.content.Context
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import helium314.keyboard.latin.utils.JniUtils
-import helium314.keyboard.settings.screens.createAboutSettings
-import helium314.keyboard.settings.screens.createAdvancedSettings
-import helium314.keyboard.settings.screens.createAppearanceSettings
-import helium314.keyboard.settings.screens.createCorrectionSettings
-import helium314.keyboard.settings.screens.createGestureTypingSettings
-import helium314.keyboard.settings.screens.createLayoutSettings
-import helium314.keyboard.settings.screens.createPreferencesSettings
-import helium314.keyboard.settings.screens.createToolbarSettings
+import com.macboard.keyboard.latin.utils.JniUtils
+import com.macboard.keyboard.settings.screens.createAboutSettings
+import com.macboard.keyboard.settings.screens.createAdvancedSettings
+import com.macboard.keyboard.settings.screens.createAppearanceSettings
+import com.macboard.keyboard.settings.screens.createCorrectionSettings
+import com.macboard.keyboard.settings.screens.createGestureTypingSettings
+import com.macboard.keyboard.settings.screens.createLayoutSettings
+import com.macboard.keyboard.settings.screens.createPreferencesSettings
+import com.macboard.keyboard.settings.screens.createToolbarSettings
 
 class SettingsContainer(context: Context) {
     private val list = createSettings(context)

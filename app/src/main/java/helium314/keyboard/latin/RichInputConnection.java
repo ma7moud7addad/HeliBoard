@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.latin;
+package com.macboard.keyboard.latin;
 
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -17,11 +17,11 @@ import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.CharacterStyle;
 
-import helium314.keyboard.keyboard.KeyboardSwitcher;
-import helium314.keyboard.latin.common.ConstantsKt;
-import helium314.keyboard.latin.define.DebugFlags;
-import helium314.keyboard.latin.settings.Settings;
-import helium314.keyboard.latin.utils.Log;
+import com.macboard.keyboard.keyboard.KeyboardSwitcher;
+import com.macboard.keyboard.latin.common.ConstantsKt;
+import com.macboard.keyboard.latin.define.DebugFlags;
+import com.macboard.keyboard.latin.settings.Settings;
+import com.macboard.keyboard.latin.utils.Log;
 import android.view.KeyEvent;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
@@ -33,17 +33,17 @@ import android.view.inputmethod.InputMethodManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import helium314.keyboard.latin.common.Constants;
-import helium314.keyboard.latin.common.StringUtils;
-import helium314.keyboard.latin.common.StringUtilsKt;
-import helium314.keyboard.latin.common.UnicodeSurrogate;
-import helium314.keyboard.latin.inputlogic.PrivateCommandPerformer;
-import helium314.keyboard.latin.settings.SpacingAndPunctuations;
-import helium314.keyboard.latin.utils.CapsModeUtils;
-import helium314.keyboard.latin.utils.DebugLogUtils;
-import helium314.keyboard.latin.utils.NgramContextUtils;
-import helium314.keyboard.latin.utils.StatsUtils;
-import helium314.keyboard.latin.utils.TextRange;
+import com.macboard.keyboard.latin.common.Constants;
+import com.macboard.keyboard.latin.common.StringUtils;
+import com.macboard.keyboard.latin.common.StringUtilsKt;
+import com.macboard.keyboard.latin.common.UnicodeSurrogate;
+import com.macboard.keyboard.latin.inputlogic.PrivateCommandPerformer;
+import com.macboard.keyboard.latin.settings.SpacingAndPunctuations;
+import com.macboard.keyboard.latin.utils.CapsModeUtils;
+import com.macboard.keyboard.latin.utils.DebugLogUtils;
+import com.macboard.keyboard.latin.utils.NgramContextUtils;
+import com.macboard.keyboard.latin.utils.StatsUtils;
+import com.macboard.keyboard.latin.utils.TextRange;
 
 import java.util.concurrent.TimeUnit;
 

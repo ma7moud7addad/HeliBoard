@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-package helium314.keyboard.settings.screens
+package com.macboard.keyboard.settings.screens
 
 import android.app.Activity
 import android.content.ClipData
@@ -43,24 +43,24 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import helium314.keyboard.keyboard.ColorSetting
-import helium314.keyboard.keyboard.KeyboardTheme
-import helium314.keyboard.latin.R
-import helium314.keyboard.latin.common.ColorType
-import helium314.keyboard.latin.common.default
-import helium314.keyboard.latin.common.encodeBase36
-import helium314.keyboard.latin.settings.Defaults
-import helium314.keyboard.latin.settings.Settings
-import helium314.keyboard.latin.utils.Log
-import helium314.keyboard.latin.utils.getActivity
-import helium314.keyboard.latin.utils.prefs
-import helium314.keyboard.latin.utils.CloseIcon
-import helium314.keyboard.settings.SearchScreen
-import helium314.keyboard.settings.SettingsActivity
-import helium314.keyboard.latin.utils.Theme
-import helium314.keyboard.settings.contentTextDirectionStyle
-import helium314.keyboard.settings.dialogs.ColorPickerDialog
-import helium314.keyboard.latin.utils.previewDark
+import com.macboard.keyboard.keyboard.ColorSetting
+import com.macboard.keyboard.keyboard.KeyboardTheme
+import com.macboard.keyboard.latin.R
+import com.macboard.keyboard.latin.common.ColorType
+import com.macboard.keyboard.latin.common.default
+import com.macboard.keyboard.latin.common.encodeBase36
+import com.macboard.keyboard.latin.settings.Defaults
+import com.macboard.keyboard.latin.settings.Settings
+import com.macboard.keyboard.latin.utils.Log
+import com.macboard.keyboard.latin.utils.getActivity
+import com.macboard.keyboard.latin.utils.prefs
+import com.macboard.keyboard.latin.utils.CloseIcon
+import com.macboard.keyboard.settings.SearchScreen
+import com.macboard.keyboard.settings.SettingsActivity
+import com.macboard.keyboard.latin.utils.Theme
+import com.macboard.keyboard.settings.contentTextDirectionStyle
+import com.macboard.keyboard.settings.dialogs.ColorPickerDialog
+import com.macboard.keyboard.latin.utils.previewDark
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 

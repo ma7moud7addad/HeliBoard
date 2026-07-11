@@ -3,9 +3,9 @@
  * modified
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
-package helium314.keyboard.latin.common
+package com.macboard.keyboard.latin.common
 
-import helium314.keyboard.latin.WordComposer
+import com.macboard.keyboard.latin.WordComposer
 import kotlin.random.Random
 
 /** An immutable class that encapsulates a snapshot of word composition data. */

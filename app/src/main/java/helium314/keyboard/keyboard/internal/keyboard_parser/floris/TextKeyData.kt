@@ -3,31 +3,31 @@
  * modified
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
-package helium314.keyboard.keyboard.internal.keyboard_parser.floris
+package com.macboard.keyboard.keyboard.internal.keyboard_parser.floris
 
 import android.view.inputmethod.EditorInfo
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
-import helium314.keyboard.keyboard.Key
-import helium314.keyboard.keyboard.KeyboardId
-import helium314.keyboard.keyboard.KeyboardTheme
-import helium314.keyboard.keyboard.internal.KeyboardCodesSet
-import helium314.keyboard.keyboard.internal.KeyboardIconsSet
-import helium314.keyboard.keyboard.internal.KeyboardParams
-import helium314.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode.checkAndConvertCode
-import helium314.keyboard.keyboard.internal.keyboard_parser.floris.KeyLabel.convertFlorisLabel
-import helium314.keyboard.keyboard.internal.keyboard_parser.floris.KeyLabel.rtlLabel
-import helium314.keyboard.latin.RichInputMethodManager
-import helium314.keyboard.latin.common.Constants
-import helium314.keyboard.latin.common.LocaleUtils.constructLocale
-import helium314.keyboard.latin.common.StringUtils
-import helium314.keyboard.latin.settings.Settings
-import helium314.keyboard.latin.spellcheck.AndroidSpellCheckerService
-import helium314.keyboard.latin.utils.LayoutType
-import helium314.keyboard.latin.utils.Log
-import helium314.keyboard.latin.utils.ToolbarKey
-import helium314.keyboard.latin.utils.toolbarKeyStrings
+import com.macboard.keyboard.keyboard.Key
+import com.macboard.keyboard.keyboard.KeyboardId
+import com.macboard.keyboard.keyboard.KeyboardTheme
+import com.macboard.keyboard.keyboard.internal.KeyboardCodesSet
+import com.macboard.keyboard.keyboard.internal.KeyboardIconsSet
+import com.macboard.keyboard.keyboard.internal.KeyboardParams
+import com.macboard.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode.checkAndConvertCode
+import com.macboard.keyboard.keyboard.internal.keyboard_parser.floris.KeyLabel.convertFlorisLabel
+import com.macboard.keyboard.keyboard.internal.keyboard_parser.floris.KeyLabel.rtlLabel
+import com.macboard.keyboard.latin.RichInputMethodManager
+import com.macboard.keyboard.latin.common.Constants
+import com.macboard.keyboard.latin.common.LocaleUtils.constructLocale
+import com.macboard.keyboard.latin.common.StringUtils
+import com.macboard.keyboard.latin.settings.Settings
+import com.macboard.keyboard.latin.spellcheck.AndroidSpellCheckerService
+import com.macboard.keyboard.latin.utils.LayoutType
+import com.macboard.keyboard.latin.utils.Log
+import com.macboard.keyboard.latin.utils.ToolbarKey
+import com.macboard.keyboard.latin.utils.toolbarKeyStrings
 
 // taken from FlorisBoard, modified (see also KeyData)
 

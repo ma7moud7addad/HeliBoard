@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-package helium314.keyboard.keyboard.emoji;
+package com.macboard.keyboard.keyboard.emoji;
 
-import helium314.keyboard.keyboard.Key;
+import com.macboard.keyboard.keyboard.Key;
 
 /**
  * Interface to handle callbacks from child elements

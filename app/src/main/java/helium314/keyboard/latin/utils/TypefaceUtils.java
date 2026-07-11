@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.latin.utils;
+package com.macboard.keyboard.latin.utils;
 
 import android.graphics.Paint;
 import android.graphics.Rect;

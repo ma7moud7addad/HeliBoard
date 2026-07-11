@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.keyboard.internal;
+package com.macboard.keyboard.keyboard.internal;
 
 import android.content.res.TypedArray;
 
-import helium314.keyboard.latin.R;
-import helium314.keyboard.latin.utils.ResourceUtils;
+import com.macboard.keyboard.latin.R;
+import com.macboard.keyboard.latin.utils.ResourceUtils;
 
 /**
  * This class holds parameters to control how a gesture stroke is sampled and recognized.

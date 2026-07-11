@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.latin.makedict;
+package com.macboard.keyboard.latin.makedict;
 
 /**
  * Simple exception thrown when a file format is not recognized.

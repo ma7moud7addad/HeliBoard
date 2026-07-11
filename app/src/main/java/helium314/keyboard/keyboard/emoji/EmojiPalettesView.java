@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.keyboard.emoji;
+package com.macboard.keyboard.keyboard.emoji;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,33 +26,33 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
-import helium314.keyboard.event.HapticEvent;
-import helium314.keyboard.keyboard.Key;
-import helium314.keyboard.keyboard.Keyboard;
-import helium314.keyboard.keyboard.KeyboardActionListener;
-import helium314.keyboard.keyboard.KeyboardId;
-import helium314.keyboard.keyboard.KeyboardLayoutSet;
-import helium314.keyboard.keyboard.KeyboardSwitcher;
-import helium314.keyboard.keyboard.KeyboardView;
-import helium314.keyboard.keyboard.MainKeyboardView;
-import helium314.keyboard.keyboard.PointerTracker;
-import helium314.keyboard.keyboard.internal.KeyDrawParams;
-import helium314.keyboard.keyboard.internal.KeyVisualAttributes;
-import helium314.keyboard.keyboard.internal.keyboard_parser.EmojiParserKt;
-import helium314.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode;
-import helium314.keyboard.latin.AudioAndHapticFeedbackManager;
-import helium314.keyboard.latin.dictionary.Dictionary;
-import helium314.keyboard.latin.dictionary.DictionaryFactory;
-import helium314.keyboard.latin.R;
-import helium314.keyboard.latin.RichInputMethodManager;
-import helium314.keyboard.latin.RichInputMethodSubtype;
-import helium314.keyboard.latin.SingleDictionaryFacilitator;
-import helium314.keyboard.latin.common.ColorType;
-import helium314.keyboard.latin.common.Colors;
-import helium314.keyboard.latin.settings.Settings;
-import helium314.keyboard.latin.settings.SettingsValues;
-import helium314.keyboard.latin.utils.DictionaryInfoUtils;
-import helium314.keyboard.latin.utils.ResourceUtils;
+import com.macboard.keyboard.event.HapticEvent;
+import com.macboard.keyboard.keyboard.Key;
+import com.macboard.keyboard.keyboard.Keyboard;
+import com.macboard.keyboard.keyboard.KeyboardActionListener;
+import com.macboard.keyboard.keyboard.KeyboardId;
+import com.macboard.keyboard.keyboard.KeyboardLayoutSet;
+import com.macboard.keyboard.keyboard.KeyboardSwitcher;
+import com.macboard.keyboard.keyboard.KeyboardView;
+import com.macboard.keyboard.keyboard.MainKeyboardView;
+import com.macboard.keyboard.keyboard.PointerTracker;
+import com.macboard.keyboard.keyboard.internal.KeyDrawParams;
+import com.macboard.keyboard.keyboard.internal.KeyVisualAttributes;
+import com.macboard.keyboard.keyboard.internal.keyboard_parser.EmojiParserKt;
+import com.macboard.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode;
+import com.macboard.keyboard.latin.AudioAndHapticFeedbackManager;
+import com.macboard.keyboard.latin.dictionary.Dictionary;
+import com.macboard.keyboard.latin.dictionary.DictionaryFactory;
+import com.macboard.keyboard.latin.R;
+import com.macboard.keyboard.latin.RichInputMethodManager;
+import com.macboard.keyboard.latin.RichInputMethodSubtype;
+import com.macboard.keyboard.latin.SingleDictionaryFacilitator;
+import com.macboard.keyboard.latin.common.ColorType;
+import com.macboard.keyboard.latin.common.Colors;
+import com.macboard.keyboard.latin.settings.Settings;
+import com.macboard.keyboard.latin.settings.SettingsValues;
+import com.macboard.keyboard.latin.utils.DictionaryInfoUtils;
+import com.macboard.keyboard.latin.utils.ResourceUtils;
 
 import static helium314.keyboard.latin.common.Constants.NOT_A_COORDINATE;
 

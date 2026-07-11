@@ -12,7 +12,7 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "helium314.keyboard"
+        applicationId = "com.macboard.keyboard"
         minSdk = 21
         targetSdk = 36
         versionCode = 3901
@@ -119,7 +119,7 @@ android {
         includeInBundle = false
     }
 
-    namespace = "helium314.keyboard.latin"
+    namespace = "com.macboard.keyboard.latin"
     lint {
         abortOnError = true
     }

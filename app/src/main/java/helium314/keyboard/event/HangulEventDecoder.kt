@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-package helium314.keyboard.event
+package com.macboard.keyboard.event
 
 import android.view.KeyEvent
-import helium314.keyboard.latin.RichInputMethodSubtype
+import com.macboard.keyboard.latin.RichInputMethodSubtype
 
-import helium314.keyboard.event.HangulCombiner.HangulJamo
+import com.macboard.keyboard.event.HangulCombiner.HangulJamo
 
 object HangulEventDecoder {
 

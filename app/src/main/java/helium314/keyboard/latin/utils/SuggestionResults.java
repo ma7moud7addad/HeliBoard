@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.latin.utils;
+package com.macboard.keyboard.latin.utils;
 
 import androidx.annotation.Nullable;
-import helium314.keyboard.latin.SuggestedWords.SuggestedWordInfo;
-import helium314.keyboard.latin.define.ProductionFlags;
+import com.macboard.keyboard.latin.SuggestedWords.SuggestedWordInfo;
+import com.macboard.keyboard.latin.define.ProductionFlags;
 
 import java.util.ArrayList;
 import java.util.Collection;

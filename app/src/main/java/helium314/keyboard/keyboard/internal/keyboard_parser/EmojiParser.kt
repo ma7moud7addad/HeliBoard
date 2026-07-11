@@ -1,21 +1,21 @@
 // SPDX-License-Identifier: GPL-3.0-only
-package helium314.keyboard.keyboard.internal.keyboard_parser
+package com.macboard.keyboard.keyboard.internal.keyboard_parser
 
 import android.content.Context
-import helium314.keyboard.keyboard.Key
-import helium314.keyboard.keyboard.Key.KeyParams
-import helium314.keyboard.keyboard.KeyboardId
-import helium314.keyboard.keyboard.emoji.SupportedEmojis
-import helium314.keyboard.keyboard.internal.KeyboardParams
-import helium314.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode
-import helium314.keyboard.latin.R
-import helium314.keyboard.latin.common.Constants
-import helium314.keyboard.latin.common.StringUtils
-import helium314.keyboard.latin.common.splitOnWhitespace
-import helium314.keyboard.latin.settings.Defaults
-import helium314.keyboard.latin.settings.Settings
-import helium314.keyboard.latin.utils.ResourceUtils
-import helium314.keyboard.latin.utils.prefs
+import com.macboard.keyboard.keyboard.Key
+import com.macboard.keyboard.keyboard.Key.KeyParams
+import com.macboard.keyboard.keyboard.KeyboardId
+import com.macboard.keyboard.keyboard.emoji.SupportedEmojis
+import com.macboard.keyboard.keyboard.internal.KeyboardParams
+import com.macboard.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode
+import com.macboard.keyboard.latin.R
+import com.macboard.keyboard.latin.common.Constants
+import com.macboard.keyboard.latin.common.StringUtils
+import com.macboard.keyboard.latin.common.splitOnWhitespace
+import com.macboard.keyboard.latin.settings.Defaults
+import com.macboard.keyboard.latin.settings.Settings
+import com.macboard.keyboard.latin.utils.ResourceUtils
+import com.macboard.keyboard.latin.utils.prefs
 import java.util.Collections
 import kotlin.let
 import kotlin.math.sqrt

@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.latin.utils;
+package com.macboard.keyboard.latin.utils;
 
 import android.text.InputType;
 import android.view.inputmethod.EditorInfo;
-import helium314.keyboard.compat.AppWorkarounds;
+import com.macboard.keyboard.compat.AppWorkarounds;
 
 public final class InputTypeUtils implements InputType {
     private static final int WEB_TEXT_PASSWORD_INPUT_TYPE = TYPE_CLASS_TEXT | TYPE_TEXT_VARIATION_WEB_PASSWORD;

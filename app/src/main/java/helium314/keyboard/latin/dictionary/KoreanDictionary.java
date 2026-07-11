@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-package helium314.keyboard.latin.dictionary;
+package com.macboard.keyboard.latin.dictionary;
 
-import helium314.keyboard.event.HangulCombiner;
-import helium314.keyboard.latin.NgramContext;
-import helium314.keyboard.latin.SuggestedWords;
-import helium314.keyboard.latin.common.ComposedData;
-import helium314.keyboard.latin.makedict.WordProperty;
-import helium314.keyboard.latin.settings.SettingsValuesForSuggestion;
+import com.macboard.keyboard.event.HangulCombiner;
+import com.macboard.keyboard.latin.NgramContext;
+import com.macboard.keyboard.latin.SuggestedWords;
+import com.macboard.keyboard.latin.common.ComposedData;
+import com.macboard.keyboard.latin.makedict.WordProperty;
+import com.macboard.keyboard.latin.settings.SettingsValuesForSuggestion;
 
 import java.text.Normalizer;
 import java.util.ArrayList;

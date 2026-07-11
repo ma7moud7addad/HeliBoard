@@ -1,12 +1,12 @@
-package helium314.keyboard.keyboard.emoji
+package com.macboard.keyboard.keyboard.emoji
 
 import android.content.Context
 import android.graphics.Paint
 import android.os.Build
 import androidx.core.content.edit
-import helium314.keyboard.keyboard.KeyboardTypeface
-import helium314.keyboard.latin.settings.Settings
-import helium314.keyboard.latin.utils.prefs
+import com.macboard.keyboard.keyboard.KeyboardTypeface
+import com.macboard.keyboard.latin.settings.Settings
+import com.macboard.keyboard.latin.utils.prefs
 
 object SupportedEmojis {
     private val unsupportedEmojis = hashSetOf<String>()

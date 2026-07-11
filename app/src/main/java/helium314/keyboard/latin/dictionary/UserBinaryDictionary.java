@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package helium314.keyboard.latin.dictionary;
+package com.macboard.keyboard.latin.dictionary;
 
 import android.content.Context;
 import android.database.ContentObserver;
@@ -16,8 +16,8 @@ import android.text.TextUtils;
 
 import com.android.inputmethod.latin.BinaryDictionary;
 
-import helium314.keyboard.latin.utils.Log;
-import helium314.keyboard.latin.utils.SubtypeLocaleUtils;
+import com.macboard.keyboard.latin.utils.Log;
+import com.macboard.keyboard.latin.utils.SubtypeLocaleUtils;
 
 import java.io.File;
 import java.util.Arrays;

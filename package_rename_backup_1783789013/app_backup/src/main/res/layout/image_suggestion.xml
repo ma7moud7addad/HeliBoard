@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This wrapper ensures the pill is centered vertically in the suggestion strip -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/image_suggestion_container"
+        android:layout_width="wrap_content"
+        android:layout_height="28dp"
+        android:layout_gravity="center_vertical"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@drawable/image_suggestion_pill_background"
+        android:elevation="2dp"
+        android:paddingStart="4dp"
+        android:paddingEnd="10dp"
+        android:layout_marginStart="6dp"
+        android:layout_marginEnd="6dp">
+
+        <FrameLayout
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:layout_marginStart="2dp"
+            android:layout_marginEnd="6dp">
+
+            <ImageView
+                android:id="@+id/image_suggestion_thumbnail"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:background="@drawable/circular_image_background" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/image_suggestion_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/image_suggestion_insert"
+            android:textSize="13sp"
+            android:textColor="?android:attr/textColorPrimary"
+            android:includeFontPadding="false" />
+    </LinearLayout>
+</FrameLayout>

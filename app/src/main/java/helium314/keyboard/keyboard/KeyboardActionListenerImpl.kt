@@ -1,29 +1,29 @@
 // SPDX-License-Identifier: GPL-3.0-only
-package helium314.keyboard.keyboard
+package com.macboard.keyboard.keyboard
 
 import android.text.InputType
 import android.util.SparseArray
 import android.view.KeyEvent
 import android.view.inputmethod.InputMethodSubtype
 import androidx.core.util.forEach
-import helium314.keyboard.event.Event
-import helium314.keyboard.event.HangulEventDecoder
-import helium314.keyboard.event.HapticEvent
-import helium314.keyboard.event.HardwareEventDecoder
-import helium314.keyboard.event.HardwareKeyboardEventDecoder
-import helium314.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode
-import helium314.keyboard.latin.AudioAndHapticFeedbackManager
-import helium314.keyboard.latin.EmojiAltPhysicalKeyDetector
-import helium314.keyboard.latin.LatinIME
-import helium314.keyboard.latin.RichInputMethodManager
-import helium314.keyboard.latin.common.Constants
-import helium314.keyboard.latin.common.InputPointers
-import helium314.keyboard.latin.common.combiningRange
-import helium314.keyboard.latin.common.moveStepsToCharCount
-import helium314.keyboard.latin.define.ProductionFlags
-import helium314.keyboard.latin.inputlogic.InputLogic
-import helium314.keyboard.latin.settings.Settings
-import helium314.keyboard.latin.utils.SubtypeSettings
+import com.macboard.keyboard.event.Event
+import com.macboard.keyboard.event.HangulEventDecoder
+import com.macboard.keyboard.event.HapticEvent
+import com.macboard.keyboard.event.HardwareEventDecoder
+import com.macboard.keyboard.event.HardwareKeyboardEventDecoder
+import com.macboard.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode
+import com.macboard.keyboard.latin.AudioAndHapticFeedbackManager
+import com.macboard.keyboard.latin.EmojiAltPhysicalKeyDetector
+import com.macboard.keyboard.latin.LatinIME
+import com.macboard.keyboard.latin.RichInputMethodManager
+import com.macboard.keyboard.latin.common.Constants
+import com.macboard.keyboard.latin.common.InputPointers
+import com.macboard.keyboard.latin.common.combiningRange
+import com.macboard.keyboard.latin.common.moveStepsToCharCount
+import com.macboard.keyboard.latin.define.ProductionFlags
+import com.macboard.keyboard.latin.inputlogic.InputLogic
+import com.macboard.keyboard.latin.settings.Settings
+import com.macboard.keyboard.latin.utils.SubtypeSettings
 import kotlin.math.abs
 
 class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inputLogic: InputLogic) : KeyboardActionListener {
