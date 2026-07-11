@@ -861,7 +861,7 @@ public final class MainKeyboardView extends KeyboardView implements DrawingProxy
             return "space";
         } else if (languageTag.startsWith("ar")) {
             // Arabic language - show "د محمود"
-            return "مسـافة";
+            return "مسافة";
         }
         
         // For any other language, keep the default behavior
