@@ -803,7 +803,7 @@ public final class MainKeyboardView extends KeyboardView implements DrawingProxy
         return newLocales;
     }
 
-    private void drawLanguageOnSpacebar(final Key key, final Canvas canvas, final Paint paint) {
+        private void drawLanguageOnSpacebar(final Key key, final Canvas canvas, final Paint paint) {
         final Keyboard keyboard = getKeyboard();
         if (keyboard == null) {
             return;
@@ -858,16 +858,15 @@ public final class MainKeyboardView extends KeyboardView implements DrawingProxy
         // Check language and customize accordingly
         if (languageTag.startsWith("en")) {
             // English language - show "dr ma7moud"
-            return "dr ma7moud";
+            return "space";
         } else if (languageTag.startsWith("ar")) {
             // Arabic language - show "د محمود"
-            return "د محمود";
+            return "مسـافة";
         }
         
         // For any other language, keep the default behavior
         return defaultText;
     }
-
     @Override
     public void deallocateMemory() {
         super.deallocateMemory();
