@@ -1583,13 +1583,30 @@ public class LatinIME extends InputMethodService implements
 
     /**
      * Display a single non-clickable status message in the suggestion strip.
-     * This is used for voice input feedback (e.g., "تحدث الآن 🎤").
+     * This is used for voice input feedback (e.g., "تحدث الآن").
      * 
      * @param message The status message to display
      */
-    private void showVoiceStatusMessage(final String message) {
+    /**
+     * Display a single non-clickable status message in the suggestion strip.
+     * Automatically chooses Arabic or English based on the current keyboard language.
+     */
+    private void showVoiceStatusMessage(final String arMessage, final String enMessage) {
         if (!hasSuggestionStripView()) {
             return;
+        }
+        
+        // تحديد اللغة الحالية للكيبورد
+        String message = enMessage; // الإنجليزي هو الافتراضي
+        try {
+            if (mRichImm != null && mRichImm.getCurrentSubtype() != null) {
+                String lang = mRichImm.getCurrentSubtype().getLocale().getLanguage();
+                if (lang.startsWith("ar")) {
+                    message = arMessage; // لو الكيبورد عربي، استخدم الجملة العربي
+                }
+            }
+        } catch (Exception e) {
+            // تجاهل الخطأ واستخدم الإنجليزي
         }
         
         // Create a single SuggestedWordInfo with the message (not clickable)
@@ -1604,26 +1621,16 @@ public class LatinIME extends InputMethodService implements
                         SuggestedWords.NOT_A_SEQUENCE_NUMBER); // autoCommitFirstWordConfidence
         
         // Create a SuggestedWords object with only this status message
-        final ArrayList<SuggestedWords.SuggestedWordInfo> statusWords = 
-                new ArrayList<>();
+        final ArrayList<SuggestedWords.SuggestedWordInfo> statusWords = new ArrayList<>();
         statusWords.add(statusWordInfo);
         
         final SuggestedWords statusSuggestions = new SuggestedWords(
-                statusWords,
-                null,  // rawSuggestions
-                null,  // typedWordInfo
-                false, // typedWordValid
-                false, // willAutoCorrect
-                false, // isObsoleteSuggestions
-                SuggestedWords.INPUT_STYLE_NONE,  // inputStyle
-                SuggestedWords.NOT_A_SEQUENCE_NUMBER);
+                statusWords, null, null, false, false, false, 
+                SuggestedWords.INPUT_STYLE_NONE, SuggestedWords.NOT_A_SEQUENCE_NUMBER);
         
-        // Display on the suggestion strip (will suppress toolbar)
+        // Display on the suggestion strip
         setSuggestedWords(statusSuggestions);
     }
-
-    // This method is public for testability of LatinIME, but also in the future it should
-    // completely replace #onCodeInput.
         public void onEvent(@NonNull final Event event) {
         // 1. المسح الشامل (MacBoard)
         if (event.getKeyCode() == -10052) {
@@ -1636,13 +1643,14 @@ public class LatinIME extends InputMethodService implements
         }
 
         // 2. الإدخال الصوتي المدمج (MacBoard)
+        // 2. الإدخال الصوتي المدمج (MacBoard)
         if (KeyCode.VOICE_INPUT == event.getKeyCode()) {
             new android.os.Handler(android.os.Looper.getMainLooper()).post(new Runnable() {
                 @Override
                 public void run() {
                     try {
                         // Show initialization message
-                        showVoiceStatusMessage("جارِ التهيئة...");
+                        showVoiceStatusMessage("جارِ التهيئة...", "Initializing...");
                         
                         final android.speech.SpeechRecognizer speechRecognizer = 
                                 android.speech.SpeechRecognizer.createSpeechRecognizer(LatinIME.this);
@@ -1663,12 +1671,12 @@ public class LatinIME extends InputMethodService implements
                         speechRecognizer.setRecognitionListener(new android.speech.RecognitionListener() {
                             @Override
                             public void onReadyForSpeech(android.os.Bundle params) {
-                                showVoiceStatusMessage("تحدث الآن 🎤");
+                                showVoiceStatusMessage("تحدث الآن", "Speak now");
                             }
 
                             @Override
                             public void onBeginningOfSpeech() {
-                                showVoiceStatusMessage("جارِ الاستماع... 🎧");
+                                showVoiceStatusMessage("جارِ الاستماع...", "Listening...");
                             }
 
                             @Override
@@ -1679,7 +1687,7 @@ public class LatinIME extends InputMethodService implements
 
                             @Override
                             public void onEndOfSpeech() {
-                                showVoiceStatusMessage("جاري المعالجة... ⏳");
+                                showVoiceStatusMessage("جارِ المعالجة...", "Processing...");
                             }
 
                             @Override
