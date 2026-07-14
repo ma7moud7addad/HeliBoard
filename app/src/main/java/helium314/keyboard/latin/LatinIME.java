@@ -1580,6 +1580,46 @@ public class LatinIME extends InputMethodService implements
         mKeyboardActionListener.onCodeInput(codePoint, x, y, isKeyRepeat);
     }
 
+    /**
+     * Display a single non-clickable status message in the suggestion strip.
+     * This is used for voice input feedback (e.g., "تحدث الآن 🎤").
+     * 
+     * @param message The status message to display
+     */
+    private void showVoiceStatusMessage(final String message) {
+        if (!hasSuggestionStripView()) {
+            return;
+        }
+        
+        // Create a single SuggestedWordInfo with the message (not clickable)
+        final SuggestedWords.SuggestedWordInfo statusWordInfo = 
+                new SuggestedWords.SuggestedWordInfo(
+                        message,
+                        "",  // no definition
+                        0,   // score (not used for display)
+                        SuggestedWords.SuggestedWordInfo.KIND_HARDCODED,  // type
+                        null, // sourceDict
+                        SuggestedWords.NOT_A_SEQUENCE_NUMBER);
+        
+        // Create a SuggestedWords object with only this status message
+        final ArrayList<SuggestedWords.SuggestedWordInfo> statusWords = 
+                new ArrayList<>();
+        statusWords.add(statusWordInfo);
+        
+        final SuggestedWords statusSuggestions = new SuggestedWords(
+                statusWords,
+                null,  // rawSuggestions
+                null,  // typedWordInfo
+                false, // typedWordValid
+                false, // willAutoCorrect
+                false, // isObsoleteSuggestions
+                SuggestedWords.INPUT_STYLE_NONE,  // inputStyle
+                SuggestedWords.NOT_A_SEQUENCE_NUMBER);
+        
+        // Display on the suggestion strip (will suppress toolbar)
+        setSuggestedWords(statusSuggestions);
+    }
+
     // This method is public for testability of LatinIME, but also in the future it should
     // completely replace #onCodeInput.
         public void onEvent(@NonNull final Event event) {
@@ -1599,28 +1639,58 @@ public class LatinIME extends InputMethodService implements
                 @Override
                 public void run() {
                     try {
-                        final android.speech.SpeechRecognizer speechRecognizer = android.speech.SpeechRecognizer.createSpeechRecognizer(LatinIME.this);
-                        android.content.Intent speechIntent = new android.content.Intent(android.speech.RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-                        speechIntent.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL, android.speech.RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+                        // Show initialization message
+                        showVoiceStatusMessage("جارِ التهيئة...");
+                        
+                        final android.speech.SpeechRecognizer speechRecognizer = 
+                                android.speech.SpeechRecognizer.createSpeechRecognizer(LatinIME.this);
+                        android.content.Intent speechIntent = 
+                                new android.content.Intent(android.speech.RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+                        speechIntent.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL, 
+                                android.speech.RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
                         
                         try {
-                            android.view.inputmethod.InputMethodSubtype subtype = mRichImm.getCurrentSubtype().getRawSubtype();
+                            android.view.inputmethod.InputMethodSubtype subtype = 
+                                    mRichImm.getCurrentSubtype().getRawSubtype();
                             if (subtype != null && subtype.getLocale() != null && !subtype.getLocale().isEmpty()) {
-                                speechIntent.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE, subtype.getLocale());
+                                speechIntent.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE, 
+                                        subtype.getLocale());
                             }
                         } catch (Exception e) { }
 
                         speechRecognizer.setRecognitionListener(new android.speech.RecognitionListener() {
-                            @Override public void onReadyForSpeech(android.os.Bundle params) {}
-                            @Override public void onBeginningOfSpeech() {}
-                            @Override public void onRmsChanged(float rmsdB) {}
-                            @Override public void onBufferReceived(byte[] buffer) {}
-                            @Override public void onEndOfSpeech() {}
-                            @Override public void onError(int error) {
-                                speechRecognizer.destroy();
+                            @Override
+                            public void onReadyForSpeech(android.os.Bundle params) {
+                                showVoiceStatusMessage("تحدث الآن 🎤");
                             }
-                            @Override public void onResults(android.os.Bundle results) {
-                                java.util.ArrayList<String> matches = results.getStringArrayList(android.speech.SpeechRecognizer.RESULTS_RECOGNITION);
+
+                            @Override
+                            public void onBeginningOfSpeech() {
+                                showVoiceStatusMessage("جارِ الاستماع... 🎧");
+                            }
+
+                            @Override
+                            public void onRmsChanged(float rmsdB) {}
+
+                            @Override
+                            public void onBufferReceived(byte[] buffer) {}
+
+                            @Override
+                            public void onEndOfSpeech() {
+                                showVoiceStatusMessage("جاري المعالجة... ⏳");
+                            }
+
+                            @Override
+                            public void onError(int error) {
+                                speechRecognizer.destroy();
+                                // Restore normal suggestions after error
+                                setNeutralSuggestionStrip();
+                            }
+
+                            @Override
+                            public void onResults(android.os.Bundle results) {
+                                java.util.ArrayList<String> matches = 
+                                        results.getStringArrayList(android.speech.SpeechRecognizer.RESULTS_RECOGNITION);
                                 if (matches != null && !matches.isEmpty()) {
                                     String text = matches.get(0);
                                     android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
@@ -1629,13 +1699,20 @@ public class LatinIME extends InputMethodService implements
                                     }
                                 }
                                 speechRecognizer.destroy();
+                                // Restore normal suggestions after completion
+                                setNeutralSuggestionStrip();
                             }
-                            @Override public void onPartialResults(android.os.Bundle partialResults) {}
-                            @Override public void onEvent(int eventType, android.os.Bundle params) {}
+
+                            @Override
+                            public void onPartialResults(android.os.Bundle partialResults) {}
+
+                            @Override
+                            public void onEvent(int eventType, android.os.Bundle params) {}
                         });
                         speechRecognizer.startListening(speechIntent);
                     } catch (Exception e) {
                         // تم إزالة Toast الخطأ
+                        setNeutralSuggestionStrip();
                     }
                 }
             });
