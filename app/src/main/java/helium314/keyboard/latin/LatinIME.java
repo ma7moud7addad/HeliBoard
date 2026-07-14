@@ -1596,11 +1596,12 @@ public class LatinIME extends InputMethodService implements
         final SuggestedWords.SuggestedWordInfo statusWordInfo = 
                 new SuggestedWords.SuggestedWordInfo(
                         message,
-                        "",  // no definition
-                        0,   // score (not used for display)
-                        SuggestedWords.SuggestedWordInfo.KIND_HARDCODED,  // type
+                        "",  // prevWordsContext
+                        0,   // score
+                        SuggestedWords.SuggestedWordInfo.KIND_HARDCODED,  // kindAndFlags
                         Dictionary.DICTIONARY_HARDCODED, // sourceDict
-                        SuggestedWords.NOT_A_SEQUENCE_NUMBER);
+                        SuggestedWords.NOT_A_SEQUENCE_NUMBER, // indexOfTouchPointOfSecondWord
+                        SuggestedWords.NOT_A_SEQUENCE_NUMBER); // autoCommitFirstWordConfidence
         
         // Create a SuggestedWords object with only this status message
         final ArrayList<SuggestedWords.SuggestedWordInfo> statusWords = 
