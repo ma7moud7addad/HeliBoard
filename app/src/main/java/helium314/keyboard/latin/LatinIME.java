@@ -79,6 +79,7 @@ import com.macboard.keyboard.latin.utils.StatsUtilsManager;
 import com.macboard.keyboard.latin.utils.SubtypeLocaleUtils;
 import com.macboard.keyboard.latin.utils.SubtypeSettings;
 import com.macboard.keyboard.latin.utils.SubtypeState;
+import com.macboard.keyboard.latin.dictionary.Dictionary;
 import com.macboard.keyboard.latin.utils.ToolbarMode;
 import com.macboard.keyboard.settings.SettingsActivity2;
 import kotlin.Unit;
@@ -1598,7 +1599,7 @@ public class LatinIME extends InputMethodService implements
                         "",  // no definition
                         0,   // score (not used for display)
                         SuggestedWords.SuggestedWordInfo.KIND_HARDCODED,  // type
-                        null, // sourceDict
+                        Dictionary.DICTIONARY_HARDCODED, // sourceDict
                         SuggestedWords.NOT_A_SEQUENCE_NUMBER);
         
         // Create a SuggestedWords object with only this status message
