@@ -455,9 +455,9 @@ final class SuggestionStripLayoutHelper {
             return false;
         }
         return word.equals("جارِ التهيئة...") || word.equals("Initializing...") ||
-               word.equals("تحدث الآن") || word.equals("Speak now") ||
-               word.equals("جارِ الاستماع...") || word.equals("Listening...") ||
-               word.equals("جارِ المعالجة...") || word.equals("Processing...");
+               word.equals("تحدث الآن 🎤") || word.equals("Speak now 🎤") ||
+               word.equals("جارِ الاستماع... 🎧") || word.equals("Listening... 🎧") ||
+               word.equals("جاري المعالجة... ⏳") || word.equals("Processing... ⏳");
     }
 
     private void layoutDebugInfo(final int positionInStrip, final ViewGroup placerView,
@@ -511,132 +511,4 @@ final class SuggestionStripLayoutHelper {
             }
             final TextView wordView = mWordViews.get(positionInStrip);
             // {@link TextView#getTag()} is used to get the index in suggestedWords at
-            // {@link SuggestionStripView#onClick(View)}.
-            wordView.setTag(indexInSuggestedWords);
-            wordView.setText(getStyledSuggestedWord(suggestedWords, indexInSuggestedWords));
-            wordView.setTextColor(getSuggestionTextColor(suggestedWords, indexInSuggestedWords));
-            KeyboardTypeface.applyToTextView(wordView);
-            if (SuggestionStripView.DEBUG_SUGGESTIONS) {
-                mDebugInfoViews.get(positionInStrip).setText(suggestedWords.getDebugString(indexInSuggestedWords));
-            }
-            count++;
-        }
-        return indexInSuggestedWords;
-    }
-
-    private int layoutPunctuationsAndReturnStartIndexOfMoreSuggestions(
-            final PunctuationSuggestions punctuationSuggestions, final ViewGroup stripView) {
-        final int countInStrip = Math.min(punctuationSuggestions.size(), PUNCTUATIONS_IN_STRIP);
-        for (int positionInStrip = 0; positionInStrip < countInStrip; positionInStrip++) {
-            if (positionInStrip != 0) {
-                // Add divider if this isn't the left most suggestion in suggestions strip.
-                addDivider(stripView, mDividerViews.get(positionInStrip));
-            }
-
-            final TextView wordView = mWordViews.get(positionInStrip);
-            final String punctuation = punctuationSuggestions.getLabel(positionInStrip);
-            // {@link TextView#getTag()} is used to get the index in suggestedWords at
-            // {@link SuggestionStripView#onClick(View)}.
-            wordView.setTag(positionInStrip);
-            wordView.setText(punctuation);
-            wordView.setContentDescription(punctuation);
-            wordView.setTextScaleX(1.0f);
-            wordView.setCompoundDrawables(null, null, null, null);
-            wordView.setTextColor(mColorAutoCorrect);
-            KeyboardTypeface.applyToTextView(wordView);
-            stripView.addView(wordView);
-            setLayoutWeight(wordView, 1.0f, mSuggestionsStripHeight);
-        }
-        mMoreSuggestionsAvailable = (punctuationSuggestions.size() > countInStrip);
-        return countInStrip;
-    }
-
-    static void setLayoutWeight(final View v, final float weight, final int height) {
-        final ViewGroup.LayoutParams lp = v.getLayoutParams();
-        if (lp instanceof final LinearLayout.LayoutParams llp) {
-            llp.weight = weight;
-            llp.width = 0;
-            llp.height = height;
-        }
-    }
-
-    private static float getTextScaleX(@Nullable final CharSequence text, final int maxWidth, final TextPaint paint) {
-        paint.setTextScaleX(1.0f);
-        final int width = getTextWidth(text, paint);
-        if (width <= maxWidth || maxWidth <= 0) {
-            return 1.0f;
-        }
-        return maxWidth / (float) width;
-    }
-
-    @Nullable
-    private static CharSequence getEllipsizedTextWithSettingScaleX(
-            @Nullable final CharSequence text, final int maxWidth, @NonNull final TextPaint paint) {
-        if (text == null) {
-            return null;
-        }
-        final float scaleX = getTextScaleX(text, maxWidth, paint);
-        if (scaleX >= MIN_TEXT_XSCALE) {
-            paint.setTextScaleX(scaleX);
-            return text;
-        }
-
-        // <code>text</code> must be ellipsized with minimum text scale x.
-        paint.setTextScaleX(MIN_TEXT_XSCALE);
-        final boolean hasBoldStyle = hasStyleSpan(text, BOLD_SPAN);
-        final boolean hasUnderlineStyle = hasStyleSpan(text, UNDERLINE_SPAN);
-        // TextUtils.ellipsize erases any span object existed after ellipsized point.
-        // We have to restore these spans afterward.
-        final CharSequence ellipsizedText = TextUtils.ellipsize(text, paint, maxWidth, TextUtils.TruncateAt.MIDDLE);
-        if (!hasBoldStyle && !hasUnderlineStyle) {
-            return ellipsizedText;
-        }
-        final Spannable spannableText = (ellipsizedText instanceof Spannable)
-                ? (Spannable)ellipsizedText : new SpannableString(ellipsizedText);
-        if (hasBoldStyle) {
-            addStyleSpan(spannableText, BOLD_SPAN);
-        }
-        if (hasUnderlineStyle) {
-            addStyleSpan(spannableText, UNDERLINE_SPAN);
-        }
-        return spannableText;
-    }
-
-    private static boolean hasStyleSpan(@Nullable final CharSequence text,
-            final CharacterStyle style) {
-        if (text instanceof Spanned) {
-            return ((Spanned)text).getSpanStart(style) >= 0;
-        }
-        return false;
-    }
-
-    private static void addStyleSpan(@NonNull final Spannable text, final CharacterStyle style) {
-        text.removeSpan(style);
-        text.setSpan(style, 0, text.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
-    }
-
-    private static int getTextWidth(@Nullable final CharSequence text, final TextPaint paint) {
-        if (TextUtils.isEmpty(text)) {
-            return 0;
-        }
-        final int length = text.length();
-        final float[] widths = new float[length];
-        final int count;
-        final Typeface savedTypeface = paint.getTypeface();
-        try {
-            paint.setTypeface(getTextTypeface(text));
-            count = paint.getTextWidths(text, 0, length, widths);
-        } finally {
-            paint.setTypeface(savedTypeface);
-        }
-        int width = 0;
-        for (int i = 0; i < count; i++) {
-            width += Math.round(widths[i] + 0.5f);
-        }
-        return width;
-    }
-
-    private static Typeface getTextTypeface(@Nullable final CharSequence text) {
-        return hasStyleSpan(text, BOLD_SPAN) ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT;
-    }
-}
+            // {@l
