@@ -1857,6 +1857,18 @@ public class LatinIME extends InputMethodService implements
     // interface
     @Override
     public void pickSuggestionManually(final SuggestedWordInfo suggestionInfo) {
+        // --- بداية التعديل: منع كتابة رسائل المايك (بالتطابق التام) ---
+        final String word = suggestionInfo.mWord;
+        if (word != null && (
+                word.equals("جارِ التهيئة...") || word.equals("Initializing...") ||
+                word.equals("تحدث الآن") || word.equals("Speak now") ||
+                word.equals("جارِ الاستماع...") || word.equals("Listening...") ||
+                word.equals("جارِ المعالجة...") || word.equals("Processing...")
+        )) {
+            return; // تجاهل الضغطة تماماً وماتكتبش حاجة
+        }
+        // --- نهاية التعديل ---
+
         final InputTransaction completeInputTransaction = mInputLogic.onPickSuggestionManually(
                 mSettings.getCurrent(), suggestionInfo,
                 mKeyboardSwitcher.getKeyboardShiftMode(),
