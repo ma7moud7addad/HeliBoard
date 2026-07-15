@@ -399,6 +399,12 @@ final class SuggestionStripLayoutHelper {
     private TextView layoutWord(final Context context, final int positionInStrip, final int width) {
         final TextView wordView = mWordViews.get(positionInStrip);
         final CharSequence word = wordView.getText();
+        
+        // --- بداية التعديل ---
+        final String wordText = word != null ? word.toString() : "";
+        final boolean isVoiceStatusMessage = isVoiceStatusMessage(wordText);
+        // --- نهاية التعديل ---
+        
         if (positionInStrip == mCenterPositionInStrip && mMoreSuggestionsAvailable) {
             // TODO: This "more suggestions hint" should have a nicely designed icon.
             wordView.setCompoundDrawablesWithIntrinsicBounds(null, null, null, mMoreSuggestionsHint);
@@ -418,13 +424,40 @@ final class SuggestionStripLayoutHelper {
         final float scaleX = wordView.getTextScaleX();
         wordView.setText(text); // TextView.setText() resets text scale x to 1.0.
         wordView.setTextScaleX(scaleX);
-        // A <code>wordView</code> should be disabled when <code>word</code> is empty in order to
-        // make it unclickable.
-        // With accessibility touch exploration on, <code>wordView</code> should be enabled even
-        // when it is empty to avoid announcing as "disabled".
-        wordView.setEnabled(!TextUtils.isEmpty(word)
-                || AccessibilityUtils.Companion.getInstance().isTouchExplorationEnabled());
+        
+        // --- بداية التعديل: تجميد الزرار بالكامل ---
+        if (isVoiceStatusMessage) {
+            wordView.setClickable(false);
+            wordView.setFocusable(false);
+            wordView.setSoundEffectsEnabled(false); // كتم الصوت
+            wordView.setBackground(null);  // إزالة الهايلايت (الريبل)
+            wordView.setEnabled(false);
+        } else {
+            wordView.setClickable(true);
+            wordView.setFocusable(true);
+            wordView.setSoundEffectsEnabled(true);
+            wordView.setEnabled(!TextUtils.isEmpty(word)
+                    || AccessibilityUtils.Companion.getInstance().isTouchExplorationEnabled());
+            
+            if (wordView.getBackground() == null) {
+                final Colors colors = Settings.getValues().mColors;
+                colors.setBackground(wordView, ColorType.STRIP_BACKGROUND);
+            }
+        }
+        // --- نهاية التعديل ---
+        
         return wordView;
+    }
+
+    // الدالة المساعدة (بالتطابق التام عشان منبوظش الإيموجي)
+    private boolean isVoiceStatusMessage(final String word) {
+        if (TextUtils.isEmpty(word)) {
+            return false;
+        }
+        return word.equals("جارِ التهيئة...") || word.equals("Initializing...") ||
+               word.equals("تحدث الآن") || word.equals("Speak now") ||
+               word.equals("جارِ الاستماع...") || word.equals("Listening...") ||
+               word.equals("جارِ المعالجة...") || word.equals("Processing...");
     }
 
     private void layoutDebugInfo(final int positionInStrip, final ViewGroup placerView,

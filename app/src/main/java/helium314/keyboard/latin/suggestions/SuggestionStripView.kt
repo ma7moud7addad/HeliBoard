@@ -334,6 +334,13 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
     }
 
     override fun onClick(view: View) {
+        // --- بداية التعديل: منع أي استجابة أو صوت لرسائل المايك ---
+        val tagCheck = view.tag
+        if (tagCheck is Int && tagCheck < suggestedWords.size()) {
+            if (isVoiceStatusMessage(suggestedWords.getInfo(tagCheck).word)) return
+        }
+        // --- نهاية التعديل ---
+
         AudioAndHapticFeedbackManager.getInstance().performHapticAndAudioFeedback(KeyCode.NOT_SPECIFIED, this, HapticEvent.KEY_PRESS)
         val tag = view.tag
         if (tag is ToolbarKey) {
@@ -359,6 +366,15 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
     }
 
     override fun onLongClick(view: View): Boolean {
+        // --- بداية التعديل: منع أي استجابة أو صوت لرسائل المايك ---
+        if (view is TextView && wordViews.contains(view)) {
+            val tagCheck = view.tag
+            if (tagCheck is Int && tagCheck < suggestedWords.size()) {
+                if (isVoiceStatusMessage(suggestedWords.getInfo(tagCheck).word)) return true
+            }
+        }
+        // --- نهاية التعديل ---
+
         AudioAndHapticFeedbackManager.getInstance().performHapticFeedback(this, HapticEvent.KEY_LONG_PRESS)
         if (view.tag is ToolbarKey) {
             onLongClickToolbarKey(view)
@@ -571,6 +587,16 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         colors.setColor(view, ColorType.TOOL_BAR_KEY)
         colors.setBackground(view, ColorType.STRIP_BACKGROUND)
     }
+
+    // --- بداية التعديل: الدالة المساعدة للتعرف على رسائل المايك ---
+    private fun isVoiceStatusMessage(word: String?): Boolean {
+        if (word.isNullOrEmpty()) return false
+        return word == "جارِ التهيئة..." || word == "Initializing..." ||
+               word == "تحدث الآن" || word == "Speak now" ||
+               word == "جارِ الاستماع..." || word == "Listening..." ||
+               word == "جارِ المعالجة..." || word == "Processing..."
+    }
+    // --- نهاية التعديل ---
 
     companion object {
         @JvmField
