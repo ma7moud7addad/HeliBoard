@@ -33,9 +33,8 @@
   ],
   [
     { "label": "alpha" },
-    { "label": "+", "type": "function", "width": 0.15, "popup": { "relevant": [ { "label": "(" }, { "label": "<" }, { "label": "±" } ] }, "labelFlags": 512 },
+    { "label": "+", "type": "function", "popup": { "relevant": [ { "label": "(" }, { "label": "<" }, { "label": "±" } ] }, "labelFlags": 512 },
     { "label": "0", "type": "numeric" },
-    { "label": "=", "type": "function", "width": 0.12, "popup": { "relevant": [ { "label": "≠"}, { "label": "≈"} ] } },
-    { "label": "space", "type": "function", "width": 0.15 },
+    { "label": "space", "type": "function" },
     { "label": "action" }
   ]]
