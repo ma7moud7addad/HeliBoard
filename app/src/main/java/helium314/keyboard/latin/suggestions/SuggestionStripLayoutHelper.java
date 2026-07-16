@@ -455,9 +455,9 @@ final class SuggestionStripLayoutHelper {
             return false;
         }
         return word.equals("جارِ التهيئة...") || word.equals("Initializing...") ||
-               word.equals("تحدث الآن 🎤") || word.equals("Speak now 🎤") ||
-               word.equals("جارِ الاستماع... 🎧") || word.equals("Listening... 🎧") ||
-               word.equals("جاري المعالجة... ⏳") || word.equals("Processing... ⏳");
+               word.equals("تحدث الآن") || word.equals("Speak now") ||
+               word.equals("جارِ الاستماع...") || word.equals("Listening...") ||
+               word.equals("جارِ المعالجة...") || word.equals("Processing...");
     }
 
     private void layoutDebugInfo(final int positionInStrip, final ViewGroup placerView,
