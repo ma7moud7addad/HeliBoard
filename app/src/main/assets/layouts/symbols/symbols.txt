@@ -1,29 +1,19 @@
-% ‰
-\
-|
-=
-[
-]
-<
->
-{
-}
-
-@
-#
-$$$
-_ % ‰
-&
-- – ⁻ — ·
-+ ± ⁺
-( ⁽ < { [
-) ⁾ > } ]
-/
-
-* † ‡ ★
-"
-'
-:
-;
-!
-?
+[[
+    { "$": "layout_direction_selector", "ltr": { "label": "$", "type": "function", "width": 0.185, "popup": { "main": { "label": "€" }, "relevant":[ { "label": "£" }, { "label": "¥" }, { "label": "¢" }, { "label": "₹" }, { "label": "₱" }, { "label": "μ" }, { "label": "π" }, { "label": "Ω" }, { "label": "|" } ] } }, "rtl": { "label": "،", "type": "function", "width": 0.185 } },
+    { "$": "layout_direction_selector", "ltr": { "label": "1", "width": 0.24, "popup": { "main": { "label": "¹" }, "relevant":[ { "label": "₁" } ] } }, "rtl": { "label": "١", "width": 0.24 } },
+    { "$": "layout_direction_selector", "ltr": { "label": "2", "width": 0.24, "popup": { "main": { "label": "²" }, "relevant": [ { "label": "₂" } ] } }, "rtl": { "label": "٢", "width": 0.24 } },
+    { "$": "layout_direction_selector", "ltr": { "label": "3", "width": 0.24, "popup": { "main": { "label": "³" }, "relevant":[ { "label": "₃" } ] } }, "rtl": { "label": "٣", "width": 0.24 } },
+    { "$": "layout_direction_selector", "ltr": { "label": "✓", "type": "function", "width": 0.185, "popup": { "main": { "label": "✗" }, "relevant":[ { "label": "α" }, { "label": "β" }, { "label": "⁺" }, { "label": "⁻" }, { "label": "♧" }, { "label": "♤" }, { "label": "♡" }, { "label": "¶" }, { "label": "♪" }, { "label": "♂" }, { "label": "♀" } ] } }, "rtl": { "label": "✓", "type": "function", "width": 0.185 } }
+  ],[
+    { "$": "layout_direction_selector", "ltr": { "label": ".", "type": "function", "width": 0.185, "popup": { "main": { "label": "?" }, "relevant":[ { "label": "!" }, { "label": "-" }, { "label": "_" }, { "label": "~" }, { "label": "," }, { "label": "…" }, { "label": ":" }, { "label": ";" }, { "label": "'" }, { "label": "\"" } ] } }, "rtl": { "label": "؛", "type": "function", "width": 0.185 } },
+    { "$": "layout_direction_selector", "ltr": { "label": "4", "width": 0.24, "popup": { "main": { "label": "⁴" }, "relevant":[ { "label": "₄" } ] } }, "rtl": { "label": "٤", "width": 0.24 } },
+    { "$": "layout_direction_selector", "ltr": { "label": "5", "width": 0.24, "popup": { "main": { "label": "⁵" }, "relevant":[ { "label": "₅" } ] } }, "rtl": { "label": "٥", "width": 0.24 } },
+    { "$": "layout_direction_selector", "ltr": { "label": "6", "width": 0.24, "popup": { "main": { "label": "⁶" }, "relevant": [ { "label": "₆" } ] } }, "rtl": { "label": "٦", "width": 0.24 } },
+    { "$": "layout_direction_selector", "ltr": { "label": "^", "type": "function", "width": 0.185, "popup": { "main": { "label": "→" }, "relevant":[ { "label": "←" }, { "label": "↑" }, { "label": "↓" }, { "label": "￬" }, { "label": "￪" }, { "label": "≫" }, { "label": "≪" }, { "label": "⟩" }, { "label": "⟨" }, { "label": "➳" }, { "label": "➔" } ] } }, "rtl": { "label": "؟", "type": "function", "width": 0.185, "popup": { "main": { "label": "?" } } } }
+  ],[
+    { "label": "shift", "type": "function", "width": 0.185 },
+    { "$": "layout_direction_selector", "ltr": { "label": "7", "width": 0.24, "popup": { "main": { "label": "⁷" }, "relevant": [ { "label": "₇" } ] } }, "rtl": { "label": "٧", "width": 0.24 } },
+    { "$": "layout_direction_selector", "ltr": { "label": "8", "width": 0.24, "popup": { "main": { "label": "⁸" }, "relevant":[ { "label": "₈" } ] } }, "rtl": { "label": "٨", "width": 0.24 } },
+    { "$": "layout_direction_selector", "ltr": { "label": "9", "width": 0.24, "popup": { "main": { "label": "⁹" }, "relevant": [ { "label": "₉" } ] } }, "rtl": { "label": "٩", "width": 0.24 } },
+    { "label": "delete", "type": "function", "width": 0.185 }
+  ]]
