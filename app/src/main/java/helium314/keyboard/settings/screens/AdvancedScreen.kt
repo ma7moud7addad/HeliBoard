@@ -92,9 +92,7 @@ fun AdvancedSettingsScreen(
         R.string.settings_category_experimental,
         Settings.PREF_EMOJI_MAX_SDK,
         Settings.PREF_URL_DETECTION,
-        // --- بداية التعديل: إضافة زرار تفعيل الكتابة بالسحب ---
-        if (JniUtils.isGestureLibraryAvailable()) SettingsWithoutKey.LOAD_GESTURE_LIB else null
-        // --- نهاية التعديل ---
+        if (JniUtils.isGestureLibraryAvailable()) JniUtils.PREF_ENABLE_BUNDLED_GESTURE else null
     )
     SearchSettingsScreen(
         onClickBack = onClickBack,
@@ -272,16 +270,10 @@ fun createAdvancedSettings(context: Context) = listOf(
     Setting(context, Settings.PREF_URL_DETECTION, R.string.url_detection_title, R.string.url_detection_summary) {
         SwitchPreference(it, Defaults.PREF_URL_DETECTION)
     },
-    // --- بداية التعديل: استبدال زرار اختيار الملف بزرار تفعيل عادي ---
-    Setting(context, SettingsWithoutKey.LOAD_GESTURE_LIB, R.string.enable_gesture_typing_title, R.string.enable_gesture_typing_summary) {
-        SwitchPreference(
-            key = JniUtils.PREF_ENABLE_BUNDLED_GESTURE,
-            title = stringResource(R.string.enable_gesture_typing_title),
-            summary = stringResource(R.string.enable_gesture_typing_summary),
-            defaultValue = true
-        )
+    // --- زرار تفعيل الكتابة بالسحب بالصيغة الصحيحة ---
+    Setting(context, JniUtils.PREF_ENABLE_BUNDLED_GESTURE, R.string.enable_gesture_typing_title, R.string.enable_gesture_typing_summary) {
+        SwitchPreference(it, true)
     },
-    // --- نهاية التعديل ---
 )
 
 @Preview
