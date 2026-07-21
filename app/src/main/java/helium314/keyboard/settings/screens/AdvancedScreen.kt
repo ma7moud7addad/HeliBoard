@@ -47,12 +47,12 @@ import com.macboard.keyboard.settings.preferences.SwitchPreference
 import com.macboard.keyboard.latin.utils.Theme
 import com.macboard.keyboard.settings.dialogs.TextInputDialog
 import com.macboard.keyboard.settings.preferences.BackupRestorePreference
-import com.macboard.keyboard.settings.preferences.LoadGestureLibPreference
 import com.macboard.keyboard.settings.preferences.TextInputPreference
 import com.macboard.keyboard.latin.utils.previewDark
 import androidx.core.content.edit
 import com.macboard.keyboard.latin.utils.Log
 import com.macboard.keyboard.latin.utils.getActivity
+import com.macboard.keyboard.latin.utils.JniUtils
 
 @Composable
 fun AdvancedSettingsScreen(
@@ -92,7 +92,9 @@ fun AdvancedSettingsScreen(
         R.string.settings_category_experimental,
         Settings.PREF_EMOJI_MAX_SDK,
         Settings.PREF_URL_DETECTION,
-        if (BuildConfig.BUILD_TYPE != "nouserlib") SettingsWithoutKey.LOAD_GESTURE_LIB else null
+        // --- بداية التعديل: إضافة زرار تفعيل الكتابة بالسحب ---
+        if (JniUtils.isGestureLibraryAvailable()) SettingsWithoutKey.LOAD_GESTURE_LIB else null
+        // --- نهاية التعديل ---
     )
     SearchSettingsScreen(
         onClickBack = onClickBack,
@@ -270,9 +272,16 @@ fun createAdvancedSettings(context: Context) = listOf(
     Setting(context, Settings.PREF_URL_DETECTION, R.string.url_detection_title, R.string.url_detection_summary) {
         SwitchPreference(it, Defaults.PREF_URL_DETECTION)
     },
-    Setting(context, SettingsWithoutKey.LOAD_GESTURE_LIB, R.string.load_gesture_library, R.string.load_gesture_library_summary) {
-        LoadGestureLibPreference(it)
+    // --- بداية التعديل: استبدال زرار اختيار الملف بزرار تفعيل عادي ---
+    Setting(context, SettingsWithoutKey.LOAD_GESTURE_LIB, R.string.enable_gesture_typing_title, R.string.enable_gesture_typing_summary) {
+        SwitchPreference(
+            key = JniUtils.PREF_ENABLE_BUNDLED_GESTURE,
+            title = stringResource(R.string.enable_gesture_typing_title),
+            summary = stringResource(R.string.enable_gesture_typing_summary),
+            defaultValue = true
+        )
     },
+    // --- نهاية التعديل ---
 )
 
 @Preview
