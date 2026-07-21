@@ -42,7 +42,6 @@ fun MainSettingsScreen(
     onClickLanguage: () -> Unit,
     onClickLayouts: () -> Unit,
     onClickDictionaries: () -> Unit,
-    onClickStickers: () -> Unit,
     onClickBack: () -> Unit,
 ) {
     SearchSettingsScreen(
@@ -78,7 +77,7 @@ fun MainSettingsScreen(
                     icon = R.drawable.ic_settings_toolbar
                 ) { NextScreenIcon() }
                 
-                // --- بداية التعديل: إظهار القائمة فقط إذا كانت المكتبة مفعلة ومتاحة ---
+                // --- إظهار القائمة فقط إذا كانت المكتبة مفعلة ومتاحة ---
                 if (JniUtils.isGestureTypingEnabled(context)) {
                     Preference(
                         name = stringResource(R.string.settings_screen_gesture),
@@ -86,7 +85,6 @@ fun MainSettingsScreen(
                         icon = R.drawable.ic_settings_gesture
                     ) { NextScreenIcon() }
                 }
-                // --- نهاية التعديل ---
                 
                 // we don't even show the menu if data gathering phase ended more than 2 weeks ago
                 if (JniUtils.sHaveGestureLib && System.currentTimeMillis() < END_DATE_EPOCH_MILLIS + TWO_WEEKS_IN_MILLIS)
@@ -111,11 +109,6 @@ fun MainSettingsScreen(
                     icon = R.drawable.ic_dictionary
                 ) { NextScreenIcon() }
                 Preference(
-                    name = stringResource(R.string.settings_screen_stickers),
-                    onClick = onClickStickers,
-                    icon = R.drawable.ic_emoji_recents
-                ) { NextScreenIcon() }
-                Preference(
                     name = stringResource(R.string.settings_screen_advanced),
                     onClick = onClickAdvanced,
                     icon = R.drawable.ic_settings_advanced
@@ -136,7 +129,7 @@ private fun PreviewScreen() {
     initPreview(LocalContext.current)
     Theme(previewDark) {
         Surface {
-            MainSettingsScreen({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})
+            MainSettingsScreen({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})
         }
     }
 }
