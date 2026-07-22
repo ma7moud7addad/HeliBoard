@@ -23,6 +23,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
+// --- بداية التعديل: إضافة المتغير اللي كان ناقص ---
+const val expectedDefaultChecksum = ""
+// --- نهاية التعديل ---
+
 // functionality for gesture data gathering as part of the NLNet Project https://nlnet.nl/project/GestureTyping/
 // will be removed once the project is finished
 
@@ -95,7 +99,9 @@ class WordData(
         val data = GestureData(
             context.getString(R.string.english_ime_name) + " " + BuildConfig.VERSION_NAME,
             if (!context.protectedPrefs().contains(Settings.PREF_LIBRARY_CHECKSUM)) null
-                else context.protectedPrefs().getString(Settings.PREF_LIBRARY_CHECKSUM, "") == JniUtils.expectedDefaultChecksum(),
+                // --- بداية التعديل: قراءة المتغير مباشرة بدون JniUtils ---
+                else context.protectedPrefs().getString(Settings.PREF_LIBRARY_CHECKSUM, "") == expectedDefaultChecksum,
+                // --- نهاية التعديل ---
             targetWord,
             dictionariesInSuggestions.map {
                 val hash = (it as? BinaryDictionary)?.hash ?: (it as? ReadOnlyBinaryDictionary)?.hash
