@@ -10,6 +10,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
+import com.macboard.keyboard.latin.utils.DeviceProtectedUtils;
 
 @SuppressLint("PrivateApi") // it's a fallback in try/catch
 public final class JniUtils {
