@@ -7,19 +7,13 @@
 package com.macboard.keyboard.latin.utils;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.util.Log;
-import com.macboard.keyboard.latin.utils.DeviceProtectedUtils;
 
-@SuppressLint("PrivateApi") // it's a fallback in try/catch
+@SuppressLint("PrivateApi")
 public final class JniUtils {
     private static final String TAG = JniUtils.class.getSimpleName();
     public static final String JNI_LIB_NAME = "jni_latinime";
     public static final String JNI_LIB_NAME_GOOGLE = "jni_latinimegoogle";
-
-    // Preference key for enabling bundled gesture typing
-    public static final String PREF_ENABLE_BUNDLED_GESTURE = "pref_enable_bundled_gesture";
 
     public static boolean sHaveGestureLib = false;
 
@@ -57,14 +51,5 @@ public final class JniUtils {
      */
     public static boolean isGestureLibraryAvailable() {
         return sHaveGestureLib;
-    }
-
-    /**
-     * Checks whether gesture typing is enabled in preferences AND library is available.
-     */
-    public static boolean isGestureTypingEnabled(Context context) {
-        SharedPreferences prefs = DeviceProtectedUtils.getSharedPreferences(context);
-        boolean enabled = prefs.getBoolean(PREF_ENABLE_BUNDLED_GESTURE, true);
-        return enabled && isGestureLibraryAvailable();
     }
 }
