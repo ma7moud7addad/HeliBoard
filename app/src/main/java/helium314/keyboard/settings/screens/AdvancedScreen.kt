@@ -52,7 +52,6 @@ import com.macboard.keyboard.latin.utils.previewDark
 import androidx.core.content.edit
 import com.macboard.keyboard.latin.utils.Log
 import com.macboard.keyboard.latin.utils.getActivity
-import com.macboard.keyboard.latin.utils.JniUtils
 
 @Composable
 fun AdvancedSettingsScreen(
@@ -91,8 +90,8 @@ fun AdvancedSettingsScreen(
             SettingsWithoutKey.DEBUG_SETTINGS else null,
         R.string.settings_category_experimental,
         Settings.PREF_EMOJI_MAX_SDK,
-        Settings.PREF_URL_DETECTION,
-        if (JniUtils.isGestureLibraryAvailable()) JniUtils.PREF_ENABLE_BUNDLED_GESTURE else null
+        Settings.PREF_URL_DETECTION
+        // تمت إزالة زرار الجيستشر من هنا نهائياً
     )
     SearchSettingsScreen(
         onClickBack = onClickBack,
@@ -269,11 +268,7 @@ fun createAdvancedSettings(context: Context) = listOf(
     },
     Setting(context, Settings.PREF_URL_DETECTION, R.string.url_detection_title, R.string.url_detection_summary) {
         SwitchPreference(it, Defaults.PREF_URL_DETECTION)
-    },
-    // --- زرار تفعيل الكتابة بالسحب بالصيغة الصحيحة ---
-    Setting(context, JniUtils.PREF_ENABLE_BUNDLED_GESTURE, R.string.enable_gesture_typing_title, R.string.enable_gesture_typing_summary) {
-        SwitchPreference(it, true)
-    },
+    }
 )
 
 @Preview
