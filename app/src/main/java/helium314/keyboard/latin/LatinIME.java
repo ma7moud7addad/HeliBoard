@@ -1154,10 +1154,13 @@ public class LatinIME extends InputMethodService implements
         mainKeyboardView.setMainDictionaryAvailability(mDictionaryFacilitator.hasAtLeastOneInitializedMainDictionary());
         mainKeyboardView.setKeyPreviewPopupEnabled(currentSettingsValues.mKeyPreviewPopupOn);
         mainKeyboardView.setSlidingKeyInputPreviewEnabled(currentSettingsValues.mSlidingKeyInputPreviewEnabled);
+        // --- بداية التعديل: إعطاء السلطة لزرار التفعيل (القضاء على الفنكوش) ---
+        boolean isMasterGestureEnabled = com.macboard.keyboard.latin.utils.JniUtils.isGestureTypingEnabled(this);
         mainKeyboardView.setGestureHandlingEnabledByUser(
-                currentSettingsValues.mGestureInputEnabled,
-                currentSettingsValues.mGestureTrailEnabled,
-                currentSettingsValues.mGestureFloatingPreviewTextEnabled);
+                isMasterGestureEnabled && currentSettingsValues.mGestureInputEnabled,
+                isMasterGestureEnabled && currentSettingsValues.mGestureTrailEnabled,
+                isMasterGestureEnabled && currentSettingsValues.mGestureFloatingPreviewTextEnabled);
+        // --- نهاية التعديل ---
 
         if (TRACE) Debug.startMethodTracing("/data/trace/latinime");
     }
