@@ -91,7 +91,6 @@ fun AdvancedSettingsScreen(
         R.string.settings_category_experimental,
         Settings.PREF_EMOJI_MAX_SDK,
         Settings.PREF_URL_DETECTION
-        // تمت إزالة زرار الجيستشر من هنا نهائياً
     )
     SearchSettingsScreen(
         onClickBack = onClickBack,
