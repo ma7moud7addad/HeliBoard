@@ -47,7 +47,6 @@ import com.macboard.keyboard.settings.preferences.SwitchPreference
 import com.macboard.keyboard.latin.utils.Theme
 import com.macboard.keyboard.settings.dialogs.TextInputDialog
 import com.macboard.keyboard.settings.preferences.BackupRestorePreference
-import com.macboard.keyboard.settings.preferences.LoadGestureLibPreference
 import com.macboard.keyboard.settings.preferences.TextInputPreference
 import com.macboard.keyboard.latin.utils.previewDark
 import androidx.core.content.edit
@@ -91,8 +90,7 @@ fun AdvancedSettingsScreen(
             SettingsWithoutKey.DEBUG_SETTINGS else null,
         R.string.settings_category_experimental,
         Settings.PREF_EMOJI_MAX_SDK,
-        Settings.PREF_URL_DETECTION,
-        if (BuildConfig.BUILD_TYPE != "nouserlib") SettingsWithoutKey.LOAD_GESTURE_LIB else null
+        Settings.PREF_URL_DETECTION
     )
     SearchSettingsScreen(
         onClickBack = onClickBack,
@@ -269,10 +267,7 @@ fun createAdvancedSettings(context: Context) = listOf(
     },
     Setting(context, Settings.PREF_URL_DETECTION, R.string.url_detection_title, R.string.url_detection_summary) {
         SwitchPreference(it, Defaults.PREF_URL_DETECTION)
-    },
-    Setting(context, SettingsWithoutKey.LOAD_GESTURE_LIB, R.string.load_gesture_library, R.string.load_gesture_library_summary) {
-        LoadGestureLibPreference(it)
-    },
+    }
 )
 
 @Preview

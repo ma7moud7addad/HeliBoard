@@ -2314,4 +2314,4 @@ public class LatinIME extends InputMethodService implements
         GestureDataGatheringSettings.INSTANCE.showEndNotificationIfNecessary(this); // will do nothing for a long time
         mInputLogic.setFacilitator(mDictionaryFacilitator);
     }
-}
+                        }

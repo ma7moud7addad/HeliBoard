@@ -1,7 +1,5 @@
-[
-  [
-    { "label": "alpha", "width": 0.15 },
-    { "label": "space", "width": -1 },
-    { "label": "delete", "width": 0.15 }
-  ]
-]
+[[
+    { "type": "placeholder", "width": -1 },
+    { "label": "delete", "type": "action", "width": 0.15 },
+    { "type": "placeholder", "width": 0.02 }
+]]

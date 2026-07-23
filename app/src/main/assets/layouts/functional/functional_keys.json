@@ -1,21 +1,24 @@
-[
-  [
-    { "label": "shift", "width": 0.15 },
-    { "type": "placeholder" },
-    { "label": "delete", "width": 0.15 }
-  ],
-  [
-    { "label": "symbol_alpha", "width": 0.15 },
-    { "$": "variation_selector",
-      "default":  { "label": "comma", "labelFlags": 1073741824 },
-      "email":    { "label": "@", "labelFlags": 1073741824, "groupId": 1, "type": "function" },
-      "uri":      { "label": "/", "labelFlags": 1073741824, "groupId": 1, "type": "function" }
+[[
+    { "$": "keyboard_state_selector",
+      "alphabet": { "label": "symbol", "type": "function", "width": 0.17, "popup": { "main": { "label": "redo", "type": "function" } } },
+      "default": { "label": "alpha", "type": "function", "width": 0.185, "popup": { "main": { "label": "redo", "type": "function" } } }
     },
-    { "$": "keyboard_state_selector", "languageKeyEnabled": { "$": "keyboard_state_selector", "alphabet": { "label": "language_switch" }}},
-    { "$": "keyboard_state_selector", "emojiKeyEnabled": { "$": "keyboard_state_selector", "alphabet": { "label": "emoji" }}},
-    { "$": "keyboard_state_selector", "symbols": { "label": "numpad" }},
-    { "label": "space" },
-    { "label": "period", "labelFlags": 1073741824 },
-    { "label": "action", "width": 0.15, "labelFlags": 1073741824 }
-  ]
-]
+    { "$": "keyboard_state_selector",
+      "alphabet": { "$": "layout_direction_selector", "ltr": { "label": "@", "width": 0.12, "popup": { "main": { "label": "*" }, "relevant":[ { "label": "!autoColumnOrder!8" }, { "label": "#" }, { "label": "%" }, { "label": "&" }, { "label": "\\" }, { "label": "|" }, { "label": "/" }, { "label": "$" }, { "label": ")" }, { "label": "[" }, { "label": "(" }, { "label": "]" }, { "label": "{" }, { "label": "}" }, { "label": "`" }, { "label": "~" } ] } }, "rtl": { "label": "ؤ", "width": 0.12, "popup": { "main": { "label": "ـ" }, "relevant":[ { "label": "!autoColumnOrder!8" }, { "label": "َ" }, { "label": "!icon/zwj_key|\u200d" }, { "label": "ࣳ" }, { "label": "ّ" }, { "label": "ٰ" }, { "label": "ْ" }, { "label": "ِ" }, { "label": "ٕ" }, { "label": "ٔ" }, { "label": "!icon/zwnj_key|\u200c" }, { "label": "ٖ" }, { "label": "ٓ" }, { "label": "ࣱ" }, { "label": "ࣲ" }, { "label": "ࣰ" } ] } } },
+      "moreSymbols": { "$": "layout_direction_selector", "ltr": { "label": "×", "type": "function", "width": 0.24, "popup": { "main": { "label": "÷" } } }, "rtl": { "label": "ﷺ", "type": "function", "width": 0.24, "popup": { "main": { "label": "ﷻ" }, "relevant":[ {"label":"﷽"} ] } } },
+      "default": { "$": "layout_direction_selector", "ltr": { "label": "+", "type": "function", "width": 0.24, "popup": { "main": { "label": "–" }, "relevant":[ { "label": "÷" }, { "label": "×" }, { "label": "=" }, { "label": "≠" }, { "label": "±" }, { "label": "≥" }, { "label": "≤" }, { "label": ">" }, { "label": "<" }, { "label": "/" }, { "label": "∞" } ] } }, "rtl": { "label": "+", "type": "function", "width": 0.24 } }
+    },
+    { "$": "keyboard_state_selector",
+      "alphabet": { "label": "space", "width": -1 },
+      "moreSymbols": { "$": "layout_direction_selector", "ltr": { "label": "⓪", "width": 0.24, "popup": { "main": { "label": "٠" }, "relevant":[ { "label": "⁰" }, { "label": "₀" } ] } }, "rtl": { "label": "۰", "width": 0.24 } },
+      "default": { "$": "layout_direction_selector", "ltr": { "label": "0", "width": 0.24, "popup": { "main": { "label": "⁰" }, "relevant":[ { "label": "₀" } ] } }, "rtl": { "label": "٠", "width": 0.24 } }
+    },
+    { "$": "keyboard_state_selector",
+      "alphabet": { "label": "emoji", "type": "normal", "width": 0.12, "popup": { "main": { "label": "select_all", "type": "function" }, "relevant":[ { "label": "timestamp", "type": "function" }, { "label": "copy", "type": "function" }, { "label": "paste", "type": "function" } ] } },
+      "default": { "label": "space", "type": "function", "width": 0.24 }
+    },
+    { "$": "keyboard_state_selector",
+      "alphabet": { "label": "action", "type": "action", "width": 0.17, "groupId": -1, "popup": { "main": { "label": "voice", "type": "function" }, "relevant": [ { "label": "undo", "type": "function" } ] } },
+      "default": { "label": "action", "type": "action", "width": 0.185, "groupId": -1, "popup": { "main": { "label": "voice", "type": "function" }, "relevant": [ { "label": "undo", "type": "function" } ] } }
+    }
+]]

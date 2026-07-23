@@ -26,6 +26,9 @@ import androidx.core.view.inputmethod.EditorInfoCompat
 import com.macboard.keyboard.event.HapticEvent
 import com.macboard.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode
 import com.macboard.keyboard.latin.common.ColorType
+import com.macboard.keyboard.latin.utils.Log
+import java.io.FileNotFoundException
+import java.io.IOException
 
 class ImageSuggestionManager(private val latinIME: LatinIME) {
 
@@ -153,6 +156,14 @@ class ImageSuggestionManager(private val latinIME: LatinIME) {
 
         val uri = latestImageUri ?: return null
 
+        // --- بداية التعديل: التفتيش على الصورة قبل عرض الكبسولة ---
+        if (!isUriValid(latinIME, uri)) {
+            Log.d("ImageSuggestionManager", "Skipping invalid/deleted image URI: $uri")
+            latestImageUri = null // مسح الـ URI الوهمي عشان الكيبورد ينساه
+            return null // إلغاء الكبسولة تماماً
+        }
+        // --- نهاية التعديل ---
+
         val mimeTypes = EditorInfoCompat.getContentMimeTypes(editorInfo)
         if (!mimeTypes.any { it.startsWith("image/") }) return null
 
@@ -237,4 +248,22 @@ class ImageSuggestionManager(private val latinIME: LatinIME) {
         if (latestImageUri == null) return false
         return true
     }
+
+    // --- بداية التعديل: دالة التفتيش على وجود الصورة ---
+    private fun isUriValid(context: Context, uri: Uri?): Boolean {
+        if (uri == null) return false
+        return try {
+            context.contentResolver.openInputStream(uri)?.use { true } ?: false
+        } catch (e: FileNotFoundException) {
+            Log.w("ImageSuggestionManager", "URI file not found: $uri", e)
+            false
+        } catch (e: SecurityException) {
+            Log.w("ImageSuggestionManager", "Security exception for URI: $uri", e)
+            false
+        } catch (e: IOException) {
+            Log.w("ImageSuggestionManager", "IOException checking URI: $uri", e)
+            false
+        }
+    }
+    // --- نهاية التعديل ---
 }

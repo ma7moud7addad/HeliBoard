@@ -50,6 +50,7 @@ fun MainSettingsScreen(
         settings = emptyList(),
     ) {
         val enabledSubtypes = SubtypeSettings.getEnabledSubtypes(true)
+        val context = LocalContext.current
         Scaffold(contentWindowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom)) { innerPadding ->
             Column(
                 Modifier.verticalScroll(rememberScrollState()).then(Modifier.padding(innerPadding))
@@ -75,12 +76,16 @@ fun MainSettingsScreen(
                     onClick = onClickToolbar,
                     icon = R.drawable.ic_settings_toolbar
                 ) { NextScreenIcon() }
-                if (JniUtils.sHaveGestureLib)
+                
+                // --- إظهار القائمة فقط إذا كانت المكتبة مفعلة ومتاحة ---
+                if (JniUtils.isGestureLibraryAvailable()) {
                     Preference(
                         name = stringResource(R.string.settings_screen_gesture),
                         onClick = onClickGestureTyping,
                         icon = R.drawable.ic_settings_gesture
                     ) { NextScreenIcon() }
+                }
+                
                 // we don't even show the menu if data gathering phase ended more than 2 weeks ago
                 if (JniUtils.sHaveGestureLib && System.currentTimeMillis() < END_DATE_EPOCH_MILLIS + TWO_WEEKS_IN_MILLIS)
                     Preference(

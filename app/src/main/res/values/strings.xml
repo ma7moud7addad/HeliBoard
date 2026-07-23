@@ -1112,6 +1112,8 @@ New dictionary:
     <string name="gesture_data_links">Information on gesture data gathering on:</string>
     <string name="image_suggestion_insert">Insert image</string>
     <string name="image_suggestion_desc">Image thumbnail</string>
+    <string name="enable_gesture_typing_title">Enable Gesture Typing</string>
+    <string name="enable_gesture_typing_summary">Use bundled gesture typing library</string>
 
 
 
