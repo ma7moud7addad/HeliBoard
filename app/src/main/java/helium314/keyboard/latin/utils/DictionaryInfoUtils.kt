@@ -137,7 +137,7 @@ object DictionaryInfoUtils {
         return dictionaryFileName.substringAfter("_").substringBefore(".").constructLocale()
     }
 
-    // actually we could extract assets dicts to unprotected storage
+    // --- بداية التعديل: استخراج القواميس المدمجة مباشرة بدون فحص بصمة ---
     fun extractAssetsDictionary(dictionaryFileName: String, locale: Locale, context: Context): File? {
         val cacheDir = getCacheDirectoryForLocale(locale, context) ?: return null
         val targetFile = File(cacheDir, "${dictionaryFileName.substringBefore("_")}.dict")
@@ -153,8 +153,16 @@ object DictionaryInfoUtils {
         return targetFile
     }
 
-    fun getAssetsDictionaryList(context: Context): Array<String>? =
-        runCatching { context.assets.list(ASSETS_DICTIONARY_FOLDER) }.getOrNull()
+    fun getAssetsDictionaryList(context: Context): Array<String>? {
+        // إرجاع القواميس الأربعة الخاصة بك مباشرة لتجاهل أي فحص معقد
+        return arrayOf(
+            "main_ar.dict",
+            "main_en.dict",
+            "emoji_ar_cldr.dict",
+            "emoji_en_cldr.dict"
+        )
+    }
+    // --- نهاية التعديل ---
 
     @JvmStatic
     fun looksValidForDictionaryInsertion(text: CharSequence, spacingAndPunctuations: SpacingAndPunctuations): Boolean {
