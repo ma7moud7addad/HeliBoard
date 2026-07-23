@@ -1,28 +1,7 @@
-q
-w
-e
-r
-t
-y
-u
-i
-o
-p
-
-a
-s
-d
-f
-g
-h
-j
-k
-l
-
-z
-x
-c
-v
-b
-n
-m
+[[
+    { "label": "q", "groupId": -1, "popup": { "main": { "label": "Q" } } }, { "label": "w", "groupId": -1, "popup": { "main": { "label": "W" } } }, { "label": "e", "groupId": -1, "popup": { "main": { "label": "E" } } }, { "label": "r", "groupId": -1, "popup": { "main": { "label": "R" }, "relevant": [ { "label": "ʳ" } ] } }, { "label": "t", "groupId": -1, "popup": { "main": { "label": "T" }, "relevant": [ { "label": "ᵗ" } ] } }, { "label": "y", "groupId": -1, "popup": { "main": { "label": "Y" }, "relevant":[ { "label": "ʸ" } ] } }, { "label": "u", "groupId": -1, "popup": { "main": { "label": "U" } } }, { "label": "i", "groupId": -1, "popup": { "main": { "label": "I" } } }, { "label": "o", "groupId": -1, "popup": { "main": { "label": "O" } } }, { "label": "p", "groupId": -1, "popup": { "main": { "label": "P" } } }
+  ],[
+    { "label": "a", "groupId": -1, "popup": { "main": { "label": "A" } } }, { "label": "s", "groupId": -1, "popup": { "main": { "label": "S" }, "relevant": [ { "label": "ˢ" } ] } }, { "label": "d", "groupId": -1, "popup": { "main": { "label": "D" }, "relevant":[ { "label": "ᵈ" } ] } }, { "label": "f", "groupId": -1, "popup": { "main": { "label": "F" } } }, { "label": "g", "groupId": -1, "popup": { "main": { "label": "G" } } }, { "label": "h", "groupId": -1, "popup": { "main": { "label": "H" }, "relevant": [ { "label": "ʰ" } ] } }, { "label": "j", "groupId": -1, "popup": { "main": { "label": "J" } } }, { "label": "k", "groupId": -1, "popup": { "main": { "label": "K" } } }, { "label": "l", "groupId": -1, "popup": { "main": { "label": "L" } } }, { "label": ".", "groupId": -1, "popup": { "main": { "label": "?" }, "relevant":[ { "label": "!autoColumnOrder!6" }, { "label": "!" }, { "label": "-" }, { "label": "_" }, { "label": "~" }, { "label": "," }, { "label": "…" }, { "label": ":" }, { "label": ";" }, { "label": "'" }, { "label": "\"" } ] } }
+  ],[
+    { "label": "shift", "type": "normal", "width": 0.10 }, { "label": "z", "groupId": -1, "popup": { "main": { "label": "Z" } } }, { "label": "x", "groupId": -1, "popup": { "main": { "label": "X" } } }, { "label": "c", "groupId": -1, "popup": { "main": { "label": "C" } } }, { "label": "v", "groupId": -1, "popup": { "main": { "label": "V" } } }, { "label": "b", "groupId": -1, "popup": { "main": { "label": "B" } } }, { "label": "n", "groupId": -1, "popup": { "main": { "label": "N" }, "relevant": [ { "label": "ⁿ" } ] } }, { "label": "m", "groupId": -1, "popup": { "main": { "label": "M" } } }, { "type": "placeholder", "width": 0.03 }, { "label": "delete", "width": 0.17 }
+]]
