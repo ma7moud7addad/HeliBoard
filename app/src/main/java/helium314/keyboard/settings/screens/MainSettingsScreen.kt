@@ -78,7 +78,7 @@ fun MainSettingsScreen(
                 ) { NextScreenIcon() }
                 
                 // --- إظهار القائمة فقط إذا كانت المكتبة مفعلة ومتاحة ---
-                if (JniUtils.isGestureTypingEnabled(context)) {
+                if (JniUtils.isGestureLibraryAvailable()) {
                     Preference(
                         name = stringResource(R.string.settings_screen_gesture),
                         onClick = onClickGestureTyping,
