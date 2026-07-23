@@ -1,31 +1,7 @@
-ض
-ص
-ق
-ف
-غ
-ع
-ه
-خ
-ح
-ج
-
-ش
-س
-ي
-ب
-ل
-ا
-ت
-ن
-م
-ك
-
-ظ
-ط
-ذ
-د
-ز
-ر
-و
-ة
-ث
+[[
+    { "label": "ض" }, { "label": "ص" }, { "label": "ث" }, { "label": "ق", "popup": { "main": { "label": "ٯ" } } }, { "label": "ف", "popup": { "main": { "label": "ڤ" }, "relevant": [ { "label": "ڡ" } ] } }, { "label": "غ" }, { "label": "ع", "popup": { "main": { "label": "؏" } } }, { "label": "ه", "popup": { "main": { "label": "ہ" }, "relevant": [ { "label": "ھ" } ] } }, { "label": "خ" }, { "label": "ح" }, { "label": "ج", "popup": { "main": { "label": "چ" } } }
+  ],[
+    { "label": "ش" }, { "label": "س" }, { "label": "ي", "popup": { "main": { "label": "ئ" } } }, { "label": "ب", "popup": { "main": { "label": "ٮ" } } }, { "label": "ل" }, { "label": "ا", "popup": { "main": { "label": "أ" }, "relevant":[ { "label": "إ" }, { "label": "آ" } ] } }, { "label": "ت", "popup": { "main": { "label": "ٮ" }, "relevant": [ { "label": "ٺ" } ] } }, { "label": "ن", "popup": { "main": { "label": "ں" } } }, { "label": "م", "popup": { "main": { "label": "م‍ﹳ" } } }, { "label": "ك", "popup": { "main": { "label": "ڪ" }, "relevant": [ { "label": "ک" } ] } }, { "label": "ط" }
+  ],[
+    { "label": "ذ" }, { "label": "ء" }, { "label": "ى", "popup": { "main": { "label": "ے" } } }, { "label": "ر" }, { "label": "ة" }, { "label": "و"}, { "label": "ز" }, { "label": "ظ" }, { "label": "د" }, { "type": "placeholder", "width": 0.014 }, { "label": "delete", "width": 0.187 }
+]]
