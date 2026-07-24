@@ -20,7 +20,6 @@ import java.io.File
 import java.io.IOException
 import java.util.Locale
 
-/** encapsulates the logic for the Latin-IME side of dictionary information management */
 object DictionaryInfoUtils {
     private val TAG = DictionaryInfoUtils::class.java.simpleName
     const val DEFAULT_MAIN_DICT = "main"
@@ -28,29 +27,16 @@ object DictionaryInfoUtils {
     const val MAIN_DICT_PREFIX = DEFAULT_MAIN_DICT + "_"
     const val ASSETS_DICTIONARY_FOLDER = "dicts"
     const val MAIN_DICT_FILE_NAME = "$DEFAULT_MAIN_DICT.dict"
-    private const val MAX_HEX_DIGITS_FOR_CODEPOINT = 6 // unicode is limited to 21 bits
+    private const val MAX_HEX_DIGITS_FOR_CODEPOINT = 6
 
-    /**
-     * Returns whether we may want to use this character as part of a file name.
-     * This basically only accepts ascii letters and numbers, and rejects everything else.
-     */
     private fun isFileNameCharacter(codePoint: Int): Boolean {
-        if (codePoint in 0x30..0x39) return true // Digit
-        if (codePoint in 0x41..0x5A) return true // Uppercase
-        if (codePoint in 0x61..0x7A) return true // Lowercase
+        if (codePoint in 0x30..0x39) return true
+        if (codePoint in 0x41..0x5A) return true
+        if (codePoint in 0x61..0x7A) return true
         return codePoint == '_'.code || codePoint == '-'.code
     }
 
-    /**
-     * Escapes a string for any characters that may be suspicious for a file or directory name.
-     *
-     * Concretely this does a sort of URL-encoding except it will encode everything that's not
-     * alphanumeric or underscore. (true URL-encoding leaves alone characters like '*', which
-     * we cannot allow here)
-     */
     private fun replaceFileNameDangerousCharacters(name: String): String {
-        // This assumes '%' is fully available as a non-separator, normal
-        // character in a file name. This is probably true for all file systems.
         val sb = StringBuilder()
         loopOverCodePoints(name) { codePoint, _ ->
             if (isFileNameCharacter(codePoint)) {
@@ -63,11 +49,8 @@ object DictionaryInfoUtils {
         return sb.toString()
     }
 
-    // we cache the extracted dictionaries in filesDir, because actual cache might be cleared at
-    // any time, and we can't permanently check whether the dictionary still exists
     fun getWordListCacheDirectory(context: Context): String = context.filesDir?.toString() + File.separator + "dicts"
 
-    /** Reverse escaping done by replaceFileNameDangerousCharacters. */
     fun getWordListIdFromFileName(fname: String): String {
         val sb = StringBuilder()
         val fnameLength = fname.length
@@ -77,7 +60,6 @@ object DictionaryInfoUtils {
             if ('%'.code != codePoint) {
                 sb.appendCodePoint(codePoint)
             } else {
-                // + 1 to pass the % sign
                 val encodedCodePoint = fname.substring(i + 1, i + 1 + MAX_HEX_DIGITS_FOR_CODEPOINT).toInt(16)
                 i += MAX_HEX_DIGITS_FOR_CODEPOINT
                 sb.appendCodePoint(encodedCodePoint)
@@ -87,11 +69,9 @@ object DictionaryInfoUtils {
         return sb.toString()
     }
 
-    /** Helper method to the list of non-empty cache directories, one for each distinct locale. */
     fun getCacheDirectories(context: Context) = File(getWordListCacheDirectory(context)).listFiles()
         ?.filter { it.isDirectory && !it.list().isNullOrEmpty() }.orEmpty()
 
-    /** Find out the cache directory associated with a specific locale. */
     fun getCacheDirectoryForLocale(locale: Locale, context: Context): String? {
         val relativeDirectoryName = replaceFileNameDangerousCharacters(locale.toLanguageTag())
         val absoluteDirectoryName = getWordListCacheDirectory(context) + File.separator + relativeDirectoryName
@@ -125,22 +105,12 @@ object DictionaryInfoUtils {
         }
     }
 
-    /**
-     * Returns the locale for a dictionary file name stored in assets.
-     *
-     * Assumes file name main_[locale].dict
-     * Returns the locale, or null if file name does not match the pattern
-     */
     fun extractLocaleFromAssetsDictionaryFile(dictionaryFileName: String): Locale {
         if (dictionaryFileName.contains('_') && !dictionaryFileName.contains('.'))
             throw IllegalStateException("invalid asset dictionary name $dictionaryFileName")
-        
-        // مسح كلمة cldr من اسم اللغة عشان يندمجوا صح في خانة واحدة
-        val localeString = dictionaryFileName.substringAfter("_").substringBefore(".").replace("_cldr", "")
-        return localeString.constructLocale()
+        return dictionaryFileName.substringAfter("_").substringBefore(".").constructLocale()
     }
 
-    // استخراج القواميس المدمجة مباشرة بدون فحص بصمة
     fun extractAssetsDictionary(dictionaryFileName: String, locale: Locale, context: Context): File? {
         val cacheDir = getCacheDirectoryForLocale(locale, context) ?: return null
         val targetFile = File(cacheDir, "${dictionaryFileName.substringBefore("_")}.dict")
@@ -157,12 +127,11 @@ object DictionaryInfoUtils {
     }
 
     fun getAssetsDictionaryList(context: Context): Array<String>? {
-        // إرجاع القواميس الأربعة الخاصة بك بأسماء تتطابق مع كود اللغة للدمج الصحيح
         return arrayOf(
             "main_ar.dict",
             "main_en.dict",
-            "emoji_ar_cldr.dict",
-            "emoji_en_cldr.dict"
+            "emoji_ar.dict",
+            "emoji_en.dict"
         )
     }
 
@@ -177,7 +146,6 @@ object DictionaryInfoUtils {
         var digitCount = 0
         loopOverCodePoints(text) { codePoint, charCount ->
             if (Character.isDigit(codePoint)) {
-                // Count digits: see below
                 digitCount += charCount
                 return@loopOverCodePoints false
             }
@@ -186,10 +154,6 @@ object DictionaryInfoUtils {
             }
             false
         }
-        // We reject strings entirely comprised of digits to avoid using PIN codes or credit
-        // card numbers. It would come in handy for word prediction though; a good example is
-        // when writing one's address where the street number is usually quite discriminative,
-        // as well as the postal code.
         return digitCount < text.length
     }
 }
