@@ -134,10 +134,13 @@ object DictionaryInfoUtils {
     fun extractLocaleFromAssetsDictionaryFile(dictionaryFileName: String): Locale {
         if (dictionaryFileName.contains('_') && !dictionaryFileName.contains('.'))
             throw IllegalStateException("invalid asset dictionary name $dictionaryFileName")
-        return dictionaryFileName.substringAfter("_").substringBefore(".").constructLocale()
+        
+        // مسح كلمة cldr من اسم اللغة عشان يندمجوا صح في خانة واحدة
+        val localeString = dictionaryFileName.substringAfter("_").substringBefore(".").replace("_cldr", "")
+        return localeString.constructLocale()
     }
 
-    // --- بداية التعديل: استخراج القواميس المدمجة مباشرة بدون فحص بصمة ---
+    // استخراج القواميس المدمجة مباشرة بدون فحص بصمة
     fun extractAssetsDictionary(dictionaryFileName: String, locale: Locale, context: Context): File? {
         val cacheDir = getCacheDirectoryForLocale(locale, context) ?: return null
         val targetFile = File(cacheDir, "${dictionaryFileName.substringBefore("_")}.dict")
@@ -154,7 +157,7 @@ object DictionaryInfoUtils {
     }
 
     fun getAssetsDictionaryList(context: Context): Array<String>? {
-        // إرجاع القواميس الأربعة الخاصة بك مباشرة لتجاهل أي فحص معقد
+        // إرجاع القواميس الأربعة الخاصة بك بأسماء تتطابق مع كود اللغة للدمج الصحيح
         return arrayOf(
             "main_ar.dict",
             "main_en.dict",
@@ -162,7 +165,6 @@ object DictionaryInfoUtils {
             "emoji_en_cldr.dict"
         )
     }
-    // --- نهاية التعديل ---
 
     @JvmStatic
     fun looksValidForDictionaryInsertion(text: CharSequence, spacingAndPunctuations: SpacingAndPunctuations): Boolean {
