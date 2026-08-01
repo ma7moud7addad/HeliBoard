@@ -50,42 +50,24 @@ class ClipboardHistoryManager(
     }
 
     private fun fetchPrimaryClip() {
-    val clipData = clipboardManager.primaryClip ?: return
-    if (clipData.itemCount == 0) return
-
-    // --- Keep sensitive clip handling ---
-    if (ClipboardManagerCompat.getClipSensitivity(clipData.description) == true) {
-        return
-    }
-
-    val desc = clipData.description
-    val clipItem = clipData.getItemAt(0) ?: return
-    val timeStamp = ClipboardManagerCompat.getClipTimestamp(clipData)
-
-    // 1. الفحص عن الصورة الأول (عشان ميتخدعش بالنص)
-    val hasImage = (0 until (desc?.mimeTypeCount ?: 0)).any { i ->
-        desc?.getMimeType(i)?.startsWith("image/") == true
-    }
-
-    if (hasImage) {
-        val uri = clipItem.uri
-        val mime = (0 until (desc?.mimeTypeCount ?: 0))
-            .mapNotNull { i -> desc?.getMimeType(i) }
-            .firstOrNull { it.startsWith("image/") }
-        if (uri != null) {
-            clipboardDao?.addClip(timeStamp, false, uri.toString(), mime)
-            return // بنوقف هنا عشان ميحفظهاش كنص كمان
+        val clipData = clipboardManager.primaryClip ?: return
+        if (clipData.itemCount == 0 || clipData.description?.hasMimeType("text/*") == false) return
+        
+        // --- بداية التعديل: منع حفظ المحتوى الحساس ---
+        // Check if the clip is marked as sensitive (Android 13+)
+        if (ClipboardManagerCompat.getClipSensitivity(clipData.description) == true) {
+            // Silently ignore sensitive clips - do not save to history
+            return
+        }
+        // --- نهاية التعديل ---
+        
+        clipData.getItemAt(0)?.let { clipItem ->
+            val timeStamp = ClipboardManagerCompat.getClipTimestamp(clipData)
+            val content = clipItem.coerceToText(latinIME)
+            if (TextUtils.isEmpty(content)) return
+            clipboardDao?.addClip(timeStamp, false, content.toString())
         }
     }
-
-    // 2. لو مفيش صورة، يحفظها كنص عادي
-    if (desc?.hasMimeType("text/*") == true) {
-        val content = clipItem.coerceToText(latinIME)
-        if (content != null && content.isNotEmpty()) {
-            clipboardDao?.addClip(timeStamp, false, content.toString(), "text/plain")
-        }
-    }
-}
 
     fun toggleClipPinned(id: Long) {
         clipboardDao?.togglePinned(id)
