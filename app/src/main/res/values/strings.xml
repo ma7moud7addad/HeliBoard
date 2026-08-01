@@ -1114,6 +1114,10 @@ New dictionary:
     <string name="image_suggestion_desc">Image thumbnail</string>
     <string name="enable_gesture_typing_title">Enable Gesture Typing</string>
     <string name="enable_gesture_typing_summary">Use bundled gesture typing library</string>
+    <!-- Preferences item for extending the clipboard history to files (images or others) -->
+    <string name="clipboard_history_files">Add images and other files to clipboard history</string>
+    <!-- Preferences item for selecting maximum combined size of clipboard history files -->
+    <string name="clipboard_history_max_file_size">Clipboard size limit</string>
 
 
 
