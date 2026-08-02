@@ -29,7 +29,7 @@ class ClipboardHistoryManager(
     private lateinit var clipboardManager: ClipboardManager
     private var clipboardSuggestionView: View? = null
     private var clipboardDao: ClipboardDao? = null
-    var tempPrimaryClip = false // لمنع التكرار اللانهائي عند اللصق
+    var tempPrimaryClip = false 
 
     fun onCreate() {
         clipboardManager = latinIME.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
@@ -52,29 +52,30 @@ class ClipboardHistoryManager(
     }
 
     private fun fetchPrimaryClip() {
-        val clipData = clipboardManager.primaryClip ?: return
-        if (clipData.itemCount == 0) return
-        
-        // منع حفظ المحتوى الحساس
-        if (ClipboardManagerCompat.getClipSensitivity(clipData.description) == true) {
-            return
-        }
-        
-        val desc = clipData.description
-        val clipItem = clipData.getItemAt(0) ?: return
-        val timeStamp = ClipboardManagerCompat.getClipTimestamp(clipData)
-
-        // لو النص عادي
-        if (desc?.hasMimeType("text/*") == true) {
-            val content = clipItem.coerceToText(latinIME)
-            if (!TextUtils.isEmpty(content)) {
-                clipboardDao?.addClip(timeStamp, false, content.toString())
+        try {
+            val clipData = clipboardManager.primaryClip ?: return
+            if (clipData.itemCount == 0) return
+            
+            if (ClipboardManagerCompat.getClipSensitivity(clipData.description) == true) {
+                return
             }
-        } 
-        // لو صورة أو ملف
-        else if (clipItem.uri != null) {
-            val mimeTypes = (0 until (desc?.mimeTypeCount ?: 0)).mapNotNull { desc?.getMimeType(it) }
-            clipboardDao?.addClipUri(timeStamp, false, latinIME, clipItem.uri, mimeTypes)
+            
+            val desc = clipData.description
+            val clipItem = clipData.getItemAt(0) ?: return
+            val timeStamp = ClipboardManagerCompat.getClipTimestamp(clipData)
+
+            if (desc?.hasMimeType("text/*") == true) {
+                val content = clipItem.coerceToText(latinIME)
+                if (!TextUtils.isEmpty(content)) {
+                    clipboardDao?.addClip(timeStamp, false, content.toString())
+                }
+            } 
+            else if (clipItem.uri != null) {
+                val mimeTypes = (0 until (desc?.mimeTypeCount ?: 0)).mapNotNull { desc?.getMimeType(it) }
+                clipboardDao?.addClipUri(timeStamp, false, latinIME, clipItem.uri, mimeTypes)
+            }
+        } catch (e: Throwable) {
+            // --- درع الحماية: يمنع الكيبورد من الموت عند بدء التشغيل ---
         }
     }
 
