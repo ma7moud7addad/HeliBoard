@@ -233,9 +233,35 @@ class ClipboardHistoryView @JvmOverloads constructor(
         
         if (clipContent.filename != null) {
             try {
-                val uri = clipContent.getContentUri(context)
-                if (uri != null) {
-                    clipboardHistoryManager.latinIME.commitImage(uri)
+                val contentInfo = clipContent.getContentInfo(context)
+                val latinIME = clipboardHistoryManager.latinIME
+                val editorInfo = latinIME.currentInputEditorInfo
+                val inputConnection = latinIME.currentInputConnection
+
+                if (contentInfo != null && editorInfo != null && inputConnection != null) {
+                    val editorMimeTypes = androidx.core.view.inputmethod.EditorInfoCompat.getContentMimeTypes(editorInfo)
+                    val contentMime = contentInfo.description.getMimeType(0)
+                    
+                    val isSupported = editorMimeTypes.any { it.equals(contentMime, ignoreCase = true) || it.startsWith("image/") }
+                    
+                    if (isSupported) {
+                        val targetPackage = editorInfo.packageName
+                        if (targetPackage != null) {
+                            try {
+                                context.grantUriPermission(targetPackage, contentInfo.contentUri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            } catch (e: Exception) { }
+                        }
+
+                        androidx.core.view.inputmethod.InputConnectionCompat.commitContent(
+                            inputConnection,
+                            editorInfo,
+                            contentInfo,
+                            androidx.core.view.inputmethod.InputConnectionCompat.INPUT_CONTENT_GRANT_READ_URI_PERMISSION,
+                            null
+                        )
+                    } else {
+                        clipboardHistoryManager.pasteWithoutChangingClips(contentInfo)
+                    }
                 } else {
                     keyboardActionListener.onTextInput(clipContent.text)
                 }
