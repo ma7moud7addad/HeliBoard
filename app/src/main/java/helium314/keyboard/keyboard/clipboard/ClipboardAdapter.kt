@@ -50,6 +50,7 @@ class ClipboardAdapter(
     ) : RecyclerView.ViewHolder(view), View.OnClickListener, View.OnTouchListener, View.OnLongClickListener {
 
         private val pinnedIconView: ImageView
+        private val thumbnailView: ImageView
         private val contentView: TextView
 
         init {
@@ -65,6 +66,9 @@ class ClipboardAdapter(
                 visibility = View.GONE
                 setImageResource(pinnedIconResId)
             }
+            thumbnailView = view.findViewById<ImageView>(R.id.clipboard_entry_thumbnail).apply {
+                visibility = View.GONE
+            }
             contentView = view.findViewById<TextView>(R.id.clipboard_entry_content).apply {
                 typeface = itemTypeFace
                 setTextColor(itemTextColor)
@@ -77,8 +81,24 @@ class ClipboardAdapter(
 
         fun setContent(historyEntry: ClipboardHistoryEntry?) {
             itemView.tag = historyEntry?.id
-            contentView.text = historyEntry?.text?.take(1000) // truncate displayed text for performance reasons
             pinnedIconView.visibility = if (historyEntry?.isPinned == true) View.VISIBLE else View.GONE
+
+            val mime = historyEntry?.mimeTypes?.firstOrNull()
+            if (historyEntry?.filename != null && mime?.startsWith("image/") == true) {
+                thumbnailView.visibility = View.VISIBLE
+                contentView.visibility = View.GONE
+                try {
+                    thumbnailView.setImageURI(historyEntry.getContentUri(itemView.context))
+                } catch (e: Exception) {
+                    thumbnailView.visibility = View.GONE
+                    contentView.visibility = View.VISIBLE
+                    contentView.text = historyEntry.text.take(1000)
+                }
+            } else {
+                thumbnailView.visibility = View.GONE
+                contentView.visibility = View.VISIBLE
+                contentView.text = historyEntry?.text?.take(1000)
+            }
         }
 
         @SuppressLint("ClickableViewAccessibility")
