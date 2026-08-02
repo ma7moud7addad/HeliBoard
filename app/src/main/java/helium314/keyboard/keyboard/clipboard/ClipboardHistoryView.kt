@@ -233,19 +233,9 @@ class ClipboardHistoryView @JvmOverloads constructor(
         
         if (clipContent.filename != null) {
             try {
-                val contentInfo = clipContent.getContentInfo(context)
-                val latinIME = KeyboardSwitcher.getInstance().latinIME
-                val editorInfo = latinIME?.currentInputEditorInfo
-                val inputConnection = latinIME?.currentInputConnection
-
-                if (contentInfo != null && latinIME != null && editorInfo != null && inputConnection != null) {
-                    androidx.core.view.inputmethod.InputConnectionCompat.commitContent(
-                        inputConnection,
-                        editorInfo,
-                        contentInfo,
-                        androidx.core.view.inputmethod.InputConnectionCompat.INPUT_CONTENT_GRANT_READ_URI_PERMISSION,
-                        null
-                    )
+                val uri = clipContent.getContentUri(context)
+                if (uri != null) {
+                    clipboardHistoryManager.latinIME.commitImage(uri)
                 } else {
                     keyboardActionListener.onTextInput(clipContent.text)
                 }
