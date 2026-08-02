@@ -23,7 +23,7 @@ import com.macboard.keyboard.latin.utils.InputTypeUtils
 import com.macboard.keyboard.latin.utils.ToolbarKey
 
 class ClipboardHistoryManager(
-        private val latinIME: LatinIME
+        val latinIME: LatinIME
 ) : ClipboardManager.OnPrimaryClipChangedListener {
 
     private lateinit var clipboardManager: ClipboardManager
