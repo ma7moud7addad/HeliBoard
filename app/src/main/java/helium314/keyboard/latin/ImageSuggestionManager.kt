@@ -127,6 +127,12 @@ class ImageSuggestionManager(private val latinIME: LatinIME) {
                     // لو دي نفس السكرين شوت اللي لسه مبعوتة حالا.. تجاهلها تماماً!
                     if (uri.toString() == lastInsertedUriString) return
 
+                    // --- إضافة السكرين شوت للحافظة تلقائياً ---
+                    com.macboard.keyboard.latin.database.ClipboardDao.getInstance(latinIME)?.addClipUri(
+                        System.currentTimeMillis(), false, latinIME, uri, listOf("image/png", "image/jpeg", "image/*")
+                    )
+                    // ------------------------------------------
+
                     latestImageUri = uri
                     dontShowCurrentSuggestion = false
                     latinIME.setNeutralSuggestionStrip()
@@ -156,13 +162,11 @@ class ImageSuggestionManager(private val latinIME: LatinIME) {
 
         val uri = latestImageUri ?: return null
 
-        // --- بداية التعديل: التفتيش على الصورة قبل عرض الكبسولة ---
         if (!isUriValid(latinIME, uri)) {
             Log.d("ImageSuggestionManager", "Skipping invalid/deleted image URI: $uri")
-            latestImageUri = null // مسح الـ URI الوهمي عشان الكيبورد ينساه
-            return null // إلغاء الكبسولة تماماً
+            latestImageUri = null 
+            return null 
         }
-        // --- نهاية التعديل ---
 
         val mimeTypes = EditorInfoCompat.getContentMimeTypes(editorInfo)
         if (!mimeTypes.any { it.startsWith("image/") }) return null
@@ -199,17 +203,14 @@ class ImageSuggestionManager(private val latinIME: LatinIME) {
             suppressClipboardListener = true
             dontShowCurrentSuggestion = true
             
-            // حفظ مسار الصورة في الذاكرة عشان الكيبورد تنساها وتتجاهلها
             lastInsertedUriString = uri.toString()
             
             val currentUri = uri 
             latestImageUri = null
             view.visibility = View.GONE
 
-            // إرسال الصورة
             latinIME.commitImage(currentUri)
 
-            // إعادة تحديث الشريط بعد 1.2 ثانية وتجاهل أي محاولة من تليجرام لإظهار نفس الصورة
             latinIME.mHandler.postDelayed({
                 suppressClipboardListener = false
                 latinIME.setNeutralSuggestionStrip()
@@ -249,7 +250,6 @@ class ImageSuggestionManager(private val latinIME: LatinIME) {
         return true
     }
 
-    // --- بداية التعديل: دالة التفتيش على وجود الصورة ---
     private fun isUriValid(context: Context, uri: Uri?): Boolean {
         if (uri == null) return false
         return try {
@@ -265,5 +265,4 @@ class ImageSuggestionManager(private val latinIME: LatinIME) {
             false
         }
     }
-    // --- نهاية التعديل ---
 }
