@@ -19,11 +19,20 @@ class Database private constructor(context: Context, name: String = NAME) : SQLi
         if (oldVersion <= 1) {
             db.execSQL(GestureDataDao.CREATE_TABLE)
         }
+        // إضافة عواميد الصور للمستخدمين القدامى بأمان
+        if (oldVersion < 3) {
+            try {
+                db.execSQL("ALTER TABLE CLIPBOARD ADD COLUMN FILE TEXT")
+            } catch (e: Exception) { /* ignore if already exists */ }
+            try {
+                db.execSQL("ALTER TABLE CLIPBOARD ADD COLUMN MIME_TYPES TEXT")
+            } catch (e: Exception) { /* ignore if already exists */ }
+        }
     }
 
     companion object {
         private val TAG = Database::class.java.simpleName
-        private const val VERSION = 2
+        private const val VERSION = 3 // تم التحديث إلى 3 لتطبيق التعديلات الجديدة
         const val NAME = "heliboard.db"
         private var instance: Database? = null
         fun getInstance(context: Context): Database {
