@@ -29,6 +29,7 @@ class ClipboardHistoryManager(
     private lateinit var clipboardManager: ClipboardManager
     private var clipboardSuggestionView: View? = null
     private var clipboardDao: ClipboardDao? = null
+    var tempPrimaryClip = false // لمنع التكرار اللانهائي عند اللصق
 
     fun onCreate() {
         clipboardManager = latinIME.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
@@ -43,6 +44,7 @@ class ClipboardHistoryManager(
     }
 
     override fun onPrimaryClipChanged() {
+        if (tempPrimaryClip) return
         if (latinIME.mSettings.current.mClipboardHistoryEnabled) {
             fetchPrimaryClip()
             dontShowCurrentSuggestion = false
@@ -51,21 +53,28 @@ class ClipboardHistoryManager(
 
     private fun fetchPrimaryClip() {
         val clipData = clipboardManager.primaryClip ?: return
-        if (clipData.itemCount == 0 || clipData.description?.hasMimeType("text/*") == false) return
+        if (clipData.itemCount == 0) return
         
-        // --- بداية التعديل: منع حفظ المحتوى الحساس ---
-        // Check if the clip is marked as sensitive (Android 13+)
+        // منع حفظ المحتوى الحساس
         if (ClipboardManagerCompat.getClipSensitivity(clipData.description) == true) {
-            // Silently ignore sensitive clips - do not save to history
             return
         }
-        // --- نهاية التعديل ---
         
-        clipData.getItemAt(0)?.let { clipItem ->
-            val timeStamp = ClipboardManagerCompat.getClipTimestamp(clipData)
+        val desc = clipData.description
+        val clipItem = clipData.getItemAt(0) ?: return
+        val timeStamp = ClipboardManagerCompat.getClipTimestamp(clipData)
+
+        // لو النص عادي
+        if (desc?.hasMimeType("text/*") == true) {
             val content = clipItem.coerceToText(latinIME)
-            if (TextUtils.isEmpty(content)) return
-            clipboardDao?.addClip(timeStamp, false, content.toString())
+            if (!TextUtils.isEmpty(content)) {
+                clipboardDao?.addClip(timeStamp, false, content.toString())
+            }
+        } 
+        // لو صورة أو ملف
+        else if (clipItem.uri != null) {
+            val mimeTypes = (0 until (desc?.mimeTypeCount ?: 0)).mapNotNull { desc?.getMimeType(it) }
+            clipboardDao?.addClipUri(timeStamp, false, latinIME, clipItem.uri, mimeTypes)
         }
     }
 
