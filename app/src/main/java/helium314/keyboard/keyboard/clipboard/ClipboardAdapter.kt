@@ -3,7 +3,10 @@
 package com.macboard.keyboard.keyboard.clipboard
 
 import android.annotation.SuppressLint
+import android.graphics.BitmapFactory
 import android.graphics.Typeface
+import android.os.Build
+import android.util.Size
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -68,6 +71,8 @@ class ClipboardAdapter(
             }
             thumbnailView = view.findViewById<ImageView>(R.id.clipboard_entry_thumbnail).apply {
                 visibility = View.GONE
+                adjustViewBounds = true
+                scaleType = ImageView.ScaleType.CENTER_CROP
             }
             contentView = view.findViewById<TextView>(R.id.clipboard_entry_content).apply {
                 typeface = itemTypeFace
@@ -87,18 +92,58 @@ class ClipboardAdapter(
             if (historyEntry?.filename != null && mime?.startsWith("image/") == true) {
                 thumbnailView.visibility = View.VISIBLE
                 contentView.visibility = View.GONE
-                try {
-                    thumbnailView.setImageURI(historyEntry.getContentUri(itemView.context))
-                } catch (e: Exception) {
+
+                val context = itemView.context
+                val uri = try { historyEntry.getContentUri(context) } catch (e: Exception) { null }
+
+                if (uri == null) {
                     thumbnailView.visibility = View.GONE
                     contentView.visibility = View.VISIBLE
                     contentView.text = historyEntry.text.take(1000)
+                    return
+                }
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    try {
+                        val thumb = context.contentResolver.loadThumbnail(uri, Size(144, 144), null)
+                        thumbnailView.setImageBitmap(thumb)
+                    } catch (t: Throwable) {
+                        loadBitmapAsync(uri, historyEntry)
+                    }
+                } else {
+                    loadBitmapAsync(uri, historyEntry)
                 }
             } else {
                 thumbnailView.visibility = View.GONE
                 contentView.visibility = View.VISIBLE
                 contentView.text = historyEntry?.text?.take(1000)
             }
+        }
+
+        private fun loadBitmapAsync(uri: android.net.Uri, historyEntry: ClipboardHistoryEntry) {
+            thumbnailView.setImageDrawable(null)
+            Thread {
+                var bmp: android.graphics.Bitmap? = null
+                try {
+                    val `is` = itemView.context.contentResolver.openInputStream(uri)
+                    bmp = BitmapFactory.decodeStream(`is`)
+                    `is`?.close()
+                } catch (e: Exception) {
+                    bmp = null
+                }
+
+                thumbnailView.post {
+                    if (bmp != null) {
+                        thumbnailView.setImageBitmap(bmp)
+                        thumbnailView.visibility = View.VISIBLE
+                        contentView.visibility = View.GONE
+                    } else {
+                        thumbnailView.visibility = View.GONE
+                        contentView.visibility = View.VISIBLE
+                        contentView.text = historyEntry.text.take(1000)
+                    }
+                }
+            }.start()
         }
 
         @SuppressLint("ClickableViewAccessibility")
