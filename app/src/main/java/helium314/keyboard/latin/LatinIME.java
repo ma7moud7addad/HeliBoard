@@ -2125,8 +2125,18 @@ public class LatinIME extends InputMethodService implements
                 if (type != null) mimeType = type;
             } catch (Exception ignored) {}
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
-                final EditorInfo editorInfo = getCurrentInputEditorInfo();
+            final EditorInfo editorInfo = getCurrentInputEditorInfo();
+            final String targetPackage = (editorInfo != null) ? editorInfo.packageName : null;
+
+            if (targetPackage != null) {
+                try {
+                    grantUriPermission(targetPackage, imageUri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                } catch (Exception e) {
+                    Log.w(TAG, "commitImage: grantUriPermission failed for " + targetPackage, e);
+                }
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1 && editorInfo != null) {
                 final ClipDescription description = new ClipDescription("HeliBoard image",
                         new String[]{mimeType});
                 final InputContentInfoCompat contentInfo = InputContentInfoCompat.wrap(
@@ -2138,18 +2148,49 @@ public class LatinIME extends InputMethodService implements
 
                 if (committed) {
                     Log.i(TAG, "commitImage: Success via commitContent");
+
+                    if (targetPackage != null) {
+                        try {
+                            final android.os.Handler h = new android.os.Handler(getMainLooper());
+                            h.postDelayed(() -> {
+                                try {
+                                    revokeUriPermission(imageUri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                                } catch (Exception ignored) {}
+                            }, 5000);
+                        } catch (Exception ignored) {}
+                    }
                     return;
                 }
             }
 
-            final android.content.ClipboardManager clipboard = 
-                (android.content.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+            final android.content.ClipboardManager clipboard =
+                    (android.content.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
             if (clipboard != null) {
-                final android.content.ClipData clip = 
-                    android.content.ClipData.newUri(getContentResolver(), "HeliBoard image", imageUri);
+                final android.content.ClipData clip =
+                        android.content.ClipData.newUri(getContentResolver(), "HeliBoard image", imageUri);
                 clipboard.setPrimaryClip(clip);
+
+                if (targetPackage != null) {
+                    try {
+                        grantUriPermission(targetPackage, imageUri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    } catch (Exception e) {
+                        Log.w(TAG, "commitImage: grantUriPermission failed for clipboard paste " + targetPackage, e);
+                    }
+                }
+
                 ic.performContextMenuAction(android.R.id.paste);
                 Log.i(TAG, "commitImage: Triggered paste via clipboard");
+
+                if (targetPackage != null) {
+                    try {
+                        final android.os.Handler h = new android.os.Handler(getMainLooper());
+                        h.postDelayed(() -> {
+                            try {
+                                revokeUriPermission(imageUri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                            } catch (Exception ignored) {}
+                        }, 5000);
+                    } catch (Exception ignored) {}
+                }
             }
         } catch (Exception e) {
             Log.w(TAG, "commitImage: Failed", e);
