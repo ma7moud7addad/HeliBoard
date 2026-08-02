@@ -21,6 +21,8 @@ import com.macboard.keyboard.latin.database.ClipboardDao
 import com.macboard.keyboard.latin.databinding.ClipboardSuggestionBinding
 import com.macboard.keyboard.latin.utils.InputTypeUtils
 import com.macboard.keyboard.latin.utils.ToolbarKey
+import com.macboard.keyboard.event.Event
+import com.macboard.keyboard.latin.common.Constants
 
 class ClipboardHistoryManager(
         val latinIME: LatinIME
@@ -75,7 +77,6 @@ class ClipboardHistoryManager(
                 clipboardDao?.addClipUri(timeStamp, false, latinIME, clipItem.uri, mimeTypes)
             }
         } catch (e: Throwable) {
-            // --- درع الحماية: يمنع الكيبورد من الموت عند بدء التشغيل ---
         }
     }
 
@@ -168,6 +169,27 @@ class ClipboardHistoryManager(
             latinIME.mHandler.postResumeSuggestions(false)
         }
         csv.isGone = true
+    }
+
+    // الخطة ب: اللصق الإجباري عن طريق حافظة النظام
+    fun pasteWithoutChangingClips(content: androidx.core.view.inputmethod.InputContentInfoCompat) {
+        val primaryClip = clipboardManager.primaryClip
+        val tempClip = android.content.ClipData(content.description, android.content.ClipData.Item(content.contentUri))
+        tempPrimaryClip = true
+        clipboardManager.setPrimaryClip(tempClip)
+        
+        latinIME.onEvent(Event.createSoftwareKeypressEvent(KeyCode.CLIPBOARD_PASTE, 0,
+            Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false))
+            
+        tempPrimaryClip = false
+        if (primaryClip == null) return
+        
+        latinIME.mHandler.postDelayed({
+            try {
+                clipboardManager.setPrimaryClip(primaryClip)
+            } catch (e: Exception) {
+            }
+        }, 500)
     }
 
     companion object {
