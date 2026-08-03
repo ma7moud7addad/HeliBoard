@@ -66,7 +66,7 @@ class ClipboardHistoryView @JvmOverloads constructor(
                 R.styleable.ClipboardHistoryView, defStyle, R.style.ClipboardHistoryView)
         pinIconId = clipboardViewAttr.getResourceId(R.styleable.ClipboardHistoryView_iconPinnedClip, 0)
         clipboardViewAttr.recycle()
-        @SuppressLint("UseKtx") 
+        @SuppressLint("UseKtx")
         val keyboardViewAttr = context.obtainStyledAttributes(attrs, R.styleable.KeyboardView, defStyle, R.style.KeyboardView)
         keyBackgroundId = keyboardViewAttr.getResourceId(R.styleable.KeyboardView_keyBackground, 0)
         keyboardViewAttr.recycle()
@@ -86,7 +86,7 @@ class ClipboardHistoryView @JvmOverloads constructor(
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private fun initialize() { 
+    private fun initialize() {
         if (this::clipboardAdapter.isInitialized) return
         val colors = Settings.getValues().mColors
         clipboardAdapter = ClipboardAdapter(clipboardLayoutParams, this).apply {
@@ -97,7 +97,7 @@ class ClipboardHistoryView @JvmOverloads constructor(
         clipboardRecyclerView = findViewById<ClipboardHistoryRecyclerView>(R.id.clipboard_list).apply {
             val colCount = resources.getInteger(R.integer.config_clipboard_keyboard_col_count)
             layoutManager = StaggeredGridLayoutManager(colCount, StaggeredGridLayoutManager.VERTICAL)
-            @Suppress("deprecation") 
+            @Suppress("deprecation")
             persistentDrawingCache = PERSISTENT_NO_CACHE
             clipboardLayoutParams.setListProperties(this)
             placeholderView = this@ClipboardHistoryView.placeholderView
@@ -228,50 +228,21 @@ class ClipboardHistoryView @JvmOverloads constructor(
         keyboardActionListener.onPressKey(KeyCode.NOT_SPECIFIED, 0, true, HapticEvent.NO_HAPTICS)
     }
 
+    // الدالة اللي اتعدلت عشان تبعت الصورة صح
     override fun onKeyUp(clipId: Long) {
         val clipContent = clipboardHistoryManager.getHistoryEntryContent(clipId) ?: return
-        
+
         if (clipContent.filename != null) {
-            try {
-                val contentInfo = clipContent.getContentInfo(context)
-                val latinIME = clipboardHistoryManager.latinIME
-                val editorInfo = latinIME.currentInputEditorInfo
-                val inputConnection = latinIME.currentInputConnection
-
-                if (contentInfo != null && editorInfo != null && inputConnection != null) {
-                    val editorMimeTypes = androidx.core.view.inputmethod.EditorInfoCompat.getContentMimeTypes(editorInfo)
-                    val contentMime = contentInfo.description.getMimeType(0)
-                    
-                    val isSupported = editorMimeTypes.any { it.equals(contentMime, ignoreCase = true) || it.startsWith("image/") }
-                    
-                    if (isSupported) {
-                        val targetPackage = editorInfo.packageName
-                        if (targetPackage != null) {
-                            try {
-                                context.grantUriPermission(targetPackage, contentInfo.contentUri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                            } catch (e: Exception) { }
-                        }
-
-                        androidx.core.view.inputmethod.InputConnectionCompat.commitContent(
-                            inputConnection,
-                            editorInfo,
-                            contentInfo,
-                            androidx.core.view.inputmethod.InputConnectionCompat.INPUT_CONTENT_GRANT_READ_URI_PERMISSION,
-                            null
-                        )
-                    } else {
-                        clipboardHistoryManager.pasteWithoutChangingClips(contentInfo)
-                    }
-                } else {
-                    keyboardActionListener.onTextInput(clipContent.text)
-                }
-            } catch (e: Exception) {
+            val contentInfo = clipContent.getContentInfo(context)
+            if (contentInfo != null) {
+                keyboardActionListener.onContent(contentInfo)
+            } else {
                 keyboardActionListener.onTextInput(clipContent.text)
             }
         } else {
             keyboardActionListener.onTextInput(clipContent.text)
         }
-        
+
         keyboardActionListener.onReleaseKey(KeyCode.NOT_SPECIFIED, false)
         if (Settings.getValues().mAlphaAfterClipHistoryEntry)
             keyboardActionListener.onCodeInput(KeyCode.ALPHA, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false)
