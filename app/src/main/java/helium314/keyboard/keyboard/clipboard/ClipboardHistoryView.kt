@@ -1,60 +1,291 @@
-@@
-     // --- التعديل النهائي والمدمر: دمج حلول الخبراء الثلاثة ---
-     override fun onKeyUp(clipId: Long) {
--        val clipContent = clipboardHistoryManager.getHistoryEntryContent(clipId) ?: return
--
--        if (clipContent.filename != null) {
--            try {
--                // 1. حل مشكلة الاسم الغلط (Authority Mismatch) اللي اكتشفها Copilot
--                val file = File(context.filesDir, "clipfiles/${clipContent.filename}")
--                val authority = "com.macboard.keyboard.latin.provider" // الاسم الصحيح 100% من الـ Manifest
--                val uri = androidx.core.content.FileProvider.getUriForFile(context, authority, file)
--
--                val latinIME = KeyboardSwitcher.getInstance().latinIME
--                if (latinIME != null && uri != null) {
--                    
--                    // 2. حل مشكلة الصلاحيات اللي اكتشفها Kimi (إعطاء تصريح إجباري للواتساب)
--                    val targetPackage = latinIME.currentInputEditorInfo?.packageName
--                    if (targetPackage != null) {
--                        context.grantUriPermission(targetPackage, uri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
--                    }
--
--                    // 3. إرسال الصورة باستخدام الدالة القوية بتاعتك اللي بتعمل اللصق الإجباري
--                    latinIME.commitImage(uri)
--                } else {
--                    keyboardActionListener.onTextInput(clipContent.text)
--                }
--            } catch (e: Exception) {
--                keyboardActionListener.onTextInput(clipContent.text)
--            }
--        } else {
--            keyboardActionListener.onTextInput(clipContent.text)
--        }
-+        val clipContent = clipboardHistoryManager.getHistoryEntryContent(clipId) ?: return
-+
-+        if (clipContent.filename != null) {
-+            try {
-+                val file = File(context.filesDir, "clipfiles/${clipContent.filename}")
-+                val uri = androidx.core.content.FileProvider.getUriForFile(
-+                    context,
-+                    "com.macboard.keyboard.latin.provider",
-+                    file
-+                )
-+
-+                val committed = try {
-+                    keyboardActionListener.commitImage(uri)
-+                } catch (e: Exception) {
-+                    false
-+                }
-+
-+                if (!committed) {
-+                    keyboardActionListener.onTextInput(clipContent.text.toString())
-+                }
-+            } catch (e: Exception) {
-+                keyboardActionListener.onTextInput(clipContent.text.toString())
-+            }
-+        } else {
-+            keyboardActionListener.onTextInput(clipContent.text.toString())
-+        }
-@@
- }
+// SPDX-License-Identifier: GPL-3.0-only
+
+package com.macboard.keyboard.keyboard.clipboard
+
+import android.annotation.SuppressLint
+import android.content.Context
+import android.content.SharedPreferences
+import android.util.AttributeSet
+import android.util.TypedValue
+import android.view.View
+import android.view.inputmethod.EditorInfo
+import android.widget.ImageButton
+import android.widget.LinearLayout
+import android.widget.TextView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import com.macboard.keyboard.event.HapticEvent
+import com.macboard.keyboard.keyboard.KeyboardActionListener
+import com.macboard.keyboard.keyboard.KeyboardId
+import com.macboard.keyboard.keyboard.KeyboardLayoutSet
+import com.macboard.keyboard.keyboard.KeyboardSwitcher
+import com.macboard.keyboard.keyboard.KeyboardTypeface
+import com.macboard.keyboard.keyboard.MainKeyboardView
+import com.macboard.keyboard.keyboard.PointerTracker
+import com.macboard.keyboard.keyboard.internal.KeyDrawParams
+import com.macboard.keyboard.keyboard.internal.KeyVisualAttributes
+import com.macboard.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode
+import com.macboard.keyboard.latin.AudioAndHapticFeedbackManager
+import com.macboard.keyboard.latin.ClipboardHistoryManager
+import com.macboard.keyboard.latin.R
+import com.macboard.keyboard.latin.common.ColorType
+import com.macboard.keyboard.latin.common.Constants
+import com.macboard.keyboard.latin.database.ClipboardDao
+import com.macboard.keyboard.latin.settings.Settings
+import com.macboard.keyboard.latin.utils.ResourceUtils
+import com.macboard.keyboard.latin.utils.ToolbarKey
+import com.macboard.keyboard.latin.utils.createToolbarKey
+import com.macboard.keyboard.latin.utils.getCodeForToolbarKey
+import com.macboard.keyboard.latin.utils.getCodeForToolbarKeyLongClick
+import com.macboard.keyboard.latin.utils.getEnabledClipboardToolbarKeys
+import com.macboard.keyboard.latin.utils.prefs
+import com.macboard.keyboard.latin.utils.setToolbarButtonsActivatedStateOnPrefChange
+import java.io.File
+
+@SuppressLint("CustomViewStyleable")
+class ClipboardHistoryView @JvmOverloads constructor(
+        context: Context,
+        attrs: AttributeSet?,
+        defStyle: Int = R.attr.clipboardHistoryViewStyle
+) : LinearLayout(context, attrs, defStyle), View.OnClickListener,
+    ClipboardDao.Listener, OnKeyEventListener,
+    View.OnLongClickListener, SharedPreferences.OnSharedPreferenceChangeListener {
+
+    private val clipboardLayoutParams = ClipboardLayoutParams(context)
+    private val pinIconId: Int
+    private val keyBackgroundId: Int
+
+    private lateinit var clipboardRecyclerView: ClipboardHistoryRecyclerView
+    private lateinit var placeholderView: TextView
+    private val toolbarKeys = mutableListOf<ImageButton>()
+    private lateinit var clipboardAdapter: ClipboardAdapter
+
+    lateinit var keyboardActionListener: KeyboardActionListener
+    private lateinit var clipboardHistoryManager: ClipboardHistoryManager
+
+    init {
+        val clipboardViewAttr = context.obtainStyledAttributes(attrs,
+                R.styleable.ClipboardHistoryView, defStyle, R.style.ClipboardHistoryView)
+        pinIconId = clipboardViewAttr.getResourceId(R.styleable.ClipboardHistoryView_iconPinnedClip, 0)
+        clipboardViewAttr.recycle()
+        @SuppressLint("UseKtx")
+        val keyboardViewAttr = context.obtainStyledAttributes(attrs, R.styleable.KeyboardView, defStyle, R.style.KeyboardView)
+        keyBackgroundId = keyboardViewAttr.getResourceId(R.styleable.KeyboardView_keyBackground, 0)
+        keyboardViewAttr.recycle()
+        if (Settings.getValues().mSecondaryStripVisible) {
+            getEnabledClipboardToolbarKeys(context.prefs())
+                .forEach { toolbarKeys.add(createToolbarKey(context, it)) }
+        }
+        fitsSystemWindows = true
+    }
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        val res = context.resources
+        val width = ResourceUtils.getKeyboardWidth(context, Settings.getValues()) + paddingLeft + paddingRight
+        val height = ResourceUtils.getSecondaryKeyboardHeight(res, Settings.getValues()) + paddingTop + paddingBottom
+        setMeasuredDimension(width, height)
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private fun initialize() {
+        if (this::clipboardAdapter.isInitialized) return
+        val colors = Settings.getValues().mColors
+        clipboardAdapter = ClipboardAdapter(clipboardLayoutParams, this).apply {
+            itemBackgroundId = keyBackgroundId
+            pinnedIconResId = pinIconId
+        }
+        placeholderView = findViewById(R.id.clipboard_empty_view)
+        clipboardRecyclerView = findViewById<ClipboardHistoryRecyclerView>(R.id.clipboard_list).apply {
+            val colCount = resources.getInteger(R.integer.config_clipboard_keyboard_col_count)
+            layoutManager = StaggeredGridLayoutManager(colCount, StaggeredGridLayoutManager.VERTICAL)
+            @Suppress("deprecation")
+            persistentDrawingCache = PERSISTENT_NO_CACHE
+            clipboardLayoutParams.setListProperties(this)
+            placeholderView = this@ClipboardHistoryView.placeholderView
+        }
+        val clipboardStrip = KeyboardSwitcher.getInstance().clipboardStrip
+        toolbarKeys.forEach {
+            clipboardStrip.addView(it)
+            it.setOnClickListener(this@ClipboardHistoryView)
+            it.setOnLongClickListener(this@ClipboardHistoryView)
+            colors.setColor(it, ColorType.TOOL_BAR_KEY)
+            colors.setBackground(it, ColorType.STRIP_BACKGROUND)
+        }
+    }
+
+    private fun setupClipKey(params: KeyDrawParams) {
+        clipboardAdapter.apply {
+            itemBackgroundId = keyBackgroundId
+            itemTypeFace = params.mTypeface
+            itemTextColor = params.mTextColor
+            itemTextSize = params.mLabelSize.toFloat()
+        }
+    }
+
+    private fun setupToolbarKeys() {
+        val toolbarKeyLayoutParams = LayoutParams(resources.getDimensionPixelSize(R.dimen.config_suggestions_strip_edge_key_width), LayoutParams.MATCH_PARENT)
+        toolbarKeys.forEach { it.layoutParams = toolbarKeyLayoutParams }
+    }
+
+    private fun setupBottomRowKeyboard(editorInfo: EditorInfo, listener: KeyboardActionListener) {
+        val keyboardView = findViewById<MainKeyboardView>(R.id.bottom_row_keyboard)
+        keyboardView.setKeyboardActionListener(listener)
+        PointerTracker.switchTo(keyboardView)
+        val kls = KeyboardLayoutSet.Builder.buildEmojiClipBottomRow(context, editorInfo)
+        val keyboard = kls.getKeyboard(KeyboardId.ELEMENT_CLIPBOARD_BOTTOM_ROW)
+        keyboardView.setKeyboard(keyboard)
+    }
+
+    fun setHardwareAcceleratedDrawingEnabled(enabled: Boolean) {
+        if (!enabled) return
+        setLayerType(LAYER_TYPE_HARDWARE, null)
+    }
+
+    fun startClipboardHistory(
+            historyManager: ClipboardHistoryManager,
+            keyVisualAttr: KeyVisualAttributes?,
+            editorInfo: EditorInfo,
+            keyboardActionListener: KeyboardActionListener
+    ) {
+        clipboardHistoryManager = historyManager
+        initialize()
+        setupToolbarKeys()
+        historyManager.prepareClipboardHistory()
+        historyManager.setHistoryChangeListener(this)
+        clipboardAdapter.clipboardHistoryManager = historyManager
+
+        val params = KeyDrawParams()
+        params.updateParams(clipboardLayoutParams.bottomRowKeyboardHeight, keyVisualAttr)
+        params.mLabelSize = (params.mLabelSize * 1.42f).toInt()
+        val settings = Settings.getInstance()
+        KeyboardTypeface.customTypeface()?.let { params.mTypeface = it }
+        setupClipKey(params)
+        setupBottomRowKeyboard(editorInfo, keyboardActionListener)
+
+        placeholderView.apply {
+            KeyboardTypeface.applyToTextView(this)
+            setTextColor(params.mTextColor)
+            setTextSize(TypedValue.COMPLEX_UNIT_PX, params.mLabelSize.toFloat() * 2)
+        }
+        clipboardRecyclerView.apply {
+            adapter = clipboardAdapter
+            val keyboardWidth = ResourceUtils.getKeyboardWidth(context, settings.current)
+            layoutParams.width = keyboardWidth
+            ClipboardLayoutParams(context).setListProperties(this)
+
+            val keyboardAttr = context.obtainStyledAttributes(
+                null, R.styleable.Keyboard, R.attr.keyboardStyle, R.style.Keyboard)
+            val leftPadding = (keyboardAttr.getFraction(R.styleable.Keyboard_keyboardLeftPadding,
+                keyboardWidth, keyboardWidth, 0f)
+                    * settings.current.mSidePaddingScale).toInt()
+            val rightPadding =  (keyboardAttr.getFraction(R.styleable.Keyboard_keyboardRightPadding,
+                keyboardWidth, keyboardWidth, 0f)
+                    * settings.current.mSidePaddingScale).toInt()
+            keyboardAttr.recycle()
+            setPadding(leftPadding, paddingTop, rightPadding, paddingBottom)
+        }
+
+        toolbarKeys.forEach { it.isEnabled = false; it.isEnabled = true }
+    }
+
+    fun stopClipboardHistory() {
+        if (!this::clipboardAdapter.isInitialized) return
+        clipboardRecyclerView.adapter = null
+        clipboardHistoryManager.setHistoryChangeListener(null)
+        clipboardAdapter.clipboardHistoryManager = null
+    }
+
+    override fun onClick(view: View) {
+        val tag = view.tag
+        if (tag is ToolbarKey) {
+            AudioAndHapticFeedbackManager.getInstance().performHapticAndAudioFeedback(KeyCode.NOT_SPECIFIED, this, HapticEvent.KEY_PRESS)
+            val code = getCodeForToolbarKey(tag)
+            if (code != KeyCode.UNSPECIFIED) {
+                keyboardActionListener.onCodeInput(code, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false)
+                return
+            }
+        }
+    }
+
+    override fun onLongClick(view: View): Boolean {
+        val tag = view.tag
+        if (tag is ToolbarKey) {
+            AudioAndHapticFeedbackManager.getInstance().performHapticAndAudioFeedback(KeyCode.NOT_SPECIFIED, this, HapticEvent.KEY_LONG_PRESS)
+            val longClickCode = getCodeForToolbarKeyLongClick(tag)
+            if (longClickCode != KeyCode.UNSPECIFIED) {
+                keyboardActionListener.onCodeInput(
+                    longClickCode,
+                    Constants.NOT_A_COORDINATE,
+                    Constants.NOT_A_COORDINATE,
+                    false
+                )
+            }
+            return true
+        }
+        return false
+    }
+
+    override fun onKeyDown(clipId: Long) {
+        keyboardActionListener.onPressKey(KeyCode.NOT_SPECIFIED, 0, true, HapticEvent.NO_HAPTICS)
+    }
+
+    // --- الدالة النضيفة اللي هتبعت الصورة ---
+    override fun onKeyUp(clipId: Long) {
+        val clipContent = clipboardHistoryManager.getHistoryEntryContent(clipId) ?: return
+
+        if (clipContent.filename != null) {
+            try {
+                val file = File(context.filesDir, "clipfiles/${clipContent.filename}")
+                val uri = androidx.core.content.FileProvider.getUriForFile(
+                    context,
+                    "com.macboard.keyboard.latin.provider",
+                    file
+                )
+
+                val committed = keyboardActionListener.commitImage(uri)
+                if (!committed) {
+                    keyboardActionListener.onTextInput(clipContent.text.toString())
+                }
+            } catch (e: Exception) {
+                keyboardActionListener.onTextInput(clipContent.text.toString())
+            }
+        } else {
+            keyboardActionListener.onTextInput(clipContent.text.toString())
+        }
+
+        keyboardActionListener.onReleaseKey(KeyCode.NOT_SPECIFIED, false)
+        if (Settings.getValues().mAlphaAfterClipHistoryEntry)
+            keyboardActionListener.onCodeInput(
+                KeyCode.ALPHA,
+                Constants.NOT_A_COORDINATE,
+                Constants.NOT_A_COORDINATE,
+                false
+            )
+    }
+    // ----------------------------------------
+
+    override fun onClipInserted(position: Int) {
+        clipboardAdapter.notifyItemInserted(position)
+        clipboardRecyclerView.smoothScrollToPosition(position)
+    }
+
+    override fun onClipsRemoved(position: Int, count: Int) {
+        clipboardAdapter.notifyItemRangeRemoved(position, count)
+    }
+
+    override fun onClipMoved(oldPosition: Int, newPosition: Int) {
+        clipboardAdapter.notifyItemMoved(oldPosition, newPosition)
+        clipboardAdapter.notifyItemChanged(newPosition)
+        if (newPosition < oldPosition) clipboardRecyclerView.smoothScrollToPosition(newPosition)
+    }
+
+    override fun onSharedPreferenceChanged(prefs: SharedPreferences?, key: String?) {
+        setToolbarButtonsActivatedStateOnPrefChange(KeyboardSwitcher.getInstance().clipboardStrip, key)
+
+        if (::clipboardHistoryManager.isInitialized && key == Settings.PREF_CLIPBOARD_HISTORY_PINNED_FIRST) {
+            Settings.getInstance().onSharedPreferenceChanged(prefs, key)
+            clipboardHistoryManager.sortHistoryEntries()
+            clipboardAdapter.notifyDataSetChanged()
+        }
+    }
+    }
