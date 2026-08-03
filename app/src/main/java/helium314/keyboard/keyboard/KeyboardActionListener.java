@@ -11,6 +11,7 @@ import android.view.KeyEvent;
 import com.macboard.keyboard.event.HapticEvent;
 import com.macboard.keyboard.latin.common.Constants;
 import com.macboard.keyboard.latin.common.InputPointers;
+import androidx.core.view.inputmethod.InputContentInfoCompat;
 
 public interface KeyboardActionListener {
     void onPressKey(int primaryCode, int repeatCount, boolean isSinglePointer, HapticEvent hapticEvent);
@@ -39,6 +40,9 @@ public interface KeyboardActionListener {
 
     // الدالة الجديدة المسؤولة عن إرسال الصور
     boolean commitImage(android.net.Uri uri);
+
+    // الدالة للتعامل مع محتوى الإدخال (الصور/ميديا) المرسلة عبر commitContent
+    void onContent(InputContentInfoCompat content);
 
     KeyboardActionListener EMPTY_LISTENER = new Adapter();
 
@@ -95,5 +99,9 @@ public interface KeyboardActionListener {
         // التنفيذ الافتراضي للدالة الجديدة
         @Override
         public boolean commitImage(android.net.Uri uri) { return false; }
+
+        // التنفيذ الافتراضي لدالة onContent
+        @Override
+        public void onContent(InputContentInfoCompat content) {}
     }
 }
