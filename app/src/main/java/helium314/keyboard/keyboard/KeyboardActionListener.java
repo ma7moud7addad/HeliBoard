@@ -7,6 +7,7 @@
 package com.macboard.keyboard.keyboard;
 
 import android.view.KeyEvent;
+import android.net.Uri;
 
 import com.macboard.keyboard.event.HapticEvent;
 import com.macboard.keyboard.latin.common.Constants;
@@ -40,6 +41,9 @@ public interface KeyboardActionListener {
     
     // الدالة الجديدة المسؤولة عن إرسال الصور
     void onContent(androidx.core.view.inputmethod.InputContentInfoCompat content);
+
+    // New API: commit an image URI. Return true on success, false otherwise.
+    boolean commitImage(android.net.Uri uri);
 
     KeyboardActionListener EMPTY_LISTENER = new Adapter();
 
@@ -94,5 +98,7 @@ public interface KeyboardActionListener {
         public void onExitCursorMode() {}
         @Override
         public void onContent(androidx.core.view.inputmethod.InputContentInfoCompat content) {}
+        @Override
+        public boolean commitImage(android.net.Uri uri) { return false; }
     }
 }
