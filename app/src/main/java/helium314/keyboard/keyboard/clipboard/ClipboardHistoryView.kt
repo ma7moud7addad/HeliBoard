@@ -228,15 +228,20 @@ class ClipboardHistoryView @JvmOverloads constructor(
         keyboardActionListener.onPressKey(KeyCode.NOT_SPECIFIED, 0, true, HapticEvent.NO_HAPTICS)
     }
 
-    // الدالة اللي اتعدلت عشان تبعت الصورة صح
+    // --- التعديل السحري: استخدام دالة commitImage الخاصة بك ---
     override fun onKeyUp(clipId: Long) {
         val clipContent = clipboardHistoryManager.getHistoryEntryContent(clipId) ?: return
 
         if (clipContent.filename != null) {
-            val contentInfo = clipContent.getContentInfo(context)
-            if (contentInfo != null) {
-                keyboardActionListener.onContent(contentInfo)
-            } else {
+            try {
+                val uri = clipContent.getContentUri(context)
+                if (uri != null) {
+                    // إرسال الصورة باستخدام الدالة القوية بتاعتك اللي بتدي تصريح للواتساب
+                    clipboardHistoryManager.latinIME.commitImage(uri)
+                } else {
+                    keyboardActionListener.onTextInput(clipContent.text)
+                }
+            } catch (e: Exception) {
                 keyboardActionListener.onTextInput(clipContent.text)
             }
         } else {
@@ -247,6 +252,7 @@ class ClipboardHistoryView @JvmOverloads constructor(
         if (Settings.getValues().mAlphaAfterClipHistoryEntry)
             keyboardActionListener.onCodeInput(KeyCode.ALPHA, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false)
     }
+    // --- نهاية التعديل ---
 
     override fun onClipInserted(position: Int) {
         clipboardAdapter.notifyItemInserted(position)
