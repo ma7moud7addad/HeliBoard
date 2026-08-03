@@ -39,6 +39,7 @@ import com.macboard.keyboard.latin.utils.getCodeForToolbarKeyLongClick
 import com.macboard.keyboard.latin.utils.getEnabledClipboardToolbarKeys
 import com.macboard.keyboard.latin.utils.prefs
 import com.macboard.keyboard.latin.utils.setToolbarButtonsActivatedStateOnPrefChange
+import java.io.File
 
 @SuppressLint("CustomViewStyleable")
 class ClipboardHistoryView @JvmOverloads constructor(
@@ -66,7 +67,7 @@ class ClipboardHistoryView @JvmOverloads constructor(
                 R.styleable.ClipboardHistoryView, defStyle, R.style.ClipboardHistoryView)
         pinIconId = clipboardViewAttr.getResourceId(R.styleable.ClipboardHistoryView_iconPinnedClip, 0)
         clipboardViewAttr.recycle()
-        @SuppressLint("UseKtx") 
+        @SuppressLint("UseKtx")
         val keyboardViewAttr = context.obtainStyledAttributes(attrs, R.styleable.KeyboardView, defStyle, R.style.KeyboardView)
         keyBackgroundId = keyboardViewAttr.getResourceId(R.styleable.KeyboardView_keyBackground, 0)
         keyboardViewAttr.recycle()
@@ -86,7 +87,7 @@ class ClipboardHistoryView @JvmOverloads constructor(
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private fun initialize() { 
+    private fun initialize() {
         if (this::clipboardAdapter.isInitialized) return
         val colors = Settings.getValues().mColors
         clipboardAdapter = ClipboardAdapter(clipboardLayoutParams, this).apply {
@@ -97,7 +98,7 @@ class ClipboardHistoryView @JvmOverloads constructor(
         clipboardRecyclerView = findViewById<ClipboardHistoryRecyclerView>(R.id.clipboard_list).apply {
             val colCount = resources.getInteger(R.integer.config_clipboard_keyboard_col_count)
             layoutManager = StaggeredGridLayoutManager(colCount, StaggeredGridLayoutManager.VERTICAL)
-            @Suppress("deprecation") 
+            @Suppress("deprecation")
             persistentDrawingCache = PERSISTENT_NO_CACHE
             clipboardLayoutParams.setListProperties(this)
             placeholderView = this@ClipboardHistoryView.placeholderView
@@ -228,16 +229,32 @@ class ClipboardHistoryView @JvmOverloads constructor(
         keyboardActionListener.onPressKey(KeyCode.NOT_SPECIFIED, 0, true, HapticEvent.NO_HAPTICS)
     }
 
-    // --- التعديل النهائي: توجيه الصورة للنظام الذكي اللي بنيناه ---
+    // --- التعديل النهائي والمدمر: دمج حلول الخبراء الثلاثة ---
     override fun onKeyUp(clipId: Long) {
         val clipContent = clipboardHistoryManager.getHistoryEntryContent(clipId) ?: return
 
         if (clipContent.filename != null) {
-            val contentInfo = clipContent.getContentInfo(context)
-            if (contentInfo != null) {
-                // هنا بنبعت الصورة للنظام الذكي اللي بيجبر الواتساب يقبلها
-                keyboardActionListener.onContent(contentInfo)
-            } else {
+            try {
+                // 1. حل مشكلة الاسم الغلط (Authority Mismatch) اللي اكتشفها Copilot
+                val file = File(context.filesDir, "clipfiles/${clipContent.filename}")
+                val authority = "com.macboard.keyboard.latin.provider" // الاسم الصحيح 100% من الـ Manifest
+                val uri = androidx.core.content.FileProvider.getUriForFile(context, authority, file)
+
+                val latinIME = KeyboardSwitcher.getInstance().latinIME
+                if (latinIME != null && uri != null) {
+                    
+                    // 2. حل مشكلة الصلاحيات اللي اكتشفها Kimi (إعطاء تصريح إجباري للواتساب)
+                    val targetPackage = latinIME.currentInputEditorInfo?.packageName
+                    if (targetPackage != null) {
+                        context.grantUriPermission(targetPackage, uri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    }
+
+                    // 3. إرسال الصورة باستخدام الدالة القوية بتاعتك اللي بتعمل اللصق الإجباري
+                    latinIME.commitImage(uri)
+                } else {
+                    keyboardActionListener.onTextInput(clipContent.text)
+                }
+            } catch (e: Exception) {
                 keyboardActionListener.onTextInput(clipContent.text)
             }
         } else {
