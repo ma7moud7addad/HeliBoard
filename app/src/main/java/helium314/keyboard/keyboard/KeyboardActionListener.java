@@ -11,122 +11,35 @@ import android.view.KeyEvent;
 import com.macboard.keyboard.event.HapticEvent;
 import com.macboard.keyboard.latin.common.Constants;
 import com.macboard.keyboard.latin.common.InputPointers;
+import androidx.core.view.inputmethod.InputContentInfoCompat;
 
 public interface KeyboardActionListener {
-    /**
-     * Called when the user presses a key. This is sent before the {@link #onCodeInput} is called.
-     * For keys that repeat, this is only called once.
-     *
-     * @param primaryCode the unicode of the key being pressed. If the touch is not on a valid key,
-     *            the value will be zero.
-     * @param repeatCount how many times the key was repeated. Zero if it is the first press.
-     * @param isSinglePointer true if pressing has occurred while no other key is being pressed.
-     * @param hapticEvent the type of haptic feedback to perform.
-     */
     void onPressKey(int primaryCode, int repeatCount, boolean isSinglePointer, HapticEvent hapticEvent);
-
     void onLongPressKey(int primaryCode);
-
-    /**
-     * Called when the user releases a key. This is sent after the {@link #onCodeInput} is called.
-     * For keys that repeat, this is only called once.
-     *
-     * @param primaryCode the code of the key that was released
-     * @param withSliding true if releasing has occurred because the user slid finger from the key
-     *             to other key without releasing the finger.
-     */
     void onReleaseKey(int primaryCode, boolean withSliding);
-
-    /** For handling hardware key presses. Returns whether the event was handled. */
     boolean onKeyDown(int keyCode, KeyEvent keyEvent);
-
-    /** For handling hardware key presses. Returns whether the event was handled. */
     boolean onKeyUp(int keyCode, KeyEvent keyEvent);
-
-    /**
-     * Send a key code to the listener.
-     *
-     * @param primaryCode this is the code of the key that was pressed
-     * @param x x-coordinate pixel of touched event. If onCodeInput is not called by
-     *            {@link PointerTracker} or so, the value should be
-     *            {@link Constants#NOT_A_COORDINATE}. If it's called on insertion from the
-     *            suggestion strip, it should be {@link Constants#SUGGESTION_STRIP_COORDINATE}.
-     * @param y y-coordinate pixel of touched event. If #onCodeInput is not called by
-     *            {@link PointerTracker} or so, the value should be
-     *            {@link Constants#NOT_A_COORDINATE}.If it's called on insertion from the
-     *            suggestion strip, it should be {@link Constants#SUGGESTION_STRIP_COORDINATE}.
-     * @param isKeyRepeat true if this is a key repeat, false otherwise
-     */
-    // TODO: change this to send an Event object instead
     void onCodeInput(int primaryCode, int x, int y, boolean isKeyRepeat);
-
-    /**
-     * Sends a string of characters to the listener.
-     *
-     * @param text the string of characters to be registered.
-     */
     void onTextInput(String text);
-
-    /**
-     * Called when user started batch input.
-     */
     void onStartBatchInput();
-
-    /**
-     * Sends the ongoing batch input points data.
-     * @param batchPointers the batch input points representing the user input
-     */
     void onUpdateBatchInput(InputPointers batchPointers);
-
-    /**
-     * Sends the final batch input points data.
-     *
-     * @param batchPointers the batch input points representing the user input
-     */
     void onEndBatchInput(InputPointers batchPointers);
-
     void onCancelBatchInput();
-
-    /**
-     * Called when user released a finger outside any key.
-     */
     void onCancelInput();
-
-    /**
-     * Called when user finished sliding key input.
-     */
     void onFinishSlidingInput();
-
-    /**
-     * Send a non-"code input" custom request to the listener.
-     * @return true if the request has been consumed, false otherwise.
-     */
     boolean onCustomRequest(int requestCode);
-
-    /**
-     * Called when the user performs a horizontal or vertical swipe gesture
-     * on the space bar.
-     */
     boolean onHorizontalSpaceSwipe(int steps);
     boolean onVerticalSpaceSwipe(int steps);
     void onEndSpaceSwipe();
     boolean toggleNumpad(boolean withSliding, boolean forceReturnToAlpha);
-
     void onMoveDeletePointer(int steps);
     void onUpWithDeletePointerActive();
     void resetMetaState();
-
-    // --- بداية تعديل MacBoard (وضع تحريك المؤشر بالـ Long Press) ---
-    /**
-     * Called when user enters cursor movement mode via long press on space bar.
-     */
     void onEnterCursorMode();
-
-    /**
-     * Called when user exits cursor movement mode.
-     */
     void onExitCursorMode();
-    // --- نهاية التعديل ---
+    
+    // الدالة الجديدة المسؤولة عن إرسال الصور
+    void onContent(androidx.core.view.inputmethod.InputContentInfoCompat content);
 
     KeyboardActionListener EMPTY_LISTENER = new Adapter();
 
@@ -160,21 +73,13 @@ public interface KeyboardActionListener {
         @Override
         public void onFinishSlidingInput() {}
         @Override
-        public boolean onCustomRequest(int requestCode) {
-            return false;
-        }
+        public boolean onCustomRequest(int requestCode) { return false; }
         @Override
-        public boolean onHorizontalSpaceSwipe(int steps) {
-            return false;
-        }
+        public boolean onHorizontalSpaceSwipe(int steps) { return false; }
         @Override
-        public boolean onVerticalSpaceSwipe(int steps) {
-            return false;
-        }
+        public boolean onVerticalSpaceSwipe(int steps) { return false; }
         @Override
-        public boolean toggleNumpad(boolean withSliding, boolean forceReturnToAlpha) {
-            return false;
-        }
+        public boolean toggleNumpad(boolean withSliding, boolean forceReturnToAlpha) { return false; }
         @Override
         public void onEndSpaceSwipe() {}
         @Override
@@ -183,12 +88,11 @@ public interface KeyboardActionListener {
         public void onUpWithDeletePointerActive() {}
         @Override
         public void resetMetaState() {}
-
-        // --- بداية تعديل MacBoard (وضع تحريك المؤشر بالـ Long Press) ---
         @Override
         public void onEnterCursorMode() {}
         @Override
         public void onExitCursorMode() {}
-        // --- نهاية التعديل ---
+        @Override
+        public void onContent(androidx.core.view.inputmethod.InputContentInfoCompat content) {}
     }
 }
