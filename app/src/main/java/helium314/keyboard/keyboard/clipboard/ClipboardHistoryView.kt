@@ -66,7 +66,7 @@ class ClipboardHistoryView @JvmOverloads constructor(
                 R.styleable.ClipboardHistoryView, defStyle, R.style.ClipboardHistoryView)
         pinIconId = clipboardViewAttr.getResourceId(R.styleable.ClipboardHistoryView_iconPinnedClip, 0)
         clipboardViewAttr.recycle()
-        @SuppressLint("UseKtx")
+        @SuppressLint("UseKtx") 
         val keyboardViewAttr = context.obtainStyledAttributes(attrs, R.styleable.KeyboardView, defStyle, R.style.KeyboardView)
         keyBackgroundId = keyboardViewAttr.getResourceId(R.styleable.KeyboardView_keyBackground, 0)
         keyboardViewAttr.recycle()
@@ -86,7 +86,7 @@ class ClipboardHistoryView @JvmOverloads constructor(
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private fun initialize() {
+    private fun initialize() { 
         if (this::clipboardAdapter.isInitialized) return
         val colors = Settings.getValues().mColors
         clipboardAdapter = ClipboardAdapter(clipboardLayoutParams, this).apply {
@@ -97,7 +97,7 @@ class ClipboardHistoryView @JvmOverloads constructor(
         clipboardRecyclerView = findViewById<ClipboardHistoryRecyclerView>(R.id.clipboard_list).apply {
             val colCount = resources.getInteger(R.integer.config_clipboard_keyboard_col_count)
             layoutManager = StaggeredGridLayoutManager(colCount, StaggeredGridLayoutManager.VERTICAL)
-            @Suppress("deprecation")
+            @Suppress("deprecation") 
             persistentDrawingCache = PERSISTENT_NO_CACHE
             clipboardLayoutParams.setListProperties(this)
             placeholderView = this@ClipboardHistoryView.placeholderView
@@ -228,20 +228,16 @@ class ClipboardHistoryView @JvmOverloads constructor(
         keyboardActionListener.onPressKey(KeyCode.NOT_SPECIFIED, 0, true, HapticEvent.NO_HAPTICS)
     }
 
-    // --- التعديل السحري: استخدام دالة commitImage الخاصة بك ---
+    // --- التعديل النهائي: توجيه الصورة للنظام الذكي اللي بنيناه ---
     override fun onKeyUp(clipId: Long) {
         val clipContent = clipboardHistoryManager.getHistoryEntryContent(clipId) ?: return
 
         if (clipContent.filename != null) {
-            try {
-                val uri = clipContent.getContentUri(context)
-                if (uri != null) {
-                    // إرسال الصورة باستخدام الدالة القوية بتاعتك اللي بتدي تصريح للواتساب
-                    clipboardHistoryManager.latinIME.commitImage(uri)
-                } else {
-                    keyboardActionListener.onTextInput(clipContent.text)
-                }
-            } catch (e: Exception) {
+            val contentInfo = clipContent.getContentInfo(context)
+            if (contentInfo != null) {
+                // هنا بنبعت الصورة للنظام الذكي اللي بيجبر الواتساب يقبلها
+                keyboardActionListener.onContent(contentInfo)
+            } else {
                 keyboardActionListener.onTextInput(clipContent.text)
             }
         } else {
