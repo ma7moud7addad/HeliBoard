@@ -229,7 +229,7 @@ class ClipboardHistoryView @JvmOverloads constructor(
         keyboardActionListener.onPressKey(KeyCode.NOT_SPECIFIED, 0, true, HapticEvent.NO_HAPTICS)
     }
 
-    // --- التعديل الصحيح: استخدام keyboardActionListener.commitImage ---
+    // --- التعديل النهائي: توجيه الصورة للنظام الذكي اللي بنيناه ---
     override fun onKeyUp(clipId: Long) {
         val clipContent = clipboardHistoryManager.getHistoryEntryContent(clipId) ?: return
 
@@ -239,16 +239,19 @@ class ClipboardHistoryView @JvmOverloads constructor(
                 val authority = "${context.packageName}.provider"
                 val uri = androidx.core.content.FileProvider.getUriForFile(context, authority, file)
 
-                // استخدام الدالة اللي ضفناها في KeyboardActionListener
-                val committed = keyboardActionListener.commitImage(uri)
-                if (!committed) {
-                    keyboardActionListener.onTextInput(clipContent.text.toString())
-                }
+                // تجهيز الصورة للإرسال بالطريقة الرسمية
+                val mime = clipContent.mimeTypes?.firstOrNull() ?: "image/*"
+                val desc = android.content.ClipDescription("clipboard_image", arrayOf(mime))
+                val contentInfo = androidx.core.view.inputmethod.InputContentInfoCompat(uri, desc, null)
+
+                // إرسالها للنظام الذكي اللي بيقرر يبعتها مباشر ولا لصق إجباري
+                keyboardActionListener.onContent(contentInfo)
+
             } catch (e: Exception) {
-                keyboardActionListener.onTextInput(clipContent.text.toString())
+                keyboardActionListener.onTextInput(clipContent.text)
             }
         } else {
-            keyboardActionListener.onTextInput(clipContent.text.toString())
+            keyboardActionListener.onTextInput(clipContent.text)
         }
 
         keyboardActionListener.onReleaseKey(KeyCode.NOT_SPECIFIED, false)
