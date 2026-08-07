@@ -235,32 +235,33 @@ class ClipboardHistoryView @JvmOverloads constructor(
 
         if (clipContent.filename != null) {
             try {
-                val file = File(context.filesDir, "clipfiles/${clipContent.filename}")
-                val uri = androidx.core.content.FileProvider.getUriForFile(
-                    context,
-                    "com.macboard.keyboard.latin.provider",
-                    file
-                )
+                val file = java.io.File(context.filesDir, "clipfiles/${clipContent.filename}")
+                
+                // التعديل السحري: الكيبورد هيجيب اسم التصريح أوتوماتيك مستحيل يغلط فيه
+                val authority = "${context.packageName}.provider"
+                val uri = androidx.core.content.FileProvider.getUriForFile(context, authority, file)
 
-                val committed = keyboardActionListener.commitImage(uri)
-                if (!committed) {
-                    keyboardActionListener.onTextInput(clipContent.text.toString())
+                val latinIME = KeyboardSwitcher.getInstance().latinIME
+                if (latinIME != null && uri != null) {
+                    val targetPackage = latinIME.currentInputEditorInfo?.packageName
+                    if (targetPackage != null) {
+                        context.grantUriPermission(targetPackage, uri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    }
+                    latinIME.commitImage(uri)
+                } else {
+                    keyboardActionListener.onTextInput(clipContent.text)
                 }
             } catch (e: Exception) {
-                keyboardActionListener.onTextInput(clipContent.text.toString())
+                android.util.Log.e("ClipboardHistoryView", "Error sending image", e)
+                keyboardActionListener.onTextInput(clipContent.text)
             }
         } else {
-            keyboardActionListener.onTextInput(clipContent.text.toString())
+            keyboardActionListener.onTextInput(clipContent.text)
         }
 
         keyboardActionListener.onReleaseKey(KeyCode.NOT_SPECIFIED, false)
         if (Settings.getValues().mAlphaAfterClipHistoryEntry)
-            keyboardActionListener.onCodeInput(
-                KeyCode.ALPHA,
-                Constants.NOT_A_COORDINATE,
-                Constants.NOT_A_COORDINATE,
-                false
-            )
+            keyboardActionListener.onCodeInput(KeyCode.ALPHA, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false)
     }
     // ----------------------------------------
 
