@@ -39,6 +39,7 @@ import com.macboard.keyboard.latin.utils.getCodeForToolbarKeyLongClick
 import com.macboard.keyboard.latin.utils.getEnabledClipboardToolbarKeys
 import com.macboard.keyboard.latin.utils.prefs
 import com.macboard.keyboard.latin.utils.setToolbarButtonsActivatedStateOnPrefChange
+import java.io.File
 
 @SuppressLint("CustomViewStyleable")
 class ClipboardHistoryView @JvmOverloads constructor(
@@ -228,24 +229,33 @@ class ClipboardHistoryView @JvmOverloads constructor(
         keyboardActionListener.onPressKey(KeyCode.NOT_SPECIFIED, 0, true, HapticEvent.NO_HAPTICS)
     }
 
-    // --- الكود الأصلي 100% بدون أي هبد أو اختراعات ---
+    // --- التعديل السحري: استخدام دالة commitImage الخاصة بك ---
     override fun onKeyUp(clipId: Long) {
-        val clipContent = clipboardHistoryManager.getHistoryEntryContent(clipId)
-        if (clipContent?.filename != null) {
-            val contentInfo = clipContent.getContentInfo(context)
-            if (contentInfo != null) {
-                keyboardActionListener.onContent(contentInfo)
-            } else {
+        val clipContent = clipboardHistoryManager.getHistoryEntryContent(clipId) ?: return
+
+        if (clipContent.filename != null) {
+            try {
+                val file = File(context.filesDir, "clipfiles/${clipContent.filename}")
+                val authority = context.getString(R.string.clipboard_provider_authority)
+                val uri = androidx.core.content.FileProvider.getUriForFile(context, authority, file)
+
+                // إرسال الصورة باستخدام الدالة القوية بتاعتك اللي بتدي تصريح للواتساب
+                val committed = keyboardActionListener.commitImage(uri)
+                if (!committed) {
+                    keyboardActionListener.onTextInput(clipContent.text)
+                }
+            } catch (e: Exception) {
                 keyboardActionListener.onTextInput(clipContent.text)
             }
         } else {
-            keyboardActionListener.onTextInput(clipContent?.text)
+            keyboardActionListener.onTextInput(clipContent.text)
         }
+
         keyboardActionListener.onReleaseKey(KeyCode.NOT_SPECIFIED, false)
         if (Settings.getValues().mAlphaAfterClipHistoryEntry)
             keyboardActionListener.onCodeInput(KeyCode.ALPHA, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false)
     }
-    // -------------------------------------------------
+    // --- نهاية التعديل ---
 
     override fun onClipInserted(position: Int) {
         clipboardAdapter.notifyItemInserted(position)
