@@ -1118,7 +1118,7 @@ New dictionary:
     <string name="clipboard_history_files">Add images and other files to clipboard history</string>
     <!-- Preferences item for selecting maximum combined size of clipboard history files -->
     <string name="clipboard_history_max_file_size">Clipboard size limit</string>
-
+    <string name="clipboard_provider_authority" translatable="false">com.macboard.keyboard.latin.provider</string>
 
 
     <!-- new strings should go above the section for gesture data gathering -->
