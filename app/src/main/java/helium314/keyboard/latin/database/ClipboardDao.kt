@@ -65,85 +65,92 @@ class ClipboardDao private constructor(private val db: Database) {
     }
 
     fun addClipUri(timestamp: Long, pinned: Boolean, context: Context, uri: Uri, mimeTypes: List<String>) {
-        clearOldClips()
-        val prefs = context.prefs()
-        if (!prefs.getBoolean(Settings.PREF_CLIPBOARD_USE_FILES, true)) return
-        val maxMb = prefs.getInt(Settings.PREF_CLIPBOARD_FILES_SIZE_LIMIT, 10)
-
-        var size: Long? = null
         try {
-            context.contentResolver.query(uri, arrayOf(OpenableColumns.SIZE), null, null, null)?.use { c ->
-                if (c.moveToFirst()) {
-                    val sizeIndex = c.getColumnIndex(OpenableColumns.SIZE)
-                    if (sizeIndex != -1) {
-                        size = c.getLong(sizeIndex)
+            clearOldClips()
+            val prefs = context.prefs()
+            if (!prefs.getBoolean(Settings.PREF_CLIPBOARD_USE_FILES, true)) return
+            val maxMb = prefs.getInt(Settings.PREF_CLIPBOARD_FILES_SIZE_LIMIT, 10)
+
+            var size: Long? = null
+            try {
+                context.contentResolver.query(uri, arrayOf(OpenableColumns.SIZE), null, null, null)?.use { c ->
+                    if (c.moveToFirst()) {
+                        val sizeIndex = c.getColumnIndex(OpenableColumns.SIZE)
+                        if (sizeIndex != -1) {
+                            size = c.getLong(sizeIndex)
+                        }
                     }
                 }
+            } catch (e: Exception) {
+                Log.w(TAG, "error checking clip size", e)
             }
-        } catch (e: Exception) {
-            Log.w(TAG, "error checking clip size", e)
-        }
 
-        if (size != null && size!! > maxMb * 1024L * 1024L) return
+            if (size != null && size!! > maxMb * 1024L * 1024L) return
 
-        val input = try {
-            context.contentResolver.openInputStream(uri) ?: return
-        } catch (e: Exception) {
-            Log.w(TAG, "error opening input stream", e)
-            return
-        }
+            val input = try {
+                context.contentResolver.openInputStream(uri) ?: return
+            } catch (e: Exception) {
+                Log.w(TAG, "error opening input stream", e)
+                return
+            }
 
-        val digest = MessageDigest.getInstance("SHA-256")
-        val outDir = File(context.filesDir, "clipfiles")
-        if (!outDir.exists()) outDir.mkdirs()
+            val digest = MessageDigest.getInstance("SHA-256")
+            val outDir = File(context.filesDir, "clipfiles")
+            if (!outDir.exists()) outDir.mkdirs()
 
-        val buffer = ByteArray(8192)
-        val temp = ByteArrayOutputStream()
-        var read: Int
-        try {
-            while (input.read(buffer).also { read = it } != -1) {
-                digest.update(buffer, 0, read)
-                temp.write(buffer, 0, read)
-                if (maxMb > 0 && temp.size() > maxMb * 1024L * 1024L) {
-                    input.close()
+            val buffer = ByteArray(8192)
+            val temp = ByteArrayOutputStream()
+            var read: Int
+            try {
+                while (input.read(buffer).also { read = it } != -1) {
+                    digest.update(buffer, 0, read)
+                    temp.write(buffer, 0, read)
+                    if (maxMb > 0 && temp.size() > maxMb * 1024L * 1024L) {
+                        input.close()
+                        return
+                    }
+                }
+                input.close()
+            } catch (e: Exception) {
+                Log.w(TAG, "error reading/writing stream", e)
+                return
+            }
+
+            // --- التعديل الآمن 100% لمعرفة امتداد الصورة ---
+            val mimeType = mimeTypes.firstOrNull()?.lowercase() ?: "image/png"
+            val extension = when {
+                mimeType.contains("jpeg") || mimeType.contains("jpg") -> "jpg"
+                mimeType.contains("gif") -> "gif"
+                mimeType.contains("webp") -> "webp"
+                else -> "png"
+            }
+            val filename = digest.digest().joinToString("") { "%02x".format(it) } + "." + extension
+            // ------------------------------------------------
+
+            val dest = File(outDir, filename)
+            if (!dest.exists()) {
+                try {
+                    dest.writeBytes(temp.toByteArray())
+                } catch (e: Exception) {
+                    Log.w(TAG, "error saving file", e)
                     return
                 }
             }
-            input.close()
-        } catch (e: Exception) {
-            Log.w(TAG, "error reading/writing stream", e)
-            return
-        }
 
-        // --- التعديل السحري: إضافة امتداد الملف (png أو jpg) ---
-        val mimeType = mimeTypes.firstOrNull() ?: "image/png"
-        var extension = android.webkit.MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType)
-        if (extension.isNullOrEmpty()) {
-            extension = if (mimeType.contains("jpeg") || mimeType.contains("jpg")) "jpg" else "png"
-        }
-        val filename = digest.digest().joinToString("") { "%02x".format(it) } + "." + extension
-        // -------------------------------------------------------
-
-        val dest = File(outDir, filename)
-        if (!dest.exists()) {
-            try {
-                dest.writeBytes(temp.toByteArray())
-            } catch (e: Exception) {
-                Log.w(TAG, "error saving file", e)
+            val existingIndex = cache.indexOfFirst { it.filename == filename }
+            if (existingIndex >= 0) {
+                if (cache[existingIndex].timeStamp != timestamp) {
+                    updateTimestampAt(existingIndex, timestamp)
+                }
                 return
             }
-        }
 
-        val existingIndex = cache.indexOfFirst { it.filename == filename }
-        if (existingIndex >= 0) {
-            if (cache[existingIndex].timeStamp != timestamp) {
-                updateTimestampAt(existingIndex, timestamp)
-            }
-            return
+            val mimeJoined = mimeTypes.joinToString("§")
+            insertNewEntry(timestamp, pinned, "", filename, mimeJoined)
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Fatal error in addClipUri", e)
         }
-
-        val mimeJoined = mimeTypes.joinToString("§")
-        insertNewEntry(timestamp, pinned, "", filename, mimeJoined)
     }
 
     private fun insertNewEntry(timestamp: Long, pinned: Boolean, text: String?, filename: String? = null, mimeTypesJoined: String? = null) {
