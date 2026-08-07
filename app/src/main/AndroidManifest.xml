@@ -17,8 +17,6 @@ SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"  android:maxSdkVersion="32" />
 
-
-
     <application android:label="@string/english_ime_name"
             android:name="com.macboard.keyboard.latin.App"
             android:icon="@drawable/macboard"
@@ -123,15 +121,16 @@ SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
                 android:resource="@xml/gesture_data_path"/>
         </provider>
         
-        <!-- التصريح الخاص بصور الحافظة -->
+        <!-- التصريح المخصص لصور الحافظة -->
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.provider"
-            android:exported="false"
-            android:grantUriPermissions="true">
+            android:authorities="@string/clipboard_provider_authority"
+            android:enabled="true"
+            android:grantUriPermissions="true"
+            android:exported="false">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths" />
+                android:resource="@xml/clipboard_provider_path"/>
         </provider>
 
     </application>
