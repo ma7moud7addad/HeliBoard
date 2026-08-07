@@ -66,16 +66,25 @@ class ClipboardHistoryManager(
             val clipItem = clipData.getItemAt(0) ?: return
             val timeStamp = ClipboardManagerCompat.getClipTimestamp(clipData)
 
+            // --- التعديل السحري: الفحص عن الصورة الأول عشان ميتخدعش بالنص ---
+            val hasImage = (0 until (desc?.mimeTypeCount ?: 0)).any { i ->
+                desc?.getMimeType(i)?.startsWith("image/") == true
+            }
+
+            if (hasImage && clipItem.uri != null) {
+                val mimeTypes = (0 until (desc?.mimeTypeCount ?: 0)).mapNotNull { desc?.getMimeType(it) }
+                clipboardDao?.addClipUri(timeStamp, false, latinIME, clipItem.uri, mimeTypes)
+                return // نوقف هنا عشان ميحفظهاش كنص
+            }
+            // -----------------------------------------------------------------
+
+            // لو مفيش صورة، نحفظه كنص
             if (desc?.hasMimeType("text/*") == true) {
                 val content = clipItem.coerceToText(latinIME)
                 if (!TextUtils.isEmpty(content)) {
                     clipboardDao?.addClip(timeStamp, false, content.toString())
                 }
             } 
-            else if (clipItem.uri != null) {
-                val mimeTypes = (0 until (desc?.mimeTypeCount ?: 0)).mapNotNull { desc?.getMimeType(it) }
-                clipboardDao?.addClipUri(timeStamp, false, latinIME, clipItem.uri, mimeTypes)
-            }
         } catch (e: Throwable) {
         }
     }
