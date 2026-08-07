@@ -229,36 +229,31 @@ class ClipboardHistoryView @JvmOverloads constructor(
         keyboardActionListener.onPressKey(KeyCode.NOT_SPECIFIED, 0, true, HapticEvent.NO_HAPTICS)
     }
 
-    // --- التعديل النهائي: توجيه الصورة للنظام الذكي اللي بنيناه ---
     override fun onKeyUp(clipId: Long) {
         val clipContent = clipboardHistoryManager.getHistoryEntryContent(clipId) ?: return
 
         if (clipContent.filename != null) {
             try {
                 val file = File(context.filesDir, "clipfiles/${clipContent.filename}")
-                val authority = "${context.packageName}.provider"
+                // التعديل السحري: استخدام الاسم من ملف strings.xml
+                val authority = context.getString(R.string.clipboard_provider_authority)
                 val uri = androidx.core.content.FileProvider.getUriForFile(context, authority, file)
 
-                // تجهيز الصورة للإرسال بالطريقة الرسمية
-                val mime = clipContent.mimeTypes?.firstOrNull() ?: "image/*"
-                val desc = android.content.ClipDescription("clipboard_image", arrayOf(mime))
-                val contentInfo = androidx.core.view.inputmethod.InputContentInfoCompat(uri, desc, null)
-
-                // إرسالها للنظام الذكي اللي بيقرر يبعتها مباشر ولا لصق إجباري
-                keyboardActionListener.onContent(contentInfo)
-
+                val committed = keyboardActionListener.commitImage(uri)
+                if (!committed) {
+                    keyboardActionListener.onTextInput(clipContent.text.toString())
+                }
             } catch (e: Exception) {
-                keyboardActionListener.onTextInput(clipContent.text)
+                keyboardActionListener.onTextInput(clipContent.text.toString())
             }
         } else {
-            keyboardActionListener.onTextInput(clipContent.text)
+            keyboardActionListener.onTextInput(clipContent.text.toString())
         }
 
         keyboardActionListener.onReleaseKey(KeyCode.NOT_SPECIFIED, false)
         if (Settings.getValues().mAlphaAfterClipHistoryEntry)
             keyboardActionListener.onCodeInput(KeyCode.ALPHA, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false)
     }
-    // --- نهاية التعديل ---
 
     override fun onClipInserted(position: Int) {
         clipboardAdapter.notifyItemInserted(position)
@@ -284,4 +279,4 @@ class ClipboardHistoryView @JvmOverloads constructor(
             clipboardAdapter.notifyDataSetChanged()
         }
     }
-    }
+}
