@@ -90,20 +90,26 @@ class ClipboardAdapter(
                 thumbnailView.visibility = View.VISIBLE
                 contentView.visibility = View.GONE
 
-                // قراءة الصورة مباشرة من الملف الداخلي للكيبورد
                 val file = File(itemView.context.filesDir, "clipfiles/${historyEntry.filename}")
                 
                 if (file.exists() && file.length() > 0) {
+                    // إعطاء الخانة رقم مميز لمنع تداخل الصور أثناء السكرول
+                    val currentId = historyEntry.id
+                    thumbnailView.tag = currentId
                     thumbnailView.setImageDrawable(null)
+                    
                     Thread {
                         val bmp = BitmapFactory.decodeFile(file.absolutePath)
                         thumbnailView.post {
-                            if (bmp != null) {
-                                thumbnailView.setImageBitmap(bmp)
-                            } else {
-                                thumbnailView.visibility = View.GONE
-                                contentView.visibility = View.VISIBLE
-                                contentView.text = historyEntry.text.take(1000)
+                            // التأكد إن الخانة لسه بتعرض نفس الصورة وماتغيرتش
+                            if (thumbnailView.tag == currentId) {
+                                if (bmp != null) {
+                                    thumbnailView.setImageBitmap(bmp)
+                                } else {
+                                    thumbnailView.visibility = View.GONE
+                                    contentView.visibility = View.VISIBLE
+                                    contentView.text = historyEntry.text.take(1000)
+                                }
                             }
                         }
                     }.start()
