@@ -229,41 +229,33 @@ class ClipboardHistoryView @JvmOverloads constructor(
         keyboardActionListener.onPressKey(KeyCode.NOT_SPECIFIED, 0, true, HapticEvent.NO_HAPTICS)
     }
 
-    // --- الدالة النضيفة اللي هتبعت الصورة ---
+    // --- التعديل الصحيح: استخدام keyboardActionListener.commitImage ---
     override fun onKeyUp(clipId: Long) {
         val clipContent = clipboardHistoryManager.getHistoryEntryContent(clipId) ?: return
 
         if (clipContent.filename != null) {
             try {
-                val file = java.io.File(context.filesDir, "clipfiles/${clipContent.filename}")
-                
-                // التعديل السحري: الكيبورد هيجيب اسم التصريح أوتوماتيك مستحيل يغلط فيه
+                val file = File(context.filesDir, "clipfiles/${clipContent.filename}")
                 val authority = "${context.packageName}.provider"
                 val uri = androidx.core.content.FileProvider.getUriForFile(context, authority, file)
 
-                val latinIME = KeyboardSwitcher.getInstance().latinIME
-                if (latinIME != null && uri != null) {
-                    val targetPackage = latinIME.currentInputEditorInfo?.packageName
-                    if (targetPackage != null) {
-                        context.grantUriPermission(targetPackage, uri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                    }
-                    latinIME.commitImage(uri)
-                } else {
-                    keyboardActionListener.onTextInput(clipContent.text)
+                // استخدام الدالة اللي ضفناها في KeyboardActionListener
+                val committed = keyboardActionListener.commitImage(uri)
+                if (!committed) {
+                    keyboardActionListener.onTextInput(clipContent.text.toString())
                 }
             } catch (e: Exception) {
-                android.util.Log.e("ClipboardHistoryView", "Error sending image", e)
-                keyboardActionListener.onTextInput(clipContent.text)
+                keyboardActionListener.onTextInput(clipContent.text.toString())
             }
         } else {
-            keyboardActionListener.onTextInput(clipContent.text)
+            keyboardActionListener.onTextInput(clipContent.text.toString())
         }
 
         keyboardActionListener.onReleaseKey(KeyCode.NOT_SPECIFIED, false)
         if (Settings.getValues().mAlphaAfterClipHistoryEntry)
             keyboardActionListener.onCodeInput(KeyCode.ALPHA, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false)
     }
-    // ----------------------------------------
+    // --- نهاية التعديل ---
 
     override fun onClipInserted(position: Int) {
         clipboardAdapter.notifyItemInserted(position)
