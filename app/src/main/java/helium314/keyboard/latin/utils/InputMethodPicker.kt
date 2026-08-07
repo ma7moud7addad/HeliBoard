@@ -66,12 +66,15 @@ fun createInputMethodPickerDialog(latinIme: LatinIME, richImm: RichInputMethodMa
         .setSingleChoiceItems(items.toTypedArray(), currentSubtypeIndex) { di, i ->
             di.dismiss()
             val (imi, subtype) = enabledSubtypes[i]
-            if (imi == thisImi)
-                latinIme.switchToSubtype(subtype)
-            else if (subtype != null)
+            if (imi == thisImi) {
+                if (subtype != null) {
+                    latinIme.onCurrentInputMethodSubtypeChanged(subtype)
+                }
+            } else if (subtype != null) {
                 latinIme.switchInputMethodAndSubtype(imi, subtype)
-            else
-                latinIme.switchInputMethod(imi.id)
+            } else {
+                richImm.inputMethodManager.setInputMethod(windowToken, imi.id)
+            }
         }
         .create()
 
