@@ -75,7 +75,6 @@ class ClipboardDao private constructor(private val db: Database) {
             val prefs = context.prefs()
             if (!prefs.getBoolean(Settings.PREF_CLIPBOARD_USE_FILES, true)) return
             
-            // --- تصليح مشكلة الكراش (قراءة الرقم بشكل صحيح) ---
             val maxMb = try {
                 prefs.getFloat(Settings.PREF_CLIPBOARD_FILES_SIZE_LIMIT, 10f).toInt()
             } catch (e: Exception) {
@@ -131,7 +130,20 @@ class ClipboardDao private constructor(private val db: Database) {
                 return
             }
 
-            val filename = digest.digest().joinToString("") { "%02x".format(it) }
+            val baseFilename = digest.digest().joinToString("") { "%02x".format(it) }
+            
+            // ✅ تصليح المشكلة: إضافة امتداد الملف بناءً على MIME type
+            val extension = when {
+                mimeTypes.any { it == "image/jpeg" || it == "image/jpg" } -> ".jpg"
+                mimeTypes.any { it == "image/png" } -> ".png"
+                mimeTypes.any { it == "image/gif" } -> ".gif"
+                mimeTypes.any { it == "image/webp" } -> ".webp"
+                mimeTypes.any { it == "image/bmp" } -> ".bmp"
+                mimeTypes.any { it.startsWith("image/") } -> ".img"
+                else -> ""
+            }
+            
+            val filename = baseFilename + extension
             val dest = File(outDir, filename)
             if (!dest.exists()) {
                 try {
@@ -154,7 +166,6 @@ class ClipboardDao private constructor(private val db: Database) {
             insertNewEntry(timestamp, pinned, "", filename, mimeJoined)
             
         } catch (e: Throwable) {
-            // --- درع الحماية: يمنع الكيبورد من الموت تماماً ---
             Log.e(TAG, "Fatal error in addClipUri", e)
         }
     }
