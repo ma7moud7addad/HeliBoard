@@ -36,7 +36,20 @@ class ClipboardHistoryEntry(
 
     fun getContentInfo(context: Context): InputContentInfoCompat? {
         val uri = getContentUri(context) ?: return null
-        val mime = mimeTypes?.firstOrNull() ?: "application/octet-stream"
+        
+        // ✅ تصليح: استخدام أول MIME type صحيح أو اختيار من الامتداد
+        val mime = when {
+            mimeTypes?.any { it.startsWith("image/") } == true -> 
+                mimeTypes.first { it.startsWith("image/") }
+            mimeTypes?.isNotEmpty() == true -> mimeTypes.first()
+            filename?.endsWith(".jpg") == true -> "image/jpeg"
+            filename?.endsWith(".png") == true -> "image/png"
+            filename?.endsWith(".gif") == true -> "image/gif"
+            filename?.endsWith(".webp") == true -> "image/webp"
+            filename?.endsWith(".bmp") == true -> "image/bmp"
+            else -> "application/octet-stream"
+        }
+        
         val desc = ClipDescription("clipboard_content", arrayOf(mime))
         return InputContentInfoCompat(uri, desc, null)
     }
