@@ -155,10 +155,72 @@ class ClipboardHistoryManager(
         textView.text = (if (isClipSensitive(inputType)) "•".repeat(content.length) else content)
             .take(200)
 
-        textView.setOnClickListener {
+        textView.setOnClickListener { view ->
             dontShowCurrentSuggestion = true
-            latinIME.onTextInput(content.toString())
-            AudioAndHapticFeedbackManager.getInstance().performHapticAndAudioFeedback(KeyCode.NOT_SPECIFIED, it, HapticEvent.KEY_PRESS)
+            AudioAndHapticFeedbackManager.getInstance().performHapticAndAudioFeedback(KeyCode.NOT_SPECIFIED, view, HapticEvent.KEY_PRESS)
+
+            // Try to perform native/system paste via the target editor's context menu action.
+            // This lets the editor read from the system clipboard (fast for very large text)
+            // If that fails, fall back to the previous onTextInput insertion.
+            val ic = latinIME.currentInputConnection ?: latinIME.getCurrentInputConnection()
+            var performedNativePaste = false
+
+            try {
+                if (ic != null) {
+                    // Check whether the primary clip already matches the suggestion's content.
+                    val primaryBefore = try { clipboardManager.primaryClip } catch (e: Exception) { null }
+                    val needSetTempClip = try {
+                        val currentClipText = primaryBefore?.getItemAt(0)?.coerceToText(latinIME)
+                        !TextUtils.equals(currentClipText, content)
+                    } catch (e: Exception) {
+                        true
+                    }
+
+                    if (needSetTempClip) {
+                        val tempClip = android.content.ClipData.newPlainText("clipboard", content)
+                        tempPrimaryClip = true
+                        try {
+                            clipboardManager.setPrimaryClip(tempClip)
+                        } catch (e: Exception) {
+                            // ignore and still try performContextMenuAction
+                        }
+
+                        try {
+                            performedNativePaste = ic.performContextMenuAction(android.R.id.paste)
+                        } catch (e: Exception) {
+                            performedNativePaste = false
+                        }
+
+                        // Try to restore original primary clip
+                        try {
+                            if (primaryBefore != null) {
+                                clipboardManager.setPrimaryClip(primaryBefore)
+                            }
+                        } catch (e: Exception) {
+                            // ignore restore failures
+                        } finally {
+                            tempPrimaryClip = false
+                        }
+                    } else {
+                        try {
+                            performedNativePaste = ic.performContextMenuAction(android.R.id.paste)
+                        } catch (e: Exception) {
+                            performedNativePaste = false
+                        }
+                    }
+                }
+            } catch (t: Throwable) {
+                performedNativePaste = false
+            }
+
+            if (!performedNativePaste) {
+                // Fallback to previous insertion mechanism
+                latinIME.onTextInput(content.toString())
+            } else {
+                // Hide/remove suggestion after successful paste
+                removeClipboardSuggestion()
+            }
+
             binding.root.isGone = true
         }
 
