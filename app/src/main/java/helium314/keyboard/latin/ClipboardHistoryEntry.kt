@@ -60,7 +60,7 @@ class ClipboardHistoryEntry(
         return InputContentInfoCompat(uri, desc, null)
     }
 
-    // 🔧 الدالة السحرية: تحميل الصورة بشكل آمن بدون threads
+    // 🔧 تحميل الصورة بشكل آمن بدون threads
     @SuppressLint("SetTextI18n")
     fun setImageAndDescription(imageView: ImageView, textView: TextView) {
         if (mimeTypes == null || filename == null) return
@@ -85,19 +85,24 @@ class ClipboardHistoryEntry(
             Log.w("ClipboardHistoryEntry", "could not load image for clip $id", e)
         }
         
+        // إذا فشل تحميل الصورة، اعرض النص بدلاً منها
         val description = if (text.isNullOrBlank()) ""
-            else "\n" + imageView.context.getString(com.macboard.keyboard.latin.R.string.item_description, text)
+            else "\n" + text
             
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            val info = imageView.context.contentResolver.getTypeInfo(mimeTypes[0])
-            info.icon.setTint(Settings.getValues().mColors.get(ColorType.EMOJI_CATEGORY))
-            imageView.setImageIcon(info.icon)
-            textView.text = imageView.context.getString(com.macboard.keyboard.latin.R.string.item_type, info.label.toString()) + description
-            return
+            try {
+                val info = imageView.context.contentResolver.getTypeInfo(mimeTypes[0])
+                info.icon.setTint(Settings.getValues().mColors.get(ColorType.EMOJI_CATEGORY))
+                imageView.setImageIcon(info.icon)
+                textView.text = info.label.toString() + description
+                return
+            } catch (e: Exception) {
+                Log.w("ClipboardHistoryEntry", "could not get type info", e)
+            }
         }
         
         imageView.setImageResource(com.macboard.keyboard.latin.R.drawable.ic_dictionary)
         Settings.getValues().mColors.setColor(imageView, ColorType.EMOJI_CATEGORY)
-        textView.text = imageView.context.getString(com.macboard.keyboard.latin.R.string.item_type, mimeTypes.first()) + description
+        textView.text = mimeTypes.firstOrNull()?.let { "$it$description" } ?: description
     }
 }
