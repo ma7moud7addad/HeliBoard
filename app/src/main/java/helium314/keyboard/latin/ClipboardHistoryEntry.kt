@@ -1,12 +1,19 @@
 // SPDX-License-Identifier: GPL-3.0-only
 package com.macboard.keyboard.latin
 
+import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.content.ClipDescription
+import android.os.Build
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.core.content.FileProvider
 import androidx.core.view.inputmethod.InputContentInfoCompat
 import com.macboard.keyboard.latin.settings.Settings
+import com.macboard.keyboard.latin.common.ColorType
+import com.macboard.keyboard.latin.utils.Log
 import java.io.File
 
 class ClipboardHistoryEntry(
@@ -37,7 +44,6 @@ class ClipboardHistoryEntry(
     fun getContentInfo(context: Context): InputContentInfoCompat? {
         val uri = getContentUri(context) ?: return null
         
-        // ✅ تصليح: استخدام أول MIME type صحيح أو اختيار من الامتداد
         val mime = when {
             mimeTypes?.any { it.startsWith("image/") } == true -> 
                 mimeTypes.first { it.startsWith("image/") }
@@ -52,5 +58,46 @@ class ClipboardHistoryEntry(
         
         val desc = ClipDescription("clipboard_content", arrayOf(mime))
         return InputContentInfoCompat(uri, desc, null)
+    }
+
+    // 🔧 الدالة السحرية: تحميل الصورة بشكل آمن بدون threads
+    @SuppressLint("SetTextI18n")
+    fun setImageAndDescription(imageView: ImageView, textView: TextView) {
+        if (mimeTypes == null || filename == null) return
+        try {
+            val path = File(imageView.context.filesDir, "clipfiles/$filename").absolutePath
+            val opt = BitmapFactory.Options()
+            opt.inJustDecodeBounds = true
+            BitmapFactory.decodeFile(path, opt)
+            
+            // تقليل حجم الصور الكبيرة
+            val scale = opt.outWidth / (imageView.resources.displayMetrics.widthPixels * 2)
+            opt.inSampleSize = scale
+            opt.inJustDecodeBounds = false
+            val bitmap = BitmapFactory.decodeFile(path, opt)
+            
+            if (bitmap != null) {
+                imageView.setImageBitmap(bitmap)
+                textView.text = null
+                return
+            }
+        } catch (e: Exception) {
+            Log.w("ClipboardHistoryEntry", "could not load image for clip $id", e)
+        }
+        
+        val description = if (text.isNullOrBlank()) ""
+            else "\n" + imageView.context.getString(com.macboard.keyboard.latin.R.string.item_description, text)
+            
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val info = imageView.context.contentResolver.getTypeInfo(mimeTypes[0])
+            info.icon.setTint(Settings.getValues().mColors.get(ColorType.EMOJI_CATEGORY))
+            imageView.setImageIcon(info.icon)
+            textView.text = imageView.context.getString(com.macboard.keyboard.latin.R.string.item_type, info.label.toString()) + description
+            return
+        }
+        
+        imageView.setImageResource(com.macboard.keyboard.latin.R.drawable.ic_dictionary)
+        Settings.getValues().mColors.setColor(imageView, ColorType.EMOJI_CATEGORY)
+        textView.text = imageView.context.getString(com.macboard.keyboard.latin.R.string.item_type, mimeTypes.first()) + description
     }
 }
