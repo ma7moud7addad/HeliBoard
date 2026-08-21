@@ -1,12 +1,12 @@
+// SPDX-License-Identifier: GPL-3.0-only
 package com.macboard.keyboard.latin
 
-import android.content.ClipDescription
 import android.content.Context
-import android.graphics.BitmapFactory
-import android.widget.ImageView
-import android.widget.TextView
+import android.net.Uri
+import android.content.ClipDescription
 import androidx.core.content.FileProvider
 import androidx.core.view.inputmethod.InputContentInfoCompat
+import com.macboard.keyboard.latin.settings.Settings
 import java.io.File
 
 class ClipboardHistoryEntry(
@@ -17,7 +17,6 @@ class ClipboardHistoryEntry(
     val filename: String? = null,
     val mimeTypes: List<String>? = null
 ) : Comparable<ClipboardHistoryEntry> {
-    
     override fun compareTo(other: ClipboardHistoryEntry): Int {
         val result = other.isPinned.compareTo(isPinned)
         if (result == 0) return other.timeStamp.compareTo(timeStamp)
@@ -25,7 +24,7 @@ class ClipboardHistoryEntry(
         return result
     }
 
-    fun getContentUri(context: Context): android.net.Uri? {
+    fun getContentUri(context: Context): Uri? {
         if (filename == null) return null
         val file = File(context.filesDir, "clipfiles/$filename")
         return try {
@@ -37,8 +36,10 @@ class ClipboardHistoryEntry(
 
     fun getContentInfo(context: Context): InputContentInfoCompat? {
         val uri = getContentUri(context) ?: return null
+        
+        // ✅ تصليح: استخدام أول MIME type صحيح أو اختيار من الامتداد
         val mime = when {
-            mimeTypes?.any { it.startsWith("image/") } == true ->
+            mimeTypes?.any { it.startsWith("image/") } == true -> 
                 mimeTypes.first { it.startsWith("image/") }
             mimeTypes?.isNotEmpty() == true -> mimeTypes.first()
             filename?.endsWith(".jpg") == true -> "image/jpeg"
@@ -48,31 +49,8 @@ class ClipboardHistoryEntry(
             filename?.endsWith(".bmp") == true -> "image/bmp"
             else -> "application/octet-stream"
         }
+        
         val desc = ClipDescription("clipboard_content", arrayOf(mime))
         return InputContentInfoCompat(uri, desc, null)
-    }
-
-    fun setImageAndDescription(imageView: ImageView, textView: TextView) {
-        if (mimeTypes == null || filename == null) return
-        try {
-            val file = File(imageView.context.filesDir, "clipfiles/$filename")
-            val path = file.absolutePath
-            val opt = BitmapFactory.Options()
-            opt.inJustDecodeBounds = true
-            BitmapFactory.decodeFile(path, opt)
-            val scale = opt.outWidth / (imageView.resources.displayMetrics.widthPixels * 2)
-            opt.inSampleSize = scale.coerceAtLeast(1)
-            opt.inJustDecodeBounds = false
-            val bitmap = BitmapFactory.decodeFile(path, opt)
-            if (bitmap != null) {
-                imageView.setImageBitmap(bitmap)
-                textView.text = null
-                return
-            }
-        } catch (e: Exception) {
-        }
-        // لو الصورة ماتحملتش، اعرض text
-        imageView.setImageDrawable(null)
-        textView.text = text.take(1000)
     }
 }
