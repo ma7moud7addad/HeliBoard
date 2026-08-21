@@ -12,7 +12,7 @@ import android.view.inputmethod.EditorInfo
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import androidx.recyclerview.widget.GridLayoutManager
 import com.macboard.keyboard.event.HapticEvent
 import com.macboard.keyboard.keyboard.KeyboardActionListener
 import com.macboard.keyboard.keyboard.KeyboardId
@@ -97,7 +97,10 @@ class ClipboardHistoryView @JvmOverloads constructor(
         placeholderView = findViewById(R.id.clipboard_empty_view)
         clipboardRecyclerView = findViewById<ClipboardHistoryRecyclerView>(R.id.clipboard_list).apply {
             val colCount = resources.getInteger(R.integer.config_clipboard_keyboard_col_count)
-            layoutManager = StaggeredGridLayoutManager(colCount, StaggeredGridLayoutManager.VERTICAL)
+            layoutManager = GridLayoutManager(context, colCount).apply {
+                // تحديد حجم ثابت للعناصر لمنع الحركة غير المستقرة
+                isAutoMeasureEnabled = false
+            }
             @Suppress("deprecation")
             persistentDrawingCache = PERSISTENT_NO_CACHE
             clipboardLayoutParams.setListProperties(this)
@@ -229,7 +232,6 @@ class ClipboardHistoryView @JvmOverloads constructor(
         keyboardActionListener.onPressKey(KeyCode.NOT_SPECIFIED, 0, true, HapticEvent.NO_HAPTICS)
     }
 
-    // --- التعديل السحري: استخدام دالة commitImage الخاصة بك ---
     override fun onKeyUp(clipId: Long) {
         val clipContent = clipboardHistoryManager.getHistoryEntryContent(clipId) ?: return
 
@@ -239,7 +241,6 @@ class ClipboardHistoryView @JvmOverloads constructor(
                 val authority = context.getString(R.string.clipboard_provider_authority)
                 val uri = androidx.core.content.FileProvider.getUriForFile(context, authority, file)
 
-                // إرسال الصورة باستخدام الدالة القوية بتاعتك اللي بتدي تصريح للواتساب
                 val committed = keyboardActionListener.commitImage(uri)
                 if (!committed) {
                     keyboardActionListener.onTextInput(clipContent.text)
@@ -255,7 +256,6 @@ class ClipboardHistoryView @JvmOverloads constructor(
         if (Settings.getValues().mAlphaAfterClipHistoryEntry)
             keyboardActionListener.onCodeInput(KeyCode.ALPHA, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false)
     }
-    // --- نهاية التعديل ---
 
     override fun onClipInserted(position: Int) {
         clipboardAdapter.notifyItemInserted(position)
