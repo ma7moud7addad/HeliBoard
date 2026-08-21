@@ -55,6 +55,7 @@ class ClipboardAdapter(
         private val thumbnailView: ImageView
         private val contentView: TextView
         private var currentImageId: Long = -1L
+        private var loadingThread: Thread? = null
 
         init {
             view.apply {
@@ -86,6 +87,10 @@ class ClipboardAdapter(
             itemView.tag = historyEntry?.id
             pinnedIconView.visibility = if (historyEntry?.isPinned == true) View.VISIBLE else View.GONE
 
+            // إيقاف أي خيط تحميل سابق لتجنب تحديث الصور الخاطئة
+            loadingThread?.interrupt()
+            loadingThread = null
+
             val mime = historyEntry?.mimeTypes?.firstOrNull()
             if (historyEntry?.filename != null && mime?.startsWith("image/") == true) {
                 thumbnailView.visibility = View.VISIBLE
@@ -99,22 +104,28 @@ class ClipboardAdapter(
                     currentImageId = currentId
                     thumbnailView.setImageDrawable(null)
                     
-                    Thread {
-                        val bmp = BitmapFactory.decodeFile(file.absolutePath)
-                        thumbnailView.post {
-                            // التأكد من أن هذا الـ ViewHolder لا يزال يعرض نفس الصورة
-                            // إذا تغيّرت البيانات (بسبب scroll)، لا نحدّث الصورة
-                            if (currentImageId == currentId && itemView.tag == currentId) {
-                                if (bmp != null) {
-                                    thumbnailView.setImageBitmap(bmp)
-                                } else {
-                                    thumbnailView.visibility = View.GONE
-                                    contentView.visibility = View.VISIBLE
-                                    contentView.text = historyEntry.text.take(1000)
+                    val thread = Thread {
+                        try {
+                            val bmp = BitmapFactory.decodeFile(file.absolutePath)
+                            thumbnailView.post {
+                                // التأكد من أن هذا الـ ViewHolder لا يزال يعرض نفس الصورة
+                                // إذا تغيّرت البيانات (بسبب scroll)، لا نحدّث الصورة
+                                if (currentImageId == currentId && itemView.tag == currentId) {
+                                    if (bmp != null) {
+                                        thumbnailView.setImageBitmap(bmp)
+                                    } else {
+                                        thumbnailView.visibility = View.GONE
+                                        contentView.visibility = View.VISIBLE
+                                        contentView.text = historyEntry.text.take(1000)
+                                    }
                                 }
                             }
+                        } catch (e: InterruptedException) {
+                            // تم إيقاف الخيط بسبب تمرير ViewHolder إلى محتوى جديد
                         }
-                    }.start()
+                    }
+                    loadingThread = thread
+                    thread.start()
                 } else {
                     thumbnailView.visibility = View.GONE
                     contentView.visibility = View.VISIBLE
