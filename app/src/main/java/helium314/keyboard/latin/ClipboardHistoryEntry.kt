@@ -3,7 +3,6 @@ package com.macboard.keyboard.latin
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.content.ClipDescription
@@ -15,10 +14,6 @@ import androidx.core.view.inputmethod.InputContentInfoCompat
 import com.macboard.keyboard.latin.settings.Settings
 import com.macboard.keyboard.latin.common.ColorType
 import com.macboard.keyboard.latin.utils.Log
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.io.File
 
 class ClipboardHistoryEntry(
@@ -65,63 +60,38 @@ class ClipboardHistoryEntry(
         return InputContentInfoCompat(uri, desc, null)
     }
 
-    // 🚀 تحميل الصورة بدون Lag باستخدام Coroutines
+    // 🔧 تحميل الصورة بشكل آمن بدون threads
     @SuppressLint("SetTextI18n")
     fun setImageAndDescription(imageView: ImageView, textView: TextView) {
         if (mimeTypes == null || filename == null) return
-        
-        // تخزين معرّف الـ clip الحالي لتجنب تحديثات قديمة
-        val currentClipId = id
-        
-        // تحميل الصورة في background thread
-        GlobalScope.launch(Dispatchers.Default) {
-            try {
-                val bitmap = loadBitmapFromFile(imageView.context)
-                
-                // تحديث الـ UI في main thread فقط إذا كان هذا هو الـ clip الحالي
-                withContext(Dispatchers.Main) {
-                    // تحقق من أن الـ ViewHolder لم يتم إعادة استخدامه لـ clip مختلف
-                    if (imageView.tag == currentClipId && bitmap != null) {
-                        imageView.setImageBitmap(bitmap)
-                        textView.text = null
-                    }
-                }
-            } catch (e: Exception) {
-                Log.w("ClipboardHistoryEntry", "could not load image for clip $id", e)
-                
-                // عرض fallback في case الفشل
-                withContext(Dispatchers.Main) {
-                    if (imageView.tag == currentClipId) {
-                        showFallbackContent(imageView, textView)
-                    }
-                }
+        try {
+            val path = File(imageView.context.filesDir, "clipfiles/$filename").absolutePath
+            val opt = BitmapFactory.Options()
+            opt.inJustDecodeBounds = true
+            BitmapFactory.decodeFile(path, opt)
+            
+            // تقليل حجم الصور الكبيرة
+            val scale = opt.outWidth / (imageView.resources.displayMetrics.widthPixels * 2)
+            opt.inSampleSize = scale
+            opt.inJustDecodeBounds = false
+            val bitmap = BitmapFactory.decodeFile(path, opt)
+            
+            if (bitmap != null) {
+                imageView.setImageBitmap(bitmap)
+                textView.text = null
+                return
             }
+        } catch (e: Exception) {
+            Log.w("ClipboardHistoryEntry", "could not load image for clip $id", e)
         }
-    }
-    
-    // 🔧 تحميل الصورة من الـ disk بدون blocking UI thread
-    private fun loadBitmapFromFile(context: Context): Bitmap? {
-        val path = File(context.filesDir, "clipfiles/$filename").absolutePath
-        val opt = BitmapFactory.Options()
-        opt.inJustDecodeBounds = true
-        BitmapFactory.decodeFile(path, opt)
         
-        // تقليل حجم الصور الكبيرة
-        val scale = opt.outWidth / (256 * 2) // fixed size بدلاً من DisplayMetrics
-        opt.inSampleSize = scale
-        opt.inJustDecodeBounds = false
-        
-        return BitmapFactory.decodeFile(path, opt)
-    }
-    
-    // 🎨 عرض محتوى بديل عند فشل تحميل الصورة
-    private fun showFallbackContent(imageView: ImageView, textView: TextView) {
+        // إذا فشل تحميل الصورة، اعرض النص بدلاً منها
         val description = if (text.isNullOrBlank()) ""
             else "\n" + text
             
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             try {
-                val info = imageView.context.contentResolver.getTypeInfo(mimeTypes?.firstOrNull() ?: "")
+                val info = imageView.context.contentResolver.getTypeInfo(mimeTypes[0])
                 info.icon.setTint(Settings.getValues().mColors.get(ColorType.EMOJI_CATEGORY))
                 imageView.setImageIcon(info.icon)
                 textView.text = info.label.toString() + description
@@ -133,6 +103,6 @@ class ClipboardHistoryEntry(
         
         imageView.setImageResource(com.macboard.keyboard.latin.R.drawable.ic_dictionary)
         Settings.getValues().mColors.setColor(imageView, ColorType.EMOJI_CATEGORY)
-        textView.text = mimeTypes?.firstOrNull()?.let { "$it$description" } ?: description
+        textView.text = mimeTypes.firstOrNull()?.let { "$it$description" } ?: description
     }
 }
