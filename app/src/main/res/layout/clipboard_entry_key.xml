@@ -20,7 +20,8 @@
                 android:adjustViewBounds="true"
                 android:scaleType="fitCenter"
                 android:layout_margin="4dp"
-                android:visibility="gone" />
+                android:visibility="gone"
+                android:minHeight="100dp" />
 
         <TextView
                 android:id="@+id/clipboard_entry_content"
@@ -30,7 +31,8 @@
                 android:hapticFeedbackEnabled="false"
                 android:soundEffectsEnabled="false"
                 android:ellipsize="end"
-                android:maxLines="4"/>
+                android:maxLines="4"
+                android:minHeight="50dp" />
 
         <ImageView
                 android:id="@+id/clipboard_entry_pinned_icon"
