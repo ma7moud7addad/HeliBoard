@@ -48,12 +48,13 @@ class ClipboardAdapter(
     override fun getItemCount() = clipboardHistoryManager?.getHistorySize() ?: 0
 
     inner class ViewHolder(
-            view: View
+             view: View
     ) : RecyclerView.ViewHolder(view), View.OnClickListener, View.OnTouchListener, View.OnLongClickListener {
 
         private val pinnedIconView: ImageView
         private val thumbnailView: ImageView
         private val contentView: TextView
+        private var currentImageId: Long = -1L
 
         init {
             view.apply {
@@ -93,16 +94,17 @@ class ClipboardAdapter(
                 val file = File(itemView.context.filesDir, "clipfiles/${historyEntry.filename}")
                 
                 if (file.exists() && file.length() > 0) {
-                    // إعطاء الخانة رقم مميز لمنع تداخل الصور أثناء السكرول
+                    // تعيين معرّف فريد للصورة الحالية لمنع التداخل مع ViewHolders الأخرى
                     val currentId = historyEntry.id
-                    thumbnailView.tag = currentId
+                    currentImageId = currentId
                     thumbnailView.setImageDrawable(null)
                     
                     Thread {
                         val bmp = BitmapFactory.decodeFile(file.absolutePath)
                         thumbnailView.post {
-                            // التأكد إن الخانة لسه بتعرض نفس الصورة وماتغيرتش
-                            if (thumbnailView.tag == currentId) {
+                            // التأكد من أن هذا الـ ViewHolder لا يزال يعرض نفس الصورة
+                            // إذا تغيّرت البيانات (بسبب scroll)، لا نحدّث الصورة
+                            if (currentImageId == currentId && itemView.tag == currentId) {
                                 if (bmp != null) {
                                     thumbnailView.setImageBitmap(bmp)
                                 } else {
