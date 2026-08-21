@@ -3,7 +3,6 @@
 package com.macboard.keyboard.keyboard.clipboard
 
 import android.annotation.SuppressLint
-import android.graphics.BitmapFactory
 import android.graphics.Typeface
 import android.util.TypedValue
 import android.view.LayoutInflater
@@ -52,10 +51,8 @@ class ClipboardAdapter(
     ) : RecyclerView.ViewHolder(view), View.OnClickListener, View.OnTouchListener, View.OnLongClickListener {
 
         private val pinnedIconView: ImageView
-        private val thumbnailView: ImageView
-        private val contentView: TextView
-        private var currentImageId: Long = -1L
-        private var loadingThread: Thread? = null
+        private val contentTextView: TextView
+        private val contentImageView: ImageView
 
         init {
             view.apply {
@@ -70,13 +67,13 @@ class ClipboardAdapter(
                 visibility = View.GONE
                 setImageResource(pinnedIconResId)
             }
-            thumbnailView = view.findViewById<ImageView>(R.id.clipboard_entry_thumbnail).apply {
-                visibility = View.GONE
-            }
-            contentView = view.findViewById<TextView>(R.id.clipboard_entry_content).apply {
+            contentTextView = view.findViewById<TextView>(R.id.clipboard_entry_content).apply {
                 typeface = itemTypeFace
                 setTextColor(itemTextColor)
                 setTextSize(TypedValue.COMPLEX_UNIT_PX, itemTextSize)
+            }
+            contentImageView = view.findViewById<ImageView>(R.id.clipboard_entry_thumbnail).apply {
+                visibility = View.GONE
             }
             clipboardLayoutParams.setItemProperties(view)
             val colors = Settings.getValues().mColors
@@ -84,58 +81,20 @@ class ClipboardAdapter(
         }
 
         fun setContent(historyEntry: ClipboardHistoryEntry?) {
-            itemView.tag = historyEntry?.id
-            pinnedIconView.visibility = if (historyEntry?.isPinned == true) View.VISIBLE else View.GONE
-
-            // إيقاف أي خيط تحميل سابق لتجنب تحديث الصور الخاطئة
-            loadingThread?.interrupt()
-            loadingThread = null
-
-            val mime = historyEntry?.mimeTypes?.firstOrNull()
-            if (historyEntry?.filename != null && mime?.startsWith("image/") == true) {
-                thumbnailView.visibility = View.VISIBLE
-                contentView.visibility = View.GONE
-
-                val file = File(itemView.context.filesDir, "clipfiles/${historyEntry.filename}")
-                
-                if (file.exists() && file.length() > 0) {
-                    // تعيين معرّف فريد للصورة الحالية لمنع التداخل مع ViewHolders الأخرى
-                    val currentId = historyEntry.id
-                    currentImageId = currentId
-                    thumbnailView.setImageDrawable(null)
-                    
-                    val thread = Thread {
-                        try {
-                            val bmp = BitmapFactory.decodeFile(file.absolutePath)
-                            thumbnailView.post {
-                                // التأكد من أن هذا الـ ViewHolder لا يزال يعرض نفس الصورة
-                                // إذا تغيّرت البيانات (بسبب scroll)، لا نحدّث الصورة
-                                if (currentImageId == currentId && itemView.tag == currentId) {
-                                    if (bmp != null) {
-                                        thumbnailView.setImageBitmap(bmp)
-                                    } else {
-                                        thumbnailView.visibility = View.GONE
-                                        contentView.visibility = View.VISIBLE
-                                        contentView.text = historyEntry.text.take(1000)
-                                    }
-                                }
-                            }
-                        } catch (e: InterruptedException) {
-                            // تم إيقاف الخيط بسبب تمرير ViewHolder إلى محتوى جديد
-                        }
-                    }
-                    loadingThread = thread
-                    thread.start()
-                } else {
-                    thumbnailView.visibility = View.GONE
-                    contentView.visibility = View.VISIBLE
-                    contentView.text = historyEntry.text.take(1000)
-                }
+            if (historyEntry == null) return
+            itemView.tag = historyEntry.id
+            
+            // 🔧 استخدام الدالة من entry بدلاً من تحميل في thread
+            if (historyEntry.filename != null) {
+                historyEntry.setImageAndDescription(contentImageView, contentTextView)
             } else {
-                thumbnailView.visibility = View.GONE
-                contentView.visibility = View.VISIBLE
-                contentView.text = historyEntry?.text?.take(1000)
+                contentTextView.text = historyEntry.text.take(1000)
+                contentImageView.visibility = View.GONE
             }
+            
+            pinnedIconView.visibility = if (historyEntry.isPinned) View.VISIBLE else View.GONE
+            contentImageView.visibility = if (historyEntry.filename != null) View.VISIBLE else View.GONE
+            contentTextView.visibility = if (contentTextView.text.isNullOrEmpty()) View.GONE else View.VISIBLE
         }
 
         @SuppressLint("ClickableViewAccessibility")
