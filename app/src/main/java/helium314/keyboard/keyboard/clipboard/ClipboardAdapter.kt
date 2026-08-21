@@ -1,9 +1,6 @@
-// SPDX-License-Identifier: GPL-3.0-only
-
 package com.macboard.keyboard.keyboard.clipboard
 
 import android.annotation.SuppressLint
-import android.graphics.BitmapFactory
 import android.graphics.Typeface
 import android.util.TypedValue
 import android.view.LayoutInflater
@@ -18,11 +15,10 @@ import com.macboard.keyboard.latin.ClipboardHistoryManager
 import com.macboard.keyboard.latin.R
 import com.macboard.keyboard.latin.common.ColorType
 import com.macboard.keyboard.latin.settings.Settings
-import java.io.File
 
 class ClipboardAdapter(
-       val clipboardLayoutParams: ClipboardLayoutParams,
-       val keyEventListener: OnKeyEventListener
+    val clipboardLayoutParams: ClipboardLayoutParams,
+    val keyEventListener: OnKeyEventListener
 ) : RecyclerView.Adapter<ClipboardAdapter.ViewHolder>() {
 
     var clipboardHistoryManager: ClipboardHistoryManager? = null
@@ -35,7 +31,7 @@ class ClipboardAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
-                .inflate(R.layout.clipboard_entry_key, parent, false)
+            .inflate(R.layout.clipboard_entry_key, parent, false)
         return ViewHolder(view)
     }
 
@@ -47,9 +43,8 @@ class ClipboardAdapter(
 
     override fun getItemCount() = clipboardHistoryManager?.getHistorySize() ?: 0
 
-    inner class ViewHolder(
-            view: View
-    ) : RecyclerView.ViewHolder(view), View.OnClickListener, View.OnTouchListener, View.OnLongClickListener {
+    inner class ViewHolder(view: View)
+        : RecyclerView.ViewHolder(view), View.OnClickListener, View.OnTouchListener, View.OnLongClickListener {
 
         private val pinnedIconView: ImageView
         private val thumbnailView: ImageView
@@ -64,14 +59,14 @@ class ClipboardAdapter(
                 isHapticFeedbackEnabled = false
             }
             Settings.getValues().mColors.setBackground(view, ColorType.KEY_BACKGROUND)
-            pinnedIconView = view.findViewById<ImageView>(R.id.clipboard_entry_pinned_icon).apply {
+            pinnedIconView = view.findViewById(R.id.clipboard_entry_pinned_icon).apply {
                 visibility = View.GONE
                 setImageResource(pinnedIconResId)
             }
-            thumbnailView = view.findViewById<ImageView>(R.id.clipboard_entry_thumbnail).apply {
+            thumbnailView = view.findViewById(R.id.clipboard_entry_thumbnail).apply {
                 visibility = View.GONE
             }
-            contentView = view.findViewById<TextView>(R.id.clipboard_entry_content).apply {
+            contentView = view.findViewById(R.id.clipboard_entry_content).apply {
                 typeface = itemTypeFace
                 setTextColor(itemTextColor)
                 setTextSize(TypedValue.COMPLEX_UNIT_PX, itemTextSize)
@@ -82,46 +77,18 @@ class ClipboardAdapter(
         }
 
         fun setContent(historyEntry: ClipboardHistoryEntry?) {
-            itemView.tag = historyEntry?.id
-            pinnedIconView.visibility = if (historyEntry?.isPinned == true) View.VISIBLE else View.GONE
+            if (historyEntry == null) return
+            itemView.tag = historyEntry.id
+            pinnedIconView.visibility = if (historyEntry.isPinned) View.VISIBLE else View.GONE
 
-            val mime = historyEntry?.mimeTypes?.firstOrNull()
-            if (historyEntry?.filename != null && mime?.startsWith("image/") == true) {
+            if (historyEntry.filename != null) {
+                historyEntry.setImageAndDescription(thumbnailView, contentView)
                 thumbnailView.visibility = View.VISIBLE
-                contentView.visibility = View.GONE
-
-                val file = File(itemView.context.filesDir, "clipfiles/${historyEntry.filename}")
-                
-                if (file.exists() && file.length() > 0) {
-                    // إعطاء الخانة رقم مميز لمنع تداخل الصور أثناء السكرول
-                    val currentId = historyEntry.id
-                    thumbnailView.tag = currentId
-                    thumbnailView.setImageDrawable(null)
-                    
-                    Thread {
-                        val bmp = BitmapFactory.decodeFile(file.absolutePath)
-                        thumbnailView.post {
-                            // التأكد إن الخانة لسه بتعرض نفس الصورة وماتغيرتش
-                            if (thumbnailView.tag == currentId) {
-                                if (bmp != null) {
-                                    thumbnailView.setImageBitmap(bmp)
-                                } else {
-                                    thumbnailView.visibility = View.GONE
-                                    contentView.visibility = View.VISIBLE
-                                    contentView.text = historyEntry.text.take(1000)
-                                }
-                            }
-                        }
-                    }.start()
-                } else {
-                    thumbnailView.visibility = View.GONE
-                    contentView.visibility = View.VISIBLE
-                    contentView.text = historyEntry.text.take(1000)
-                }
+                contentView.visibility = if (contentView.text.isNullOrEmpty()) View.GONE else View.VISIBLE
             } else {
                 thumbnailView.visibility = View.GONE
                 contentView.visibility = View.VISIBLE
-                contentView.text = historyEntry?.text?.take(1000)
+                contentView.text = historyEntry.text.take(1000)
             }
         }
 
