@@ -3,7 +3,6 @@
 package com.macboard.keyboard.keyboard.clipboard
 
 import android.annotation.SuppressLint
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Typeface
 import android.util.TypedValue
@@ -19,7 +18,6 @@ import com.macboard.keyboard.latin.ClipboardHistoryManager
 import com.macboard.keyboard.latin.R
 import com.macboard.keyboard.latin.common.ColorType
 import com.macboard.keyboard.latin.settings.Settings
-import kotlinx.coroutines.*
 import java.io.File
 
 class ClipboardAdapter(
@@ -34,8 +32,6 @@ class ClipboardAdapter(
     var itemTypeFace: Typeface? = null
     var itemTextColor = 0
     var itemTextSize = 0f
-    
-    private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -58,9 +54,6 @@ class ClipboardAdapter(
         private val pinnedIconView: ImageView
         private val thumbnailView: ImageView
         private val contentView: TextView
-        
-        private var loadingJob: Job? = null
-        private var currentItemId: Long? = null
 
         init {
             view.apply {
@@ -89,63 +82,44 @@ class ClipboardAdapter(
         }
 
         fun setContent(historyEntry: ClipboardHistoryEntry?) {
-            // إلغاء أي عملية تحميل سابقة
-            loadingJob?.cancel()
-            loadingJob = null
-            
             itemView.tag = historyEntry?.id
             pinnedIconView.visibility = if (historyEntry?.isPinned == true) View.VISIBLE else View.GONE
-            
-            currentItemId = historyEntry?.id
 
             val mime = historyEntry?.mimeTypes?.firstOrNull()
             if (historyEntry?.filename != null && mime?.startsWith("image/") == true) {
-                // تنظيف الصورة السابقة فوراً
-                thumbnailView.setImageBitmap(null)
                 thumbnailView.visibility = View.VISIBLE
                 contentView.visibility = View.GONE
 
                 val file = File(itemView.context.filesDir, "clipfiles/${historyEntry.filename}")
-                val itemId = historyEntry.id
                 
                 if (file.exists() && file.length() > 0) {
-                    // تحميل الصورة باستخدام Coroutines
-                    loadingJob = scope.launch {
-                        try {
-                            val bitmap = withContext(Dispatchers.IO) {
-                                BitmapFactory.decodeFile(file.absolutePath)
-                            }
-                            
-                            // التأكد من أن ViewHolder ما زال يعرض نفس العنصر
-                            if (currentItemId == itemId && bitmap != null) {
-                                thumbnailView.setImageBitmap(bitmap)
-                            } else if (currentItemId != itemId) {
-                                // تم إعادة استخدام ViewHolder لعنصر آخر، تنظيف الموارد
-                                bitmap?.recycle()
-                            } else {
-                                // فشل التحميل، عرض النص
-                                thumbnailView.visibility = View.GONE
-                                contentView.visibility = View.VISIBLE
-                                contentView.text = historyEntry.text.take(1000)
-                            }
-                        } catch (e: Exception) {
-                            // في حالة الخطأ أو الإلغاء
-                            if (isActive && currentItemId == itemId) {
-                                thumbnailView.visibility = View.GONE
-                                contentView.visibility = View.VISIBLE
-                                contentView.text = historyEntry.text.take(1000)
+                    // إعطاء الخانة رقم مميز لمنع تداخل الصور أثناء السكرول
+                    val currentId = historyEntry.id
+                    thumbnailView.tag = currentId
+                    thumbnailView.setImageDrawable(null)
+                    
+                    Thread {
+                        val bmp = BitmapFactory.decodeFile(file.absolutePath)
+                        thumbnailView.post {
+                            // التأكد إن الخانة لسه بتعرض نفس الصورة وماتغيرتش
+                            if (thumbnailView.tag == currentId) {
+                                if (bmp != null) {
+                                    thumbnailView.setImageBitmap(bmp)
+                                } else {
+                                    thumbnailView.visibility = View.GONE
+                                    contentView.visibility = View.VISIBLE
+                                    contentView.text = historyEntry.text.take(1000)
+                                }
                             }
                         }
-                    }
+                    }.start()
                 } else {
                     thumbnailView.visibility = View.GONE
                     contentView.visibility = View.VISIBLE
                     contentView.text = historyEntry.text.take(1000)
                 }
             } else {
-                // نص عادي بدون صورة
                 thumbnailView.visibility = View.GONE
-                thumbnailView.setImageBitmap(null)
                 contentView.visibility = View.VISIBLE
                 contentView.text = historyEntry?.text?.take(1000)
             }
@@ -167,12 +141,5 @@ class ClipboardAdapter(
             clipboardHistoryManager?.toggleClipPinned(view.tag as Long)
             return true
         }
-    }
-    
-    override fun onViewRecycled(holder: ViewHolder) {
-        // تنظيف الموارد عند إعادة استخدام ViewHolder
-        holder.loadingJob?.cancel()
-        holder.loadingJob = null
-        super.onViewRecycled(holder)
     }
 }
