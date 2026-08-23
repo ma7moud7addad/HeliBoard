@@ -66,16 +66,7 @@ public final class SlidingKeyInputDrawingPreview extends AbstractDrawingPreview 
      */
     @Override
     public void drawPreview(@NonNull final Canvas canvas) {
-        if (!isPreviewEnabled() || !mShowsSlidingKeyInputPreview) {
-            return;
-        }
-
-        // TODO: Finalize the rubber band preview implementation.
-        final float radius = mPreviewBodyRadius;
-        final Path path = mRoundedLine.makePath(
-                CoordinateUtils.x(mPreviewFrom), CoordinateUtils.y(mPreviewFrom), radius,
-                CoordinateUtils.x(mPreviewTo), CoordinateUtils.y(mPreviewTo), radius);
-        canvas.drawPath(path, mPaint);
+        return; // Completely disabled sliding key input preview
     }
 
     /**
