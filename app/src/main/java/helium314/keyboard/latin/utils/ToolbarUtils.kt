@@ -146,8 +146,13 @@ fun upgradeToolbarPrefs(prefs: SharedPreferences) {
 }
 
 private fun upgradeToolbarPref(prefs: SharedPreferences, pref: String, default: String) {
-    if (!prefs.contains(pref)) return
-    val list = prefs.getString(pref, default)!!.split(Separators.ENTRY).toMutableList()
+    // If preference doesn't exist OR is empty/corrupted, initialize with default
+    val currentString = if (prefs.contains(pref)) prefs.getString(pref, default) else null
+    if (currentString.isNullOrBlank()) {
+        prefs.edit { putString(pref, default) }
+        return
+    }
+    val list = currentString.split(Separators.ENTRY).toMutableList()
     val splitDefault = defaultToolbarPref.split(Separators.ENTRY)
     splitDefault.forEach { entry ->
         val keyWithSeparator = entry.substringBefore(Separators.KV) + Separators.KV
@@ -194,10 +199,12 @@ fun removePinnedKey(prefs: SharedPreferences, key: ToolbarKey) {
 }
 
 private fun getEnabledToolbarKeys(prefs: SharedPreferences, pref: String, default: String): List<ToolbarKey> {
-    val string = prefs.getString(pref, default)!!
-    return string.split(Separators.ENTRY).mapNotNull {
+    val string = prefs.getString(pref, default) ?: default
+    // Fallback to default if preference is empty or blank (corrupted)
+    val effectiveString = if (string.isBlank()) default else string
+    return effectiveString.split(Separators.ENTRY).mapNotNull {
         val split = it.split(Separators.KV)
-        if (split.last() == "true") {
+        if (split.size >= 2 && split.last() == "true") {
             try {
                 ToolbarKey.valueOf(split.first())
             } catch (_: IllegalArgumentException) {
