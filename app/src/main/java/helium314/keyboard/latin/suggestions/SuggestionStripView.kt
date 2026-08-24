@@ -307,6 +307,12 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
             suggestionsStrip.visibility = visibility
     }
 
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        // Defensive rebuild: if toolbar or pinned keys are empty but should have content, rebuild them
+        rebuildToolbarIfEmpty()
+    }
+
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
         dismissMoreSuggestionsPanel()
@@ -546,6 +552,9 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
     }
 
     private fun updateKeys() {
+        // Defensive: rebuild toolbar if unexpectedly empty
+        rebuildToolbarIfEmpty()
+
         updateVoiceKey()
         val settingsValues = Settings.getValues()
 
@@ -563,6 +572,42 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         toolbarExpandKey.setOnClickListener(if (hideToolbarKeys || !toolbarIsExpandable) null else this)
         pinnedKeys.visibility = if (hideToolbarKeys) GONE else suggestionsStrip.visibility
         isExternalSuggestionVisible = false
+    }
+
+    /**
+     * Defensive rebuild of toolbar and pinned keys if they are empty but preferences say they should exist.
+     * This fixes a bug where toolbar icons disappear after keyboard hide/show (e.g. when taking screenshots).
+     */
+    private fun rebuildToolbarIfEmpty() {
+        val prefs = context.prefs()
+        val settingsValues = Settings.getValues()
+        val colors = settingsValues.mColors
+
+        // Rebuild toolbar keys if empty but should have keys
+        val enabledKeys = getEnabledToolbarKeys(prefs)
+        if (toolbar.childCount == 0 && enabledKeys.isNotEmpty() &&
+            (settingsValues.mToolbarMode == ToolbarMode.TOOLBAR_KEYS || settingsValues.mToolbarMode == ToolbarMode.EXPANDABLE)) {
+            for (key in enabledKeys) {
+                val button = createToolbarKey(context, key)
+                button.layoutParams = toolbarKeyLayoutParams
+                setupKey(button, colors)
+                toolbar.addView(button)
+            }
+        }
+
+        // Rebuild pinned keys if empty but should have keys
+        val pinned = getPinnedToolbarKeys(prefs)
+        if (pinnedKeys.childCount == 0 && pinned.isNotEmpty() && !isGone && !settingsValues.mSuggestionStripHiddenPerUserSettings) {
+            for (pinnedKey in pinned) {
+                val button = createToolbarKey(context, pinnedKey)
+                button.layoutParams = toolbarKeyLayoutParams
+                setupKey(button, colors)
+                pinnedKeys.addView(button)
+                val pinnedKeyInToolbar = toolbar.findViewWithTag<View>(pinnedKey)
+                if (pinnedKeyInToolbar != null && settingsValues.mQuickPinToolbarKeys)
+                    pinnedKeyInToolbar.background = enabledToolKeyBackground
+            }
+        }
     }
 
     private fun addKeyToPinnedKeys(pinnedKey: ToolbarKey) {
