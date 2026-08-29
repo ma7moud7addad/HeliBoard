@@ -1,40 +1,30 @@
-[[
-    { "label": "comma", "type": "function", "labelFlags": 512 },
-    { "label": "1", "type": "numeric" },
-    { "label": "2", "type": "numeric" },
-    { "label": "3", "type": "numeric" },
-    { "label": "%", "type":  "function", "popup": { "main": { "label": "$$$"} }, "labelFlags": 512 }
+[
+  [
+    { "label": "$", "type": "function", "width": 0.17 },
+    { "label": "1", "type": "numeric", "width": 0.22 },
+    { "label": "2", "type": "numeric", "width": 0.22 },
+    { "label": "3", "type": "numeric", "width": 0.22 },
+    { "label": "✓", "type": "function", "width": 0.17 }
   ],
   [
-    { "label": "-", "type":  "function", "popup": {
-      "relevant": [
-        { "label": ")" },
-        { "label": ">" },
-        { "label": "~" }
-      ]
-    }, "labelFlags": 512 },
-    { "label": "4", "type": "numeric" },
-    { "label": "5", "type": "numeric" },
-    { "label": "6", "type": "numeric" },
-    { "label": "period", "type":  "function", "labelFlags": 512 }
+    { "label": ".", "type": "function", "width": 0.17 },
+    { "label": "4", "type": "numeric", "width": 0.22 },
+    { "label": "5", "type": "numeric", "width": 0.22 },
+    { "label": "6", "type": "numeric", "width": 0.22 },
+    { "label": "^", "type": "function", "width": 0.17 }
   ],
   [
-    { "label": "*", "type":  "function", "popup": {
-      "relevant": [
-        { "label": "/" },
-        { "label": "×" },
-        { "label": "÷" }
-      ]
-    }, "labelFlags": 512 },
-    { "label": "7", "type": "numeric" },
-    { "label": "8", "type": "numeric" },
-    { "label": "9", "type": "numeric" },
-    { "label": "delete" }
+    { "label": "*", "type": "function", "width": 0.17 },
+    { "label": "7", "type": "numeric", "width": 0.22 },
+    { "label": "8", "type": "numeric", "width": 0.22 },
+    { "label": "9", "type": "numeric", "width": 0.22 },
+    { "label": "delete", "type": "function", "width": 0.17 }
   ],
   [
-    { "label": "alpha" },
-    { "label": "+", "type": "function", "popup": { "relevant": [ { "label": "(" }, { "label": "<" }, { "label": "±" } ] }, "labelFlags": 512 },
-    { "label": "0", "type": "numeric" },
-    { "label": "space", "type": "function" },
-    { "label": "action" }
-  ]]
+    { "label": ",", "type": "function", "width": 0.17 },
+    { "label": "+", "type": "function", "width": 0.22 },
+    { "label": "0", "type": "numeric", "width": 0.22 },
+    { "label": "space", "type": "function", "width": 0.22 },
+    { "label": "action", "type": "action", "width": 0.17 }
+  ]
+]
