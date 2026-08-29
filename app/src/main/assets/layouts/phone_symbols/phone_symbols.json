@@ -1,26 +1,30 @@
 [
   [
-    { "label": "(", "type": "numeric" },
-    { "label": "/", "type": "numeric" },
-    { "label": ")", "type": "numeric" },
-    { "label": "-", "type": "function", "labelFlags": 1073742400, "popup": { "main": { "label": "+" } } }
+    { "label": "€", "type": "function", "width": 0.17 },
+    { "label": "①", "type": "numeric", "width": 0.22 },
+    { "label": "②", "type": "numeric", "width": 0.22 },
+    { "label": "③", "type": "numeric", "width": 0.22 },
+    { "label": "✓", "type": "function", "width": 0.17 }
   ],
   [
-    { "label": "N", "type": "numeric" },
-    { "label": "!string/label_pause_key", "code": 44, "type": "numeric" },
-    { "label": ",", "type": "numeric" },
-    { "label": "space", "type": "function" }
+    { "label": "!", "type": "function", "width": 0.17 },
+    { "label": "④", "type": "numeric", "width": 0.22 },
+    { "label": "⑤", "type": "numeric", "width": 0.22 },
+    { "label": "⑥", "type": "numeric", "width": 0.22 },
+    { "label": "=", "type": "function", "width": 0.17 }
   ],
   [
-    { "label": "＊|*", "type": "numeric" },
-    { "label": "!string/label_wait_key", "code": 59, "type": "numeric" },
-    { "label": "\\#", "type": "numeric" },
-    { "label": "delete" }
+    { "label": "#", "type": "function", "width": 0.17 },
+    { "label": "⑦", "type": "numeric", "width": 0.22 },
+    { "label": "⑧", "type": "numeric", "width": 0.22 },
+    { "label": "⑨", "type": "numeric", "width": 0.22 },
+    { "label": "delete", "type": "function", "width": 0.17 }
   ],
   [
-    { "label": "123|!code/key_switch_alpha_symbol", "type": "numeric", "labelFlags": 524432 },
-    { "label": "+", "type": "numeric" },
-    { "label": ".", "type": "numeric", "groupId": 1 },
-    { "label": "action" }
+    { "label": "123?|!code/key_switch_alpha_symbol", "type": "function", "width": 0.17 },
+    { "label": "×", "type": "function", "width": 0.22 },
+    { "label": "⓪", "type": "numeric", "width": 0.22 },
+    { "label": "space", "type": "function", "width": 0.22 },
+    { "label": "action", "type": "action", "width": 0.17 }
   ]
 ]
