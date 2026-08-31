@@ -75,4 +75,8 @@
     <color name="toolbar_scrollbar">#66808080</color>
     <color name="suggestion_background_color">#E8EAED</color>  <!-- رمادي فاتح زي Gboard -->
 
+    <!-- Drag Handle Colors - for expandable panels (Clipboard & Emoji) -->
+    <color name="drag_handle_color">#9E9E9E</color>
+    <color name="drag_handle_color_active">#616161</color>
+
 </resources>
