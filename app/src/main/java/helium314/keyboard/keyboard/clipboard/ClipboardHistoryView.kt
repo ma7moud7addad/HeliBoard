@@ -21,6 +21,7 @@ import com.macboard.keyboard.keyboard.KeyboardSwitcher
 import com.macboard.keyboard.keyboard.KeyboardTypeface
 import com.macboard.keyboard.keyboard.MainKeyboardView
 import com.macboard.keyboard.keyboard.PointerTracker
+import com.macboard.keyboard.keyboard.common.DragHandleView
 import com.macboard.keyboard.keyboard.internal.KeyDrawParams
 import com.macboard.keyboard.keyboard.internal.KeyVisualAttributes
 import com.macboard.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode
@@ -58,6 +59,9 @@ class ClipboardHistoryView @JvmOverloads constructor(
     private lateinit var placeholderView: TextView
     private val toolbarKeys = mutableListOf<ImageButton>()
     private lateinit var clipboardAdapter: ClipboardAdapter
+
+    // Expandable panel handler for drag-to-expand functionality
+    private var expandableHandler: ClipboardExpandableHandler? = null
 
     lateinit var keyboardActionListener: KeyboardActionListener
     private lateinit var clipboardHistoryManager: ClipboardHistoryManager
@@ -110,6 +114,29 @@ class ClipboardHistoryView @JvmOverloads constructor(
             it.setOnLongClickListener(this@ClipboardHistoryView)
             colors.setColor(it, ColorType.TOOL_BAR_KEY)
             colors.setBackground(it, ColorType.STRIP_BACKGROUND)
+        }
+
+        // Initialize expandable panel handler
+        initializeExpandableHandler()
+    }
+
+    /**
+     * Initialize the expandable panel handler with drag handle and constraints.
+     * Sets up drag handle UI, constraints, and callbacks.
+     */
+    private fun initializeExpandableHandler() {
+        val dragHandleView = findViewById<DragHandleView>(R.id.clipboard_drag_handle) ?: return
+        
+        // Calculate min/max height constraints
+        val res = context.resources
+        val minHeight = ResourceUtils.getSecondaryKeyboardHeight(res, Settings.getValues())
+        val maxHeight = (res.displayMetrics.heightPixels * 0.75f).toInt() // 75% of screen height
+
+        // Create and initialize the handler
+        expandableHandler = ClipboardExpandableHandler(this, dragHandleView).apply {
+            initialize(minHeight, maxHeight)
+            setContentView(clipboardRecyclerView)
+            setupDragHandle()
         }
     }
 
@@ -193,6 +220,7 @@ class ClipboardHistoryView @JvmOverloads constructor(
         clipboardRecyclerView.adapter = null
         clipboardHistoryManager.setHistoryChangeListener(null)
         clipboardAdapter.clipboardHistoryManager = null
+        expandableHandler = null
     }
 
     override fun onClick(view: View) {
