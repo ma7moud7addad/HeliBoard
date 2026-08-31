@@ -10,6 +10,14 @@
     android:background="@android:color/transparent"
     style="?attr/clipboardHistoryViewStyle">
 
+    <!-- Drag Handle for expandable panel -->
+    <com.macboard.keyboard.keyboard.common.DragHandleView
+        android:id="@+id/clipboard_drag_handle"
+        android:layout_width="match_parent"
+        android:layout_height="6dp"
+        android:layout_gravity="top"
+        android:background="@android:color/transparent" />
+
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
